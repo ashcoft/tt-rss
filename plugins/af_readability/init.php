@@ -396,7 +396,7 @@ class Af_Readability extends Plugin {
                 return $tmp;
         }
 
-        function embed() : void {
+        public function embed() : void {
                 $article_id = (int) $_REQUEST["id"];
 
                 # Query with ownership check: only return entries owned by current user
@@ -416,6 +416,35 @@ class Af_Readability extends Plugin {
                         if ($extracted_content !== false) {
                                 $ret["content"] = Sanitizer::sanitize($extracted_content);
                         }
+                }
+
+                print json_encode($ret);
+        }
+
+        /**
+         * Direct URL fetch for share-anything feature
+         * Allows fetching content from any URL directly
+         */
+        public function direct_fetch() : void {
+                $url = $_REQUEST["url"] ?? "";
+
+                if (empty($url)) {
+                        print json_encode(["error" => "No URL provided"]);
+                        return;
+                }
+
+                // Validate URL
+                if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                        print json_encode(["error" => "Invalid URL format"]);
+                        return;
+                }
+
+                $extracted_content = $this->extract_content($url);
+
+                if ($extracted_content !== false) {
+                        $ret = ["content" => Sanitizer::sanitize($extracted_content)];
+                } else {
+                        $ret = ["error" => "Unable to fetch content from URL"];
                 }
 
                 print json_encode($ret);

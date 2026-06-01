@@ -15,16 +15,30 @@ This plugin inlines full article content using the Readability library.
 - Filter actions for inline and append modes
 - Per-feed configuration via feed editor
 - Share functionality for bookmarklets
+- **Direct URL fetch**: Paste any URL to fetch and view its content
 - DLE (DataLife Engine) tag preprocessing for image dump sites
 - Ad injection removal for cleaner content extraction
 
 ## Usage
+
+### Per-Feed Content Inlining
 
 1. Enable the plugin in Preferences > Plugins
 2. Go to Preferences > Feeds
 3. Click on the Readability settings section
 4. Enable for specific feeds in the feed editor
 5. Click the article button (description icon) to load full content
+
+### Direct URL Fetching
+
+1. With the plugin enabled, look for the "Fetch URL" button in the toolbar
+2. Click it and paste any URL (e.g., `https://acidcow.com/picdump/...`)
+3. The fetched content will be displayed in a modal dialog
+
+You can also call directly from browser console:
+```javascript
+Plugins.Af_Readability.fetchUrl();
+```
 
 ## Supported Page Types
 
@@ -41,6 +55,7 @@ The plugin includes preprocessing for:
 1. **DLE Content Preprocessing**: Added `preprocess_dle_content()` method to clean up DataLife Engine CMS content before Readability parsing
 2. **Enhanced Ignored Elements**: Extended the `ExtraIgnoredElements` configuration to include more ad-related elements
 3. **Ad Pattern Removal**: Multiple regex patterns to remove common ad injection patterns found on sites like acidcow.com
+4. **Direct URL Fetch**: New `direct_fetch()` endpoint and `fetchUrl()` JS function for fetching any URL
 
 ## Dependencies
 
