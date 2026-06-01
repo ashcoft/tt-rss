@@ -1,6 +1,18 @@
 name: Sync & Publish Versions
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+    - '.devcontainer/**'
+    - '.vscode/**'
+    - 'tests/**'
+    - 'tests_functional/**'
+    - 'tests_integration/**'
+    - '*.md'
+    - '*.neon'
+    - '*.xml'
+    - 'phpstan.neon'
   workflow_dispatch:
 
 permissions:
@@ -34,9 +46,14 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    # Skip if this is a version bump commit
+    if: "!contains(github.event.head_commit.message, '[skip release]')"
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -47,16 +64,76 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Get version
+      - name: Determine version bump type
+        id: version_bump
+        run: |
+          # Check for changeset files
+          if ls .changeset/*.md 2>/dev/null | head -1 | grep -q .; then
+            # Parse changeset to determine bump type
+            CHANGESET_FILE=$(ls .changeset/*.md | head -1)
+            if [ -f "$CHANGESET_FILE" ]; then
+              BUMP_TYPE=$(grep -oP '(major|minor|patch)' "$CHANGESET_FILE" | head -1 || echo "patch")
+              echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+              echo "Using bump type from changeset: $BUMP_TYPE"
+            else
+              echo "bump_type=patch" >> $GITHUB_OUTPUT
+              echo "No changeset found, defaulting to patch"
+            fi
+          else
+            # No changeset files - check commit messages for conventional commits
+            COMMIT_MSG=$(git log -1 --format=%s)
+            if echo "$COMMIT_MSG" | grep -qP '^feat(\(.+\))?!?:'; then
+              echo "bump_type=minor" >> $GITHUB_OUTPUT
+              echo "Detected feature commit, bumping minor"
+            elif echo "$COMMIT_MSG" | grep -qP '^fix(\(.+\))?:'; then
+              echo "bump_type=patch" >> $GITHUB_OUTPUT
+              echo "Detected fix commit, bumping patch"
+            else
+              echo "bump_type=patch" >> $GITHUB_OUTPUT
+              echo "Defaulting to patch bump"
+            fi
+          fi
+
+      - name: Bump version
         id: version
-        run: echo "VERSION=$(cat version_static.txt)" >> $GITHUB_OUTPUT
+        run: |
+          # Read current version
+          CURRENT_VERSION=$(cat version_static.txt)
+          BUMP_TYPE=${{ steps.version_bump.outputs.bump_type }}
+          
+          # Parse version components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          
+          # Increment based on bump type
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "TAG_NAME=v${NEW_VERSION}" >> $GITHUB_OUTPUT
+          
+          # Update version_static.txt
+          echo "$NEW_VERSION" > version_static.txt
+          echo "Version bumped: $CURRENT_VERSION -> $NEW_VERSION (${BUMP_TYPE})"
+          cat version_static.txt
 
       - name: Create release
-        id: create_release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="v$(cat version_static.txt)"
+          TAG_NAME="${{ steps.version.outputs.TAG_NAME }}"
           
           # Check if release already exists
           if gh release view "$TAG_NAME" --repo ${{ github.repository }} 2>/dev/null; then
@@ -69,9 +146,6 @@ jobs:
             --title "Release $TAG_NAME" \
             --notes "Release $TAG_NAME of tt-rss-non-dockerize" \
             --repo ${{ github.repository }}
-          
-          echo "RELEASE_URL=https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_OUTPUT
-          echo "UPLOAD_URL=https://uploads.github.com/repos/${{ github.repository }}/releases/$(gh release view "$TAG_NAME" --json id --jq .id)/assets" >> $GITHUB_OUTPUT
 
       - name: Create release artifacts
         run: |
@@ -126,12 +200,20 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="v$(cat version_static.txt)"
+          TAG_NAME="${{ steps.version.outputs.TAG_NAME }}"
           gh release upload "$TAG_NAME" "dist/tt-rss-$(cat version_static.txt).tar.gz" --repo ${{ github.repository }}
 
       - name: Upload zip artifact
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG_NAME="v$(cat version_static.txt)"
+          TAG_NAME="${{ steps.version.outputs.TAG_NAME }}"
           gh release upload "$TAG_NAME" "dist/tt-rss-$(cat version_static.txt).zip" --repo ${{ github.repository }}
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version_static.txt
+          git commit -m "chore: bump version to ${{ steps.version.outputs.VERSION }} [skip release]"
+          git push
