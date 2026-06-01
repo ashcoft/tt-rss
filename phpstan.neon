@@ -11,7 +11,7 @@ parameters:
         - lib
         - node_modules (?)
         - plugins.local
-        - plugins/af_readability/vendor
+        - plugins/af_readability
         - tests
         - vendor
         - rector.php
