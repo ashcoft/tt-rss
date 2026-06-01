@@ -13,6 +13,7 @@ return RectorConfig::configure()
 	->withSkip([
 		__DIR__ . '/lib',
 		__DIR__ . '/plugins.local',
+		__DIR__ . '/plugins/af_readability',
 		__DIR__ . '/vendor',
 		// not a fan
 		Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector::class,
