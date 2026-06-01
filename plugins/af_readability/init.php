@@ -307,6 +307,11 @@ class Af_Readability extends Plugin {
 
                 $extracted_content = $this->extract_content($article["link"]);
 
+                # Handle extraction failure
+                if ($extracted_content === false) {
+                        return $article;
+                }
+
                 # let's see if there's anything of value in there
                 $content_test = trim(strip_tags(Sanitizer::sanitize($extracted_content)));
 
@@ -350,6 +355,11 @@ class Af_Readability extends Plugin {
                 if ($enable_share_anything) {
                         $extracted_content = $this->extract_content($link);
 
+                        # Handle extraction failure
+                        if ($extracted_content === false) {
+                                return false;
+                        }
+
                         # let's see if there's anything of value in there
                         $content_test = trim(strip_tags(Sanitizer::sanitize($extracted_content)));
 
@@ -389,13 +399,23 @@ class Af_Readability extends Plugin {
         function embed() : void {
                 $article_id = (int) $_REQUEST["id"];
 
-                $sth = $this->pdo->prepare("SELECT link FROM ttrss_entries WHERE id = ?");
-                $sth->execute([$article_id]);
+                # Query with ownership check: only return entries owned by current user
+                $sth = $this->pdo->prepare("
+                        SELECT e.link FROM ttrss_entries e
+                        JOIN ttrss_user_entries ue ON ue.ref_id = e.id
+                        WHERE e.id = ? AND ue.owner_uid = ?
+                ");
+                $sth->execute([$article_id, $_SESSION['uid']]);
 
                 $ret = [];
 
                 if ($row = $sth->fetch()) {
-                        $ret["content"] = Sanitizer::sanitize($this->extract_content($row["link"]));
+                        $extracted_content = $this->extract_content($row["link"]);
+
+                        # Handle extraction failure - return empty content
+                        if ($extracted_content !== false) {
+                                $ret["content"] = Sanitizer::sanitize($extracted_content);
+                        }
                 }
 
                 print json_encode($ret);
