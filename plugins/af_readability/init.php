@@ -43,7 +43,7 @@ class Af_Readability extends Plugin {
                 $host->add_hook($host::HOOK_GET_FULL_TEXT, $this);
 
                 $host->add_filter_action($this, "action_inline", __("Inline content"));
-                $host->add_filter_action($this, "action_inline_append", __("Append content"));
+                $host->add_filter_action($this, "action_append", __("Append content"));
         }
 
         public function get_js() {
@@ -56,7 +56,9 @@ class Af_Readability extends Plugin {
         }
 
         public function hook_prefs_tab($args) {
-                if ($args != "prefFeeds") return;
+                if ($args != "prefFeeds") {
+                        return;
+                }
 
                 $enable_share_anything = sql_bool_to_bool($this->host->get($this, "enable_share_anything"));
 
@@ -188,8 +190,9 @@ class Af_Readability extends Plugin {
                                 return $this->process_article($article, false);
                         case "action_append":
                                 return $this->process_article($article, true);
+                        default:
+                                return $article;
                 }
-                return $article;
         }
 
         /**
@@ -209,8 +212,9 @@ class Af_Readability extends Plugin {
                         // Clean up DLE engine tags and ad injections before parsing
                         $tmp = $this->preprocess_dle_content($tmp);
 
-                        if (!@$tmpdoc->loadHTML('<?xml encoding="UTF-8">' . $tmp))
+                        if (!@$tmpdoc->loadHTML('<?xml encoding="UTF-8">' . $tmp)) {
                                 return false;
+                        }
 
                         // this is the worst hack yet :(
                         if (strtolower($tmpdoc->encoding) != 'utf-8') {
@@ -315,10 +319,11 @@ class Af_Readability extends Plugin {
                 $content_test = trim(strip_tags(Sanitizer::sanitize($extracted_content)));
 
                 if ($content_test) {
-                        if ($append_mode)
+                        if ($append_mode) {
                                 $article["content"] .= "<hr/>" . $extracted_content;
-                        else
+                        } else {
                                 $article["content"] = $extracted_content;
+                        }
                 }
 
                 return $article;
@@ -341,8 +346,9 @@ class Af_Readability extends Plugin {
 
                 $feed_id = $article["feed"]["id"];
 
-                if (!in_array($feed_id, $enabled_feeds))
+                if (!in_array($feed_id, $enabled_feeds)) {
                         return $article;
+                }
 
                 return $this->process_article($article, in_array($feed_id, $append_feeds));
 
@@ -382,8 +388,8 @@ class Af_Readability extends Plugin {
                         $sth = $this->pdo->prepare("SELECT id FROM ttrss_feeds WHERE id = ? AND owner_uid = ?");
                         $sth->execute([$feed, $_SESSION['uid']]);
 
-                        if ($row = $sth->fetch()) {
-                                array_push($tmp, $feed);
+                        if ($sth->fetch()) {
+                                $tmp[] = $feed;
                         }
                 }
 
