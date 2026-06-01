@@ -43,7 +43,7 @@ class Af_Readability extends Plugin {
                 $host->add_hook($host::HOOK_GET_FULL_TEXT, $this);
 
                 $host->add_filter_action($this, "action_inline", __("Inline content"));
-                $host->add_filter_action($this, "action_append", __("Append content"));
+                $host->add_filter_action($this, "action_inline_append", __("Append content"));
         }
 
         public function get_js() {
@@ -56,9 +56,7 @@ class Af_Readability extends Plugin {
         }
 
         public function hook_prefs_tab($args) {
-                if ($args != "prefFeeds") {
-                        return;
-                }
+                if ($args != "prefFeeds") return;
 
                 $enable_share_anything = sql_bool_to_bool($this->host->get($this, "enable_share_anything"));
 
@@ -127,7 +125,7 @@ class Af_Readability extends Plugin {
                 <?php
         }
 
-        public function hook_prefs_edit_feed($feed_id) {
+        function hook_prefs_edit_feed($feed_id) {
                 $enabled_feeds = $this->get_stored_array("enabled_feeds");
                 $append_feeds = $this->get_stored_array("append_feeds");
                 ?>
@@ -150,7 +148,7 @@ class Af_Readability extends Plugin {
                 <?php
         }
 
-        public function hook_prefs_save_feed($feed_id) {
+        function hook_prefs_save_feed($feed_id) {
                 $enabled_feeds = $this->get_stored_array("enabled_feeds");
                 $append_feeds = $this->get_stored_array("append_feeds");
 
@@ -184,15 +182,14 @@ class Af_Readability extends Plugin {
                 $this->host->set($this, "append_feeds", $append_feeds);
         }
 
-        public function hook_article_filter_action($article, $action) {
+        function hook_article_filter_action($article, $action) {
                 switch ($action) {
                         case "action_inline":
                                 return $this->process_article($article, false);
                         case "action_append":
                                 return $this->process_article($article, true);
-                        default:
-                                return $article;
                 }
+                return $article;
         }
 
         /**
@@ -212,9 +209,8 @@ class Af_Readability extends Plugin {
                         // Clean up DLE engine tags and ad injections before parsing
                         $tmp = $this->preprocess_dle_content($tmp);
 
-                        if (!@$tmpdoc->loadHTML('<?xml encoding="UTF-8">' . $tmp)) {
+                        if (!@$tmpdoc->loadHTML('<?xml encoding="UTF-8">' . $tmp))
                                 return false;
-                        }
 
                         // this is the worst hack yet :(
                         if (strtolower($tmpdoc->encoding) != 'utf-8') {
@@ -240,10 +236,6 @@ class Af_Readability extends Plugin {
                                         $entries = $tmpxpath->query('(//a[@href]|//img[@src])');
 
                                         foreach ($entries as $entry) {
-                                                if (!$entry instanceof \DOMElement) {
-                                                        continue;
-                                                }
-
                                                 if ($entry->hasAttribute("href")) {
                                                         $entry->setAttribute("href",
                                                                         UrlHelper::rewrite_relative(UrlHelper::$fetch_effective_url, $entry->getAttribute("href")));
@@ -311,19 +303,23 @@ class Af_Readability extends Plugin {
          * @return array<string,mixed>
          * @throws PDOException
          */
-        public function process_article(array $article, bool $append_mode) : array {
+        function process_article(array $article, bool $append_mode) : array {
 
                 $extracted_content = $this->extract_content($article["link"]);
+
+                # Handle extraction failure
+                if ($extracted_content === false) {
+                        return $article;
+                }
 
                 # let's see if there's anything of value in there
                 $content_test = trim(strip_tags(Sanitizer::sanitize($extracted_content)));
 
                 if ($content_test) {
-                        if ($append_mode) {
+                        if ($append_mode)
                                 $article["content"] .= "<hr/>" . $extracted_content;
-                        } else {
+                        else
                                 $article["content"] = $extracted_content;
-                        }
                 }
 
                 return $article;
@@ -339,26 +335,30 @@ class Af_Readability extends Plugin {
                 return $this->host->get_array($this, $name);
         }
 
-        public function hook_article_filter($article) {
+        function hook_article_filter($article) {
 
                 $enabled_feeds = $this->get_stored_array("enabled_feeds");
                 $append_feeds = $this->get_stored_array("append_feeds");
 
                 $feed_id = $article["feed"]["id"];
 
-                if (!in_array($feed_id, $enabled_feeds)) {
+                if (!in_array($feed_id, $enabled_feeds))
                         return $article;
-                }
 
                 return $this->process_article($article, in_array($feed_id, $append_feeds));
 
         }
 
-        public function hook_get_full_text($link) {
+        function hook_get_full_text($link) {
                 $enable_share_anything = $this->host->get($this, "enable_share_anything");
 
                 if ($enable_share_anything) {
                         $extracted_content = $this->extract_content($link);
+
+                        # Handle extraction failure
+                        if ($extracted_content === false) {
+                                return false;
+                        }
 
                         # let's see if there's anything of value in there
                         $content_test = trim(strip_tags(Sanitizer::sanitize($extracted_content)));
@@ -371,7 +371,7 @@ class Af_Readability extends Plugin {
                 return false;
         }
 
-        public function api_version() {
+        function api_version() {
                 return 2;
         }
 
@@ -388,24 +388,34 @@ class Af_Readability extends Plugin {
                         $sth = $this->pdo->prepare("SELECT id FROM ttrss_feeds WHERE id = ? AND owner_uid = ?");
                         $sth->execute([$feed, $_SESSION['uid']]);
 
-                        if ($sth->fetch()) {
-                                $tmp[] = $feed;
+                        if ($row = $sth->fetch()) {
+                                array_push($tmp, $feed);
                         }
                 }
 
                 return $tmp;
         }
 
-        public function embed() : void {
+        function embed() : void {
                 $article_id = (int) $_REQUEST["id"];
 
-                $sth = $this->pdo->prepare("SELECT link FROM ttrss_entries WHERE id = ?");
-                $sth->execute([$article_id]);
+                # Query with ownership check: only return entries owned by current user
+                $sth = $this->pdo->prepare("
+                        SELECT e.link FROM ttrss_entries e
+                        JOIN ttrss_user_entries ue ON ue.ref_id = e.id
+                        WHERE e.id = ? AND ue.owner_uid = ?
+                ");
+                $sth->execute([$article_id, $_SESSION['uid']]);
 
                 $ret = [];
 
                 if ($row = $sth->fetch()) {
-                        $ret["content"] = Sanitizer::sanitize($this->extract_content($row["link"]));
+                        $extracted_content = $this->extract_content($row["link"]);
+
+                        # Handle extraction failure - return empty content
+                        if ($extracted_content !== false) {
+                                $ret["content"] = Sanitizer::sanitize($extracted_content);
+                        }
                 }
 
                 print json_encode($ret);
