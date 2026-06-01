@@ -62,7 +62,7 @@ jobs:
         run: npm ci
 
       - name: Add changeset (create changeset file if changes exist)
-        uses: changesets/action@v1
+        uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commitMessage: "chore: add changeset"
