@@ -13,5 +13,7 @@ parameters:
         - plugins.local
         - plugins/af_readability
         - tests
+        - tests_functional
+        - tests_integration
         - vendor
         - rector.php
