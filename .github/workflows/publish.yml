@@ -1,17 +1,6 @@
 name: Sync & Publish Versions
 
 on:
-  push:
-    branches: [main]
-    paths-ignore:
-    - '.devcontainer/**'
-    - '.vscode/**'
-    - 'tests/**'
-    - '*.md'
-    - '*.neon'
-    - '*.xml'
-    # Note: .changeset/** is intentionally NOT ignored - changeset files need to be committed
-    # Note: package.json is NOT ignored - changeset dependencies need to be installed
   workflow_dispatch:
 
 permissions:
@@ -44,10 +33,7 @@ jobs:
     needs: [validate-sql]
     permissions:
       contents: write
-      pull-requests: write
     runs-on: ubuntu-latest
-    # Only run on push to main with changesets or manual dispatch
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[[skip ci]]') == false
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -55,19 +41,95 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org/'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Add changeset (create changeset file if changes exist)
-        uses: changesets/action@63a615b9cd06ba9a3e6d13796c7fbcb080a60a0b
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commitMessage: "chore: add changeset"
-          title: "Release Changes"
-          labels: "release"
-          createReleases: "github"
+      - name: Get version
+        id: version
+        run: echo "VERSION=$(cat version_static.txt)" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        id: create_release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v$(cat version_static.txt)"
+          
+          # Check if release already exists
+          if gh release view "$TAG_NAME" --repo ${{ github.repository }} 2>/dev/null; then
+            echo "Release $TAG_NAME already exists. Deleting..."
+            gh release delete "$TAG_NAME" --repo ${{ github.repository }} --yes
+          fi
+          
+          # Create new release
+          gh release create "$TAG_NAME" \
+            --title "Release $TAG_NAME" \
+            --notes "Release $TAG_NAME of tt-rss-non-dockerize" \
+            --repo ${{ github.repository }}
+          
+          echo "RELEASE_URL=https://github.com/${{ github.repository }}/releases/tag/$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "UPLOAD_URL=https://uploads.github.com/repos/${{ github.repository }}/releases/$(gh release view "$TAG_NAME" --json id --jq .id)/assets" >> $GITHUB_OUTPUT
+
+      - name: Create release artifacts
+        run: |
+          mkdir -p dist
+          
+          # Create tar.gz
+          tar -czf "dist/tt-rss-$(cat version_static.txt).tar.gz" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.changeset' \
+            --exclude='tests' \
+            --exclude='tests_functional' \
+            --exclude='tests_integration' \
+            --exclude='node_modules' \
+            --exclude='cache/*' \
+            --exclude='*.log' \
+            --exclude='.phpunit*' \
+            --exclude='phpstan.neon' \
+            --exclude='rector.php' \
+            --exclude='package-lock.json' \
+            --exclude='.gitignore' \
+            --exclude='.gitattributes' \
+            .
+          
+          # Create zip
+          zip -r "dist/tt-rss-$(cat version_static.txt).zip" . \
+            -x '.git/*' \
+            -x '.github/*' \
+            -x '.changeset/*' \
+            -x 'tests/*' \
+            -x 'tests_functional/*' \
+            -x 'tests_integration/*' \
+            -x 'node_modules/*' \
+            -x 'cache/*' \
+            -x '*.log' \
+            -x '.phpunit*' \
+            -x 'phpstan.neon' \
+            -x 'rector.php' \
+            -x 'package-lock.json' \
+            -x '.gitignore' \
+            -x '.gitattributes'
+          
+          # Move zip to dist
+          mv tt-rss-$(cat version_static.txt).zip dist/
+          
+          echo "Artifacts created:"
+          ls -la dist/
+
+      - name: Upload tar.gz artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v$(cat version_static.txt)"
+          gh release upload "$TAG_NAME" "dist/tt-rss-$(cat version_static.txt).tar.gz" --repo ${{ github.repository }}
+
+      - name: Upload zip artifact
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG_NAME="v$(cat version_static.txt)"
+          gh release upload "$TAG_NAME" "dist/tt-rss-$(cat version_static.txt).zip" --repo ${{ github.repository }}
