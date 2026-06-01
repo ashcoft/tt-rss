@@ -9,18 +9,18 @@ class Af_Readability extends Plugin {
         /** @var PluginHost $host */
         private $host;
 
-        function about() {
+        public function about() {
                 return array(null,
                         "Try to inline article content using Readability",
                         "fox");
         }
 
-        function flags() {
+        public function flags() {
                 return array("needs_curl" => true);
         }
 
         /** @return void */
-        function save() {
+        public function save() {
                 $enable_share_anything = checkbox_to_sql_bool($_POST["enable_share_anything"] ?? "");
 
                 $this->host->set($this, "enable_share_anything", $enable_share_anything);
@@ -28,7 +28,7 @@ class Af_Readability extends Plugin {
                 echo __("Data saved.");
         }
 
-        function init($host)
+        public function init($host)
         {
                 $this->host = $host;
 
@@ -46,16 +46,16 @@ class Af_Readability extends Plugin {
                 $host->add_filter_action($this, "action_inline_append", __("Append content"));
         }
 
-        function get_js() {
+        public function get_js() {
                 return file_get_contents(__DIR__ . "/init.js");
         }
 
-        function hook_article_button($line) {
+        public function hook_article_button($line) {
                 return "<i class='material-icons' onclick=\"Plugins.Af_Readability.embed(".$line["id"].")\"
                         style='cursor : pointer' title=\"".__('Toggle full article text')."\">description</i>";
         }
 
-        function hook_prefs_tab($args) {
+        public function hook_prefs_tab($args) {
                 if ($args != "prefFeeds") return;
 
                 $enable_share_anything = sql_bool_to_bool($this->host->get($this, "enable_share_anything"));
