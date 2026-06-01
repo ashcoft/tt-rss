@@ -77,8 +77,11 @@ jobs:
         run: |
           mkdir -p dist
           
-          # Create tar.gz
-          tar -czf "dist/tt-rss-$(cat version_static.txt).tar.gz" \
+          # Save version to variable
+          VERSION=$(cat version_static.txt)
+          
+          # Create tar.gz (archive first, then move to dist)
+          tar -czf "/tmp/tt-rss-${VERSION}.tar.gz" \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='.changeset' \
@@ -95,9 +98,10 @@ jobs:
             --exclude='.gitignore' \
             --exclude='.gitattributes' \
             .
+          mv "/tmp/tt-rss-${VERSION}.tar.gz" dist/
           
-          # Create zip
-          zip -r "dist/tt-rss-$(cat version_static.txt).zip" . \
+          # Create zip (archive first, then move to dist)
+          zip -r "/tmp/tt-rss-${VERSION}.zip" . \
             -x '.git/*' \
             -x '.github/*' \
             -x '.changeset/*' \
@@ -113,9 +117,7 @@ jobs:
             -x 'package-lock.json' \
             -x '.gitignore' \
             -x '.gitattributes'
-          
-          # Move zip to dist
-          mv tt-rss-$(cat version_static.txt).zip dist/
+          mv "/tmp/tt-rss-${VERSION}.zip" dist/
           
           echo "Artifacts created:"
           ls -la dist/
