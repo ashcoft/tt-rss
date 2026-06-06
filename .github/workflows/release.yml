@@ -202,14 +202,9 @@ jobs:
           RELEASE_NOTES=$(git log --oneline -20 | head -10 | sed 's/^[a-f0-9]* /- /')
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo 'main')
           
-          # Create release notes file
-          cat << RELEASENOTES > /tmp/release_notes.md
-## What's Changed
-
-${RELEASE_NOTES}
-
-**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${TAG_NAME}
-RELEASENOTES
+          # Create release notes using printf
+          printf '## What'\''s Changed\n\n%s\n\n**Full Changelog**: https://github.com/%s/compare/%s...%s\n' \
+            "$RELEASE_NOTES" "$REPO" "$PREV_TAG" "$TAG_NAME" > /tmp/release_notes.md
           
           # Create release
           gh release create "$TAG_NAME" \
