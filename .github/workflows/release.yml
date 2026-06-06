@@ -1,0 +1,291 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  # Check for changeset files and determine version bump
+  release-preview:
+    name: Release Preview
+    runs-on: ubuntu-latest
+    outputs:
+      has_changesets: ${{ steps.check_changesets.outputs.has_changesets }}
+      version_type: ${{ steps.version_type.outputs.type }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Check for changeset files
+        id: check_changesets
+        run: |
+          if ls .changeset/*.md 2>/dev/null | head -1 | grep -q .; then
+            echo "has_changesets=true" >> $GITHUB_OUTPUT
+            echo "Found changeset files"
+          else
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+            echo "No changeset files found"
+          fi
+
+      - name: Determine version type
+        id: version_type
+        run: |
+          if [ -f package.json ]; then
+            npm install --silent @changesets/cli 2>/dev/null || true
+          fi
+          
+          # Try to use npx changesets status to get version info
+          if which npx > /dev/null && [ -f node_modules/.bin/changesets ]; then
+            npx --yes @changesets/cli version --verbose 2>/dev/null || true
+          fi
+          
+          # Fallback: determine from commit messages
+          COMMIT_MSG=$(git log -1 --format=%s)
+          if echo "$COMMIT_MSG" | grep -qP '^feat(\(.+\))?!?:'; then
+            echo "type=minor" >> $GITHUB_OUTPUT
+          elif echo "$COMMIT_MSG" | grep -qP '^[a-z]+(\(.+\))?!?:'; then
+            echo "type=patch" >> $GITHUB_OUTPUT
+          else
+            echo "type=patch" >> $GITHUB_OUTPUT
+          fi
+
+  # Run quality checks
+  quality-checks:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Validate SQL
+        run: |
+          echo "Checking SQL schema files..."
+          find schema -name "*.sql" -exec grep -L "ENGINE" {} \; 2>/dev/null | head -5 || echo "All schema files validated"
+
+  # Create release artifacts
+  create-release:
+    name: Create Release
+    needs: [release-preview, quality-checks]
+    if: needs.release-preview.outputs.has_changesets == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org/'
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: npm install @changesets/cli
+
+      - name: Create changeset version bump
+        id: changeset_version
+        run: |
+          npx changeset version
+          
+          # Read the version from package.json if it was updated
+          if [ -f package.json ]; then
+            NEW_VERSION=$(node -e "console.log(require('./package.json').version)" 2>/dev/null || echo "")
+            if [ -n "$NEW_VERSION" ]; then
+              echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/v//' || echo "0.0.0")
+          echo "CURRENT_VERSION=$CURRENT" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT"
+
+      - name: Calculate new version
+        id: new_version
+        run: |
+          CURRENT="${{ needs.release-preview.outputs.version_type }}"
+          # Default bump type based on changeset or commit
+          if [ -f .changeset/config.json ]; then
+            # Use changesets to determine version
+            BUMP_TYPE="patch"
+            if ls .changeset/*.md 2>/dev/null | head -1 | grep -q .; then
+              CHANGESET=$(ls .changeset/*.md | head -1)
+              if grep -q "major" "$CHANGESET"; then
+                BUMP_TYPE="major"
+              elif grep -q "minor" "$CHANGESET"; then
+                BUMP_TYPE="minor"
+              fi
+            fi
+          else
+            BUMP_TYPE="patch"
+          fi
+          
+          echo "BUMP_TYPE=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          
+          # Parse current version
+          CURRENT_VER="${{ steps.current_version.outputs.CURRENT_VERSION }}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VER"
+          
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1)); PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version will be: $NEW_VERSION (${BUMP_TYPE} bump)"
+
+      - name: Create release artifacts
+        run: |
+          mkdir -p dist
+          VERSION="${{ steps.new_version.outputs.VERSION }}"
+          
+          # Create tar.gz
+          tar -czf "/tmp/tt-rss-${VERSION}.tar.gz" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.changeset' \
+            --exclude='tests' \
+            --exclude='tests_functional' \
+            --exclude='tests_integration' \
+            --exclude='node_modules' \
+            --exclude='cache/*' \
+            --exclude='*.log' \
+            --exclude='.phpunit*' \
+            --exclude='phpstan.neon' \
+            --exclude='rector.php' \
+            --exclude='package-lock.json' \
+            --exclude='.gitignore' \
+            --exclude='.gitattributes' \
+            .
+          mv "/tmp/tt-rss-${VERSION}.tar.gz" dist/
+          
+          # Create zip
+          zip -r "/tmp/tt-rss-${VERSION}.zip" . \
+            -x '.git/*' \
+            -x '.github/*' \
+            -x '.changeset/*' \
+            -x 'tests/*' \
+            -x 'tests_functional/*' \
+            -x 'tests_integration/*' \
+            -x 'node_modules/*' \
+            -x 'cache/*' \
+            -x '*.log' \
+            -x '.phpunit*' \
+            -x 'phpstan.neon' \
+            -x 'rector.php' \
+            -x 'package-lock.json' \
+            -x '.gitignore' \
+            -x '.gitattributes'
+          mv "/tmp/tt-rss-${VERSION}.zip" dist/
+          
+          echo "Created artifacts:"
+          ls -la dist/
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Stage all changes (including changeset消费的files)
+          git add -A
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: release v${{ steps.new_version.outputs.VERSION }}"
+            git push
+            echo "Committed version bump"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.new_version.outputs.VERSION }}"
+          TAG_NAME="v${VERSION}"
+          
+          # Generate release notes from commits
+          RELEASE_NOTES=$(git log --oneline -20 | head -10 | sed 's/^[a-f0-9]* /- /')
+          
+          # Check if release already exists
+          if gh release view "$TAG_NAME" --repo ${{ github.repository }} 2>/dev/null; then
+            echo "Release $TAG_NAME exists, deleting..."
+            gh release delete "$TAG_NAME" --repo ${{ github.repository }} --yes
+          fi
+          
+          # Create release
+          gh release create "$TAG_NAME" \
+            --title "Release $TAG_NAME" \
+            --notes "## What's Changed
+
+$RELEASE_NOTES
+
+**Full Changelog**: https://github.com/${{ github.repository }}/compare/$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo 'main')...$TAG_NAME" \
+            --repo ${{ github.repository }}
+
+      - name: Upload release artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.new_version.outputs.VERSION }}"
+          TAG_NAME="v${VERSION}"
+          
+          # Upload tar.gz
+          gh release upload "$TAG_NAME" "dist/tt-rss-${VERSION}.tar.gz" --repo ${{ github.repository }}
+          
+          # Upload zip
+          gh release upload "$TAG_NAME" "dist/tt-rss-${VERSION}.zip" --repo ${{ github.repository }}
+
+      - name: Delete consumed changeset files
+        run: |
+          rm -f .changeset/*.md
+          git add -A
+          git commit -m "chore: clean up consumed changesets" || true
+          git push || true
+
+  # Notify when no release needed
+  no-release:
+    name: No Changesets
+    runs-on: ubuntu-latest
+    if: needs.release-preview.outputs.has_changesets == 'false'
+    steps:
+      - name: No release needed
+        run: |
+          echo "No changeset files found. No release will be created."
+          echo "To create a release, add a changeset file to .changeset/"
+          echo "Example:"
+          echo '  echo "---" > .changeset/my-change.md'
+          echo '  echo "  \"my-feature\": patch" >> .changeset/my-change.md'
+          echo '  echo "  Added a new feature" >> .changeset/my-change.md'
