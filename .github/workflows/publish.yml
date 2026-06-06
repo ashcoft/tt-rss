@@ -68,20 +68,21 @@ jobs:
           echo "## Quality Checks Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| CSS Lint | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-          echo "| JavaScript Code Quality | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-          echo "| PHP Code Quality | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-          echo "| Shell Code Quality | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-          echo "| SQL Validation | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
-          echo "| Version JSON | ✅ Published |" >> $GITHUB_STEP_SUMMARY
+          echo "| CSS Lint | Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| JavaScript Code Quality | Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| PHP Code Quality | Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shell Code Quality | Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| SQL Validation | Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version JSON | Published |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Creating Releases with Changesets" >> $GITHUB_STEP_SUMMARY
-          echo "To create a release, add a changeset file to the \`.changeset/\` directory:" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "To create a release, add a changeset file to the .changeset/ directory:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Example:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           echo 'echo "---" > .changeset/my-change.md' >> $GITHUB_STEP_SUMMARY
-          echo 'echo \'"tt-rss-non-dockerize": patch\' >> .changeset/my-change.md' >> $GITHUB_STEP_SUMMARY
+          echo 'echo "tt-rss-non-dockerize: patch" >> .changeset/my-change.md' >> $GITHUB_STEP_SUMMARY
           echo 'echo "" >> .changeset/my-change.md' >> $GITHUB_STEP_SUMMARY
           echo 'echo "Your change description here" >> .changeset/my-change.md' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Bump types:** \`major\`, \`minor\`, \`patch\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Bump types:** major, minor, patch" >> $GITHUB_STEP_SUMMARY
