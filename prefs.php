@@ -144,6 +144,9 @@
 	<a href="#" onclick="document.location.href = 'index.php'"><?= __('Exit preferences') ?></a>
 </div>
 
+<!-- Release update notification banner -->
+<div id="release-update-banner" style="display: none;"></div>
+
 <div id="main" dojoType="dijit.layout.BorderContainer">
     <div dojoType="dijit.layout.TabContainer" region="center" id="pref-tabs">
         <div id="prefsTab" dojoType="dijit.layout.ContentPane"

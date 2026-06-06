@@ -28,33 +28,74 @@ jobs:
         # Get the commit timestamp in Unix format
         COMMIT_TIMESTAMP=$(git show -s --format=%ct HEAD)
 
-        # Create version.json with the expected format for RPC#checkforupdates()
-        jq -n \
-          --arg commit_id "$COMMIT_SHORT_SHA" \
-          --argjson commit_timestamp "$COMMIT_TIMESTAMP" \
-          '{
-            changeset: {
-              id: $commit_id,
-              timestamp: $commit_timestamp
+        # Get the latest release tag and version info
+        if gh release list --limit 1 --format json 2>/dev/null | jq -e 'length > 0' >/dev/null; then
+          RELEASE_TAG=$(gh release list --limit 1 --format json | jq -r '.[0].tagName')
+          RELEASE_NAME=$(gh release list --limit 1 --format json | jq -r '.[0].name // empty')
+          RELEASE_URL="https://github.com/ashcoft/tt-rss-non-dockerize/releases/tag/$RELEASE_TAG"
+          ASSETS=$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[] | {name: .name, url: .url}' 2>/dev/null || echo '[]')
+          
+          # Build release-info with version comparison
+          cat > release-info.json << 'EOF'
+          {
+            "changeset": {
+              "id": "COMMIT_SHA_PLACEHOLDER",
+              "timestamp": TIMESTAMP_PLACEHOLDER
+            },
+            "release": {
+              "tag": "RELEASE_TAG_PLACEHOLDER",
+              "url": "RELEASE_URL_PLACEHOLDER"
             }
-          }' > version.json
+          }
+          EOF
+          
+          # Use jq to properly substitute values
+          jq -n \
+            --arg commit_id "$COMMIT_SHORT_SHA" \
+            --argjson commit_timestamp "$COMMIT_TIMESTAMP" \
+            --arg release_tag "$RELEASE_TAG" \
+            --arg release_url "$RELEASE_URL" \
+            '{
+              changeset: {
+                id: $commit_id,
+                timestamp: $commit_timestamp
+              },
+              release: {
+                tag: $release_tag,
+                url: $release_url
+              }
+            }' > release-info.json
+          
+          echo "Release found: $RELEASE_TAG"
+        else
+          echo "No release found, creating basic version.json"
+          jq -n \
+            --arg commit_id "$COMMIT_SHORT_SHA" \
+            --argjson commit_timestamp "$COMMIT_TIMESTAMP" \
+            '{
+              changeset: {
+                id: $commit_id,
+                timestamp: $commit_timestamp
+              }
+            }' > release-info.json
+        fi
 
-        cat version.json
+        cat release-info.json
 
-    - name: Deploy version.json to gh-pages
+    - name: Deploy release-info.json to gh-pages
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Save version.json to a safe location outside the repo
-        cp version.json /tmp/version.json
+        # Save release-info.json to a safe location outside the repo
+        cp release-info.json /tmp/release-info.json
 
         # Fetch gh-pages branch
         git fetch origin gh-pages 2>/dev/null || true
 
         if git rev-parse --verify origin/gh-pages >/dev/null 2>&1; then
           # gh-pages exists
-          # Remove the local version.json first to avoid conflicts when switching branches
-          rm -f version.json
+          # Remove the local release-info.json first to avoid conflicts when switching branches
+          rm -f release-info.json
           git checkout gh-pages
         else
           # Create new orphan gh-pages branch
@@ -62,9 +103,9 @@ jobs:
           git rm -rf . 2>/dev/null || true
         fi
 
-        # Restore version.json from safe location
-        cp /tmp/version.json version.json
-        git add version.json
+        # Restore release-info.json from safe location
+        cp /tmp/release-info.json release-info.json
+        git add release-info.json
 
         # Check if there are changes to commit
         if git diff --staged --quiet; then
@@ -73,7 +114,7 @@ jobs:
           # Configure git for GitHub Actions bot
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Update version info [automated]"
+          git commit -m "Update release info [automated]"
 
           # Push using GitHub CLI with GITHUB_TOKEN
           gh auth setup-git

@@ -305,7 +305,7 @@ class RPC extends Handler_Protected {
 	}
 
 	function checkforupdates(): void {
-		$rv = ["changeset" => [], "plugins" => []];
+		$rv = ["changeset" => [], "plugins" => [], "release" => null];
 
 		$version = Config::get_version(false);
 
@@ -313,17 +313,47 @@ class RPC extends Handler_Protected {
 		$git_commit = $version["commit"] ?? false;
 
 		if (Config::get(Config::CHECK_FOR_UPDATES) && $_SESSION["access_level"] >= UserHelper::ACCESS_LEVEL_ADMIN && $git_timestamp) {
-			$content = @UrlHelper::fetch(['url' => 'https://tt-rss.org/tt-rss/version.json']);
+			// Check for non-dockerize release info first (our fork's releases)
+			$release_content = @UrlHelper::fetch(['url' => 'https://ashcoft.github.io/tt-rss-non-dockerize/release-info.json']);
 
-			if ($content) {
-				$content = json_decode($content, true);
+			if ($release_content) {
+				$release_data = json_decode($release_content, true);
 
-				if ($content && isset($content["changeset"])) {
-					if ($git_timestamp < (int)$content['changeset']['timestamp'] && $git_commit != $content['changeset']['id']) {
-						$rv['changeset'] = [
-							...$content['changeset'],
-							'compare_url' => "https://github.com/tt-rss/tt-rss/compare/{$git_commit}...{$content['changeset']['id']}",
-						];
+				if ($release_data && isset($release_data['release'])) {
+					$rv['release'] = $release_data['release'];
+				}
+
+				// Check for upstream tt-rss updates if no release info from our fork
+				if (!isset($release_data['release'])) {
+					$content = @UrlHelper::fetch(['url' => 'https://tt-rss.org/tt-rss/version.json']);
+
+					if ($content) {
+						$content = json_decode($content, true);
+
+						if ($content && isset($content["changeset"])) {
+							if ($git_timestamp < (int)$content['changeset']['timestamp'] && $git_commit != $content['changeset']['id']) {
+								$rv['changeset'] = [
+									...$content['changeset'],
+									'compare_url' => "https://github.com/tt-rss/tt-rss/compare/{$git_commit}...{$content['changeset']['id']}",
+								];
+							}
+						}
+					}
+				}
+			} else {
+				// Fallback to upstream tt-rss version check
+				$content = @UrlHelper::fetch(['url' => 'https://tt-rss.org/tt-rss/version.json']);
+
+				if ($content) {
+					$content = json_decode($content, true);
+
+					if ($content && isset($content["changeset"])) {
+						if ($git_timestamp < (int)$content['changeset']['timestamp'] && $git_commit != $content['changeset']['id']) {
+							$rv['changeset'] = [
+								...$content['changeset'],
+								'compare_url' => "https://github.com/tt-rss/tt-rss/compare/{$git_commit}...{$content['changeset']['id']}",
+							];
+						}
 					}
 				}
 			}

@@ -935,8 +935,33 @@ const App = {
 			.then((reply) => {
 				const ttrss_icon_a = document.getElementById('updates-available');
 				const plugin_icon_a = document.getElementById('plugin-updates-available');
+				const release_banner = document.getElementById('release-update-banner');
 
-				if (reply.changeset.id) {
+				// Handle release update notification
+				if (reply.release && reply.release.tag) {
+					// Store release info for display on preferences page
+					window.__latest_release = reply.release;
+
+					// Show release banner on preferences page
+					if (this.isPrefs() && release_banner) {
+						release_banner.innerHTML = `
+							<div class="alert alert-info" style="margin: 10px; padding: 12px;">
+								<i class="material-icons" style="vertical-align: middle;">new_releases</i>
+								<strong>New Release Available:</strong>
+								<a href="${reply.release.url}" target="_blank" rel="noopener noreferrer">
+									${reply.release.tag}
+								</a>
+							</div>
+						`;
+						release_banner.style.display = 'block';
+					}
+
+					// Update header icon if on main page
+					if (ttrss_icon_a && !reply.changeset.id) {
+						ttrss_icon_a.href = reply.release.url;
+						ttrss_icon_a.show();
+					}
+				} else if (reply.changeset.id) {
 					ttrss_icon_a.href = reply.changeset.compare_url;
 					ttrss_icon_a.show();
 				} else {
