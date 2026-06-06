@@ -16,3 +16,4 @@ parameters:
         - tests_integration
         - vendor
         - rector.php
+    treatPhpDocTypesAsCertain: false
