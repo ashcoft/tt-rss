@@ -1,8 +1,8 @@
 name: Sync from upstream tt-rss
 'on':
   schedule:
-  - cron: '0 */48 * * *'
-  workflow_dispatch: null
+    - cron: '0 */48 * * *'
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -50,11 +50,20 @@ jobs:
       run: |
         FEEDLY_DIR="themes/feedly"
         mkdir -p "$FEEDLY_DIR"
-        curl -sL https://api.github.com/repos/ashcoft/tt-rss-feedly-theme/tarball/dist | tar -xz -C /tmp/
-        FEEDLY_SRC=$(tar -tzf /tmp/*.tar.gz 2>/dev/null | head -1 | cut -d/ -f1 | head -c 100)
-        if [ -n "$FEEDLY_SRC" ] && [ -d "/tmp/$FEEDLY_SRC" ]; then
-          cp -rn "/tmp/$FEEDLY_SRC/"* "$FEEDLY_DIR/" 2>/dev/null || true
-          echo "Added feedly theme from dist branch"
+        
+        # Download and extract feedly theme tarball
+        curl -sL https://api.github.com/repos/ashcoft/tt-rss-feedly-theme/tarball/dist -o /tmp/feedly.tar.gz
+        if [ -f /tmp/feedly.tar.gz ]; then
+          # Extract and get the top-level directory name
+          tar -xzf /tmp/feedly.tar.gz -C /tmp/
+          FEEDLY_SRC=$(tar -tzf /tmp/feedly.tar.gz | head -1 | cut -d/ -f1)
+          if [ -n "$FEEDLY_SRC" ] && [ -d "/tmp/$FEEDLY_SRC" ]; then
+            cp -rn "/tmp/$FEEDLY_SRC/"* "$FEEDLY_DIR/" 2>/dev/null || true
+            echo "Added feedly theme from dist branch"
+          else
+            echo "Warning: feedly theme directory not found after extraction"
+          fi
+          rm -f /tmp/feedly.tar.gz
         else
           echo "Warning: feedly theme download failed"
         fi
