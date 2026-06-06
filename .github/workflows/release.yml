@@ -131,7 +131,7 @@ jobs:
           mkdir -p dist
           VERSION="${{ steps.new_version.outputs.VERSION }}"
           
-          # Create tar.gz
+          # Create tar.gz (excluding vendor and node_modules)
           tar -czf "/tmp/tt-rss-${VERSION}.tar.gz" \
             --exclude='.git' \
             --exclude='.github' \
@@ -140,6 +140,7 @@ jobs:
             --exclude='tests_functional' \
             --exclude='tests_integration' \
             --exclude='node_modules' \
+            --exclude='vendor' \
             --exclude='cache/*' \
             --exclude='*.log' \
             --exclude='.phpunit*' \
@@ -148,10 +149,12 @@ jobs:
             --exclude='package-lock.json' \
             --exclude='.gitignore' \
             --exclude='.gitattributes' \
+            --exclude='lib/dojo' \
+            --exclude='lib/dijit' \
             .
           mv "/tmp/tt-rss-${VERSION}.tar.gz" dist/
           
-          # Create zip
+          # Create zip (excluding vendor and node_modules)
           zip -r "/tmp/tt-rss-${VERSION}.zip" . \
             -x '.git/*' \
             -x '.github/*' \
@@ -160,6 +163,7 @@ jobs:
             -x 'tests_functional/*' \
             -x 'tests_integration/*' \
             -x 'node_modules/*' \
+            -x 'vendor/*' \
             -x 'cache/*' \
             -x '*.log' \
             -x '.phpunit*' \
@@ -167,7 +171,12 @@ jobs:
             -x 'rector.php' \
             -x 'package-lock.json' \
             -x '.gitignore' \
-            -x '.gitattributes'
+            -x '.gitattributes' \
+            -x 'lib/dojo/*' \
+            -x 'lib/dijit/*' \
+            -x 'lib/dojox/*' \
+            -x 'themes/dijit/*' \
+            .
           mv "/tmp/tt-rss-${VERSION}.zip" dist/
           
           echo "Created artifacts:"
