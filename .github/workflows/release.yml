@@ -193,28 +193,29 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           VERSION="${{ steps.new_version.outputs.VERSION }}"
           TAG_NAME="v${VERSION}"
           
           # Generate release notes from commits
           RELEASE_NOTES=$(git log --oneline -20 | head -10 | sed 's/^[a-f0-9]* /- /')
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo 'main')
           
-          # Check if release already exists
-          if gh release view "$TAG_NAME" --repo ${{ github.repository }} 2>/dev/null; then
-            echo "Release $TAG_NAME exists, deleting..."
-            gh release delete "$TAG_NAME" --repo ${{ github.repository }} --yes
-          fi
+          # Create release notes file
+          cat << RELEASENOTES > /tmp/release_notes.md
+## What's Changed
+
+${RELEASE_NOTES}
+
+**Full Changelog**: https://github.com/${REPO}/compare/${PREV_TAG}...${TAG_NAME}
+RELEASENOTES
           
           # Create release
           gh release create "$TAG_NAME" \
             --title "Release $TAG_NAME" \
-            --notes "## What's Changed
-
-$RELEASE_NOTES
-
-**Full Changelog**: https://github.com/${{ github.repository }}/compare/$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo 'main')...$TAG_NAME" \
-            --repo ${{ github.repository }}
+            --notes-file /tmp/release_notes.md \
+            --repo "${REPO}"
 
       - name: Upload release artifacts
         env:
