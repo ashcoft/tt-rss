@@ -16,22 +16,29 @@ Please refer to [the installation guide](https://tt-rss.org/docs/Installation-Gu
   * No major breaking changes are planned.
   * Like the original project:
     * The minimum PHP version supported by tt-rss will match [what's in Debian's current `stable` release](https://packages.debian.org/stable/php).
-    * What's on the `main` branch (or `latest` and the most recent `sha-*` tag for the Docker images) is intended to be stable
-      and safe for use.  Like all software, however, bugs sometimes slip through; the goal is to address those bugs promptly.
-    * Using the latest code/image is strongly encouraged, and may be a prerequisite to getting support in certain situations.
+    * What's on the `main` branch is intended to be stable and safe for use. Like all software, however, bugs sometimes slip through; the goal is to address those bugs promptly.
+    * Using the latest code is strongly encouraged, and may be a prerequisite to getting support in certain situations.
   * Developer note: Due to use of `invalid@email.com` on `supahgreg`'s pre-2025-10-03 commits (which were done on `tt-rss.org`) GitHub incorrectly shows `ivanivanov884`
-    (the GitHub user associated with that e-mail address) as the author instead of `wn_`/`supahgreg`.  Apologies for any confusion.  `¯\_(ツ)_/¯`
-* Docker images (for `linux/amd64` and `linux/arm64`; drop-in replacements for the old images;
-  see [the installation guide](https://tt-rss.org/docs/Installation-Guide.html)) are being built and published
-  ([via GitHub Actions](https://github.com/tt-rss/tt-rss/actions/workflows/publish.yml)) to:
-  * Docker Hub (as [supahgreg/tt-rss](https://hub.docker.com/r/supahgreg/tt-rss/) and [supahgreg/tt-rss-web-nginx](https://hub.docker.com/r/supahgreg/tt-rss-web-nginx/)).
-  * GitHub Container Registry (as [ghcr.io/tt-rss/tt-rss](https://github.com/orgs/tt-rss/packages/container/package/tt-rss)
-    and [ghcr.io/tt-rss/tt-rss-web-nginx](https://github.com/orgs/tt-rss/packages/container/package/tt-rss-web-nginx)).
-* Documentation from https://tt-rss.org has been recreated in https://github.com/tt-rss/tt-rss.github.io,
+    (the GitHub user associated with that e-mail address) as the author instead of `wn_`/`supahgreg`. Apologies for any confusion. `¯\_(ツ)_/¯`
+
+### This non-Docker fork
+
+This repository is a fork of the main tt-rss project with Docker-related files removed for users who prefer
+to run tt-rss without Docker. All other functionality is preserved.
+
+* Feedly theme is included and set as the default theme.
+* Standard PHP installation requirements apply (no Docker dependencies).
+
+## Documentation
+
+Documentation from https://tt-rss.org has been recreated in https://github.com/tt-rss/tt-rss.github.io,
   which is the new source for https://tt-rss.org content.
   * The original project's repository that held content for https://tt-rss.org was mirrored to https://github.com/tt-rss/tt-rss-web-static .
     Some content tweaks were made after mirroring (prior to the new repository being set up), and the repository is now archived.
-* Plugins that were under https://gitlab.tt-rss.org/tt-rss/plugins have been mirrored to `https://github.com/tt-rss/tt-rss-plugin-*`.
+
+## Plugins
+
+Plugins that were under https://gitlab.tt-rss.org/tt-rss/plugins have been mirrored to `https://github.com/tt-rss/tt-rss-plugin-*`.
   * Plugin repository names have changed to get a consistent `tt-rss-plugin-*` prefix.
 
 ## Development and contributing
