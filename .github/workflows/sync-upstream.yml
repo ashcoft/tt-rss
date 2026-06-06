@@ -76,6 +76,7 @@ jobs:
           echo "No changes to commit"
         else
           git commit -m "Sync: nondockerize + feedly theme as default"
-          git push origin main
+          # Use force-with-lease to handle race conditions with concurrent runs
+          git push origin main --force-with-lease
           echo "Pushed to origin main"
         fi
