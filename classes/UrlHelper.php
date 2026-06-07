@@ -419,8 +419,9 @@ class UrlHelper {
 		} elseif ($auth_type === 'any') {
 			// https://docs.guzzlephp.org/en/stable/faq.html#how-can-i-add-custom-curl-options
 			$req_options['curl'][\CURLOPT_HTTPAUTH] = \CURLAUTH_ANY;
-			if ($login && $pass)
+			if ($login && $pass) { // @phpstan-line true - defensive check, credentials may not be present
 				$req_options['curl'][\CURLOPT_USERPWD] = "$login:$pass";
+			}
 		}
 
 		if ($post_query)
@@ -459,9 +460,10 @@ class UrlHelper {
 			self::$fetch_last_error = $ex->getMessage();
 
 			if ($ex instanceof GuzzleHttp\Exception\RequestException) {
+				// 4xx or 5xx response
 				if ($ex instanceof GuzzleHttp\Exception\BadResponseException) {
-					// 4xx or 5xx
 					self::$fetch_last_error_code = $ex->getResponse()->getStatusCode();
+					self::$fetch_last_content_type = $ex->getResponse()->getHeaderLine('content-type');
 
 					// If credentials were provided and we got a 403 back, retry once with auth type 'any'
 					// to attempt compatibility with unusual configurations.
@@ -469,8 +471,6 @@ class UrlHelper {
 						$options['auth_type'] = 'any';
 						return self::fetch($options);
 					}
-
-					self::$fetch_last_content_type = $ex->getResponse()->getHeaderLine('content-type');
 
 					if ($type && !str_contains(self::$fetch_last_content_type, "$type"))
 						self::$fetch_last_error_content = (string) $ex->getResponse()->getBody();
