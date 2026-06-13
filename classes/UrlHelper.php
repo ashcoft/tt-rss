@@ -420,6 +420,7 @@ class UrlHelper {
 			// https://docs.guzzlephp.org/en/stable/faq.html#how-can-i-add-custom-curl-options
 			$req_options['curl'][\CURLOPT_HTTPAUTH] = \CURLAUTH_ANY;
 			// @phpstan-ignore-next-line booleanAnd.leftAlwaysFalse,booleanAnd.rightAlwaysFalse,booleanAnd.rightAlwaysTrue
+			// @phpstan-ignore-next-line
 			if ($login && $pass) {
 				$req_options['curl'][\CURLOPT_USERPWD] = "$login:$pass";
 			}
