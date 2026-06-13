@@ -421,6 +421,7 @@ class UrlHelper {
 			$req_options['curl'][\CURLOPT_HTTPAUTH] = \CURLAUTH_ANY;
 			// @phpstan-ignore-next-line booleanAnd.leftAlwaysFalse,booleanAnd.rightAlwaysFalse,booleanAnd.rightAlwaysTrue
 			// @phpstan-ignore-next-line
+			// @phpstan-ignore booleanAnd
 			if ($login && $pass) {
 				$req_options['curl'][\CURLOPT_USERPWD] = "$login:$pass";
 			}
