@@ -419,7 +419,7 @@ class UrlHelper {
 		} elseif ($auth_type === 'any') {
 			// https://docs.guzzlephp.org/en/stable/faq.html#how-can-i-add-custom-curl-options
 			$req_options['curl'][\CURLOPT_HTTPAUTH] = \CURLAUTH_ANY;
-			if ($login && $pass) { // @phpstan-line true - defensive check, credentials may not be present
+			if ($login && $pass) { // @phpstan-ignore-line booleanAnd.leftAlwaysFalse,booleanAnd.rightAlwaysFalse - defensive check, credentials may not be present
 				$req_options['curl'][\CURLOPT_USERPWD] = "$login:$pass";
 			}
 		}
