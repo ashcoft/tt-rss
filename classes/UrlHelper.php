@@ -465,7 +465,7 @@ class UrlHelper {
 
 					// If credentials were provided and we got a 403 back, retry once with auth type 'any'
 					// to attempt compatibility with unusual configurations.
-					if ($login && $pass && self::$fetch_last_error_code === 403 && $auth_type !== 'any') {
+					if (self::$fetch_last_error_code === 403 && $auth_type !== 'any' && $login && $pass) {
 						$options['auth_type'] = 'any';
 						return self::fetch($options);
 					}
