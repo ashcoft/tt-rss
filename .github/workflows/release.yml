@@ -19,15 +19,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install Dependencies
-        run: npm install -g @changesets/cli
-
       - name: Check for Changesets
         id: changeset
         run: |
@@ -45,7 +36,6 @@ jobs:
         uses: changesets/action@v1
         with:
           title: "Release {{version}}"
-          commitMessage: "chore: release version {version}"
           publish: npm publish --access public --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
