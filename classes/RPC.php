@@ -312,7 +312,10 @@ class RPC extends Handler_Protected {
 		$git_timestamp = $version["timestamp"] ?? false;
 		$git_commit = $version["commit"] ?? false;
 
-		if (Config::get(Config::CHECK_FOR_UPDATES) && $_SESSION["access_level"] >= UserHelper::ACCESS_LEVEL_ADMIN && $git_timestamp) {
+		// Don't check for updates in Docker containers
+		$is_docker = file_exists('/.dockerenv') || getenv('container');
+
+		if (Config::get(Config::CHECK_FOR_UPDATES) && $_SESSION["access_level"] >= UserHelper::ACCESS_LEVEL_ADMIN && $git_timestamp && !$is_docker) {
 			$content = @UrlHelper::fetch(['url' => 'https://tt-rss.org/tt-rss/version.json']);
 
 			if ($content) {
