@@ -1,0 +1,11 @@
+name: CodeQL Configuration
+paths:
+  - js
+  - lib
+  - api
+  - classes
+  - themes
+paths-ignore:
+  - node_modules
+  - vendor
+  - cache
