@@ -1560,6 +1560,25 @@ class Feeds extends Handler_Protected {
 			$order_by = $override_order;
 		}
 
+		// Whitelist validation to prevent SQL injection in ORDER BY clause
+		// Only allow values that are known to be safe from _order_to_override_query()
+		$allowed_order_by_values = [
+			'',  // Empty/default: score DESC, date_entered DESC, updated DESC
+			'score DESC, date_entered DESC, updated DESC',  // Explicit default
+			'ttrss_entries.title, date_entered, updated',  // title
+			'updated',  // date_reverse
+			'updated DESC',  // feed_dates
+		];
+
+		// Check if order_by is from plugin hook (override_order) or from user input
+		$is_from_plugin = $override_order && $order_by === $override_order;
+		$is_in_whitelist = in_array($order_by, $allowed_order_by_values, true);
+
+		if (!$is_from_plugin && !$is_in_whitelist) {
+			// Unsafe order_by from user input - use default
+			$order_by = "score DESC, date_entered DESC, updated DESC";
+		}
+
 		if ($override_strategy) {
 			$query_strategy_part = $override_strategy;
 		}
