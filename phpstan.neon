@@ -16,3 +16,7 @@ parameters:
         - tests_integration
         - vendor
         - rector.php
+    ignoreErrors:
+        - '#Right side of && is always true#'
+        - '#Right side of && is always false#'
+        - '#Left side of && is always false#'
