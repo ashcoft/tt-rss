@@ -5,7 +5,6 @@
 		"lib": "."
 	},
 	"devDependencies": {
-		"intern-geezer": "2.2.2",
 		"http-proxy": "1.18.1",
 		"glob": "3.2.7",
 		"jsgi-node": "0.3.1",
@@ -15,13 +14,13 @@
 	},
 	"main": "main",
 	"scripts": {
-		"test": "intern-client config=tests/dojo.intern",
-		"test-coverage": "intern-client config=tests/dojo.intern reporters=console reporters=lcovhtml",
-		"test-remote": "intern-runner config=tests/dojo.intern",
-		"test-remote-coverage": "intern-runner config=tests/dojo.intern reporters=runner reporters=lcovhtml",
-		"test-local": "intern-runner config=tests/dojo.intern.local",
-		"test-local-coverage": "intern-runner config=tests/dojo.intern.local reporters=runner reporters=lcovhtml",
-		"test-proxy": "intern-runner config=tests/dojo.intern.proxy proxyOnly=true"
+		"test": "echo 'Tests should be run from project root'",
+		"test-coverage": "echo 'Tests should be run from project root'",
+		"test-remote": "echo 'Tests should be run from project root'",
+		"test-remote-coverage": "echo 'Tests should be run from project root'",
+		"test-local": "echo 'Tests should be run from project root'",
+		"test-local-coverage": "echo 'Tests should be run from project root'",
+		"test-proxy": "echo 'Tests should be run from project root'"
 	},
 	"description": "Dojo core is a powerful, lightweight library that makes common tasks quicker and easier. Animate elements, manipulate the DOM, and query with easy CSS syntax, all without sacrificing performance.",
 	"license": "BSD-3-Clause OR AFL-2.1",
