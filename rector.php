@@ -14,7 +14,6 @@ return RectorConfig::configure()
 		__DIR__ . '/lib',
 		__DIR__ . '/plugins.local',
 		__DIR__ . '/vendor',
-		__DIR__ . '/.github',
 		// not a fan
 		Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector::class,
 		// noisy at the moment (needs more review)
