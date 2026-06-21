@@ -9,8 +9,60 @@ permissions:
   contents: write
   pull-requests: write
 
-uses: changesets/action@v1.9.0
-with:
-  title: "Release {{version}}"
-  commitMessage: "chore: release version {version}"
-  setupGitHubUser: true
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: npm install -g @changesets/cli
+
+      - name: Check for Changesets
+        id: changeset
+        run: |
+          # Check if there are existing changeset files
+          if ls .changeset/*.md 2>/dev/null | head -1 | grep -q .; then
+            echo "Changeset files found, creating release..."
+            echo "has_changesets=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changeset files found."
+            echo "has_changesets=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release PR
+        if: steps.changeset.outputs.has_changesets == 'true'
+        uses: changesets/action@v1
+        with:
+          title: "Release {{version}}"
+          commitMessage: "chore: release version {version}"
+          publish: npm publish --access public --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary (No Changesets)
+        if: steps.changeset.outputs.has_changesets == 'false'
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "No changeset files found in .changeset/ directory." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### To Create a Release" >> $GITHUB_STEP_SUMMARY
+          echo "Add a changeset file to .changeset/ directory:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo 'mkdir -p .changeset' >> $GITHUB_STEP_SUMMARY
+          echo 'echo "---" > .changeset/my-feature.md' >> $GITHUB_STEP_SUMMARY
+          echo 'echo "tt-rss-non-dockerize: minor" >> .changeset/my-feature.md' >> $GITHUB_STEP_SUMMARY
+          echo 'echo "" >> .changeset/my-feature.md' >> $GITHUB_STEP_SUMMARY
+          echo 'echo "Added new feature" >> .changeset/my-feature.md' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
