@@ -40,14 +40,20 @@ jobs:
             echo "has_changesets=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Release PR
+      - name: Create Version Bump
         if: steps.changeset.outputs.has_changesets == 'true'
-        uses: changesets/action@v1
-        with:
-          title: "Release {{version}}"
-          publish: npm publish --access public --dry-run
+        run: npx @changesets/cli version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Version Bump
+        if: steps.changeset.outputs.has_changesets == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Version Packages" || echo "No changes to commit"
+          git push
 
       - name: Summary (No Changesets)
         if: steps.changeset.outputs.has_changesets == 'false'
