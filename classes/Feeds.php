@@ -46,6 +46,9 @@ class Feeds extends Handler_Protected {
 	const NEVER_GROUP_FEEDS = [ Feeds::FEED_RECENTLY_READ, Feeds::FEED_ARCHIVED ];
 	const NEVER_GROUP_BY_DATE = [ Feeds::FEED_PUBLISHED, Feeds::FEED_STARRED, Feeds::FEED_FRESH ];
 
+	/** Default sorting order for headlines */
+	const DEFAULT_ORDER_BY = 'score DESC, date_entered DESC, updated DESC';
+
 	function csrf_ignore(string $method): bool {
 		return $method === 'index';
 	}
@@ -1554,10 +1557,29 @@ class Feeds extends Handler_Protected {
 			$query_strategy_part = "true";
 		}
 
-		$order_by = "score DESC, date_entered DESC, updated DESC";
+		$order_by = self::DEFAULT_ORDER_BY;
 
 		if ($override_order) {
 			$order_by = $override_order;
+		}
+
+		// Whitelist validation to prevent SQL injection in ORDER BY clause
+		// Only allow values that are known to be safe from _order_to_override_query()
+		$allowed_order_by_values = [
+			'',  // Empty/default: uses DEFAULT_ORDER_BY
+			self::DEFAULT_ORDER_BY,  // Explicit default
+			'ttrss_entries.title, date_entered, updated',  // title
+			'updated',  // date_reverse
+			'updated DESC',  // feed_dates
+		];
+
+		// Check if order_by is from plugin hook (override_order) or from user input
+		$is_from_plugin = $override_order && $order_by === $override_order;
+		$is_in_whitelist = in_array($order_by, $allowed_order_by_values, true);
+
+		if (!$is_from_plugin && !$is_in_whitelist) {
+			// Unsafe order_by from user input - use default
+			$order_by = self::DEFAULT_ORDER_BY;
 		}
 
 		if ($override_strategy) {
