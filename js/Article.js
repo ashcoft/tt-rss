@@ -279,8 +279,8 @@ const Article = {
 
 			const content_inner = row.querySelector(".content-inner");
 
-			row._packedContentHtml = row.getAttribute("data-content") || "";
-			row._packedEnclosuresHtml = row.getAttribute("data-rendered-enclosures") || "";
+			row._packedContentHtml = row.dataset.content || "";
+			row._packedEnclosuresHtml = row.dataset.renderedEnclosures || "";
 
 			// missing in unexpanded mode
 			if (content_inner)
