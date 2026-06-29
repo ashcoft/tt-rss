@@ -254,7 +254,9 @@ const Article = {
 		if (row.getAttribute("data-is-packed") === "1") {
 			const container = row.querySelector(".content-inner");
 
-			container.innerHTML = row.getAttribute("data-content").trim() + row.getAttribute("data-rendered-enclosures").trim();
+			const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
+			const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
+			container.innerHTML = packedContent + packedEnclosures;
 
 			dojo.parser.parse(container);
 
@@ -276,6 +278,9 @@ const Article = {
 			row.setAttribute("data-is-packed", "1");
 
 			const content_inner = row.querySelector(".content-inner");
+
+			row._packedContentHtml = row.getAttribute("data-content") || "";
+			row._packedEnclosuresHtml = row.getAttribute("data-rendered-enclosures") || "";
 
 			// missing in unexpanded mode
 			if (content_inner)
