@@ -1,4 +1,3 @@
-```
 # Dependencies
 node_modules/
 
@@ -73,4 +72,17 @@ htmlcov/
 .mypy_cache/
 .pytest_cache/
 
-```
+# tt-rss specific
+/config.php
+/feed-icons/
+/cache/
+/lock/
+/messages.mo
+/plugins.local/
+/templates.local/
+/themes.local/
+/vendor/**/.git
+/.phpunit*cache
+/.phpstan-tmp
+/.rector-tmp
+/.tools/
