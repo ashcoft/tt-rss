@@ -4,8 +4,13 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "lint:css": "stylelint 'lib/flat-ttrss/**/*.css' 'plugins/**/*.css' 'themes/**/*.less'",
     "lint:js": "eslint js plugins",
+    "less": "gulp less",
+    "less:watch": "gulp",
     "phpunit": "XDEBUG_MODE=coverage ./vendor/bin/phpunit",
     "phpunit:integration": "./tests_integration/run.sh"
   },
@@ -19,6 +24,7 @@
     "gulp-touch-fd": "^2.0.0",
     "less": "^4.6.6",
     "stylelint": "^17.13.0",
-    "stylelint-config-standard": "^40.0.0"
+    "stylelint-config-standard": "^40.0.0",
+    "vite": "^5.4.0"
   }
 }
