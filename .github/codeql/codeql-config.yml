@@ -11,14 +11,7 @@ languages:
   - github-actions
 
 # Paths to exclude from analysis (vendor directories, build artifacts, etc.)
-exclude:
-  - node_modules
-  - vendor
-  - cache
-  - images
-  - locale
-  - themes
-  - sql
+paths-ignore:
 
 # Queries to run (security-and-quality is the default set for security-focused analysis)
 queries:
