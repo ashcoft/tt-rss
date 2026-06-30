@@ -61,5 +61,72 @@ export default [
       '@stylistic/js/computed-property-spacing': ['error', 'never'],
       '@stylistic/js/max-statements-per-line': ['warn', { 'max': 2 }]
     }
+  },
+
+  // Vite migration: browser-based shim files with relaxed rules
+  {
+    files: ['src/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'script',
+      globals: {
+        ...globals.browser,
+        console: 'readonly',
+
+        // Dojo globals
+        dojo: 'readonly',
+        dijit: 'readonly',
+
+        // AMD Shim globals
+        AMDShim: 'readonly',
+        __amdShim: 'readonly'
+      }
+    },
+
+    plugins: {
+      '@stylistic/js': stylistic
+    },
+
+    rules: {
+      'no-console': 'off',
+      'no-unused-vars': ['error', {
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_'
+      }],
+      'prefer-const': 'error',
+      'eqeqeq': ['error', 'always'],
+      'no-empty': ['error', { 'allowEmptyCatch': true }],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+      'no-extend-native': 'error',
+      'array-callback-return': 'error',
+      'no-var': 'error',
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
+      '@stylistic/js/eol-last': 'error',
+      '@stylistic/js/no-trailing-spaces': 'error',
+      '@stylistic/js/no-multiple-empty-lines': ['error', { 'max': 2 }]
+    }
+  },
+
+  // Vite config: Node.js based
+  {
+    files: ['vite.config.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        __dirname: 'readonly',
+        __filename: 'readonly'
+      }
+    },
+
+    rules: {
+      'no-undef': 'off',
+      'no-console': 'off',
+      'no-unused-vars': 'off'
+    }
   }
 ];
