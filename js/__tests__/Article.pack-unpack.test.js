@@ -385,15 +385,10 @@ describe('Article.pack() -> Article.unpack() round-trip', () => {
 
 		const prevSanitize = globalThis.DOMPurify.sanitize;
 		const sanitizeForTest = (html) => {
-			let previous;
-			let current = html;
-			do {
-				previous = current;
-				current = current
-					.replace(/onerror\s*=\s*[^ >]+/gi, '')
-					.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
-			} while (current !== previous);
-			return current;
+			if (typeof prevSanitize === 'function') {
+				return prevSanitize(html);
+			}
+			return '';
 		};
 		globalThis.DOMPurify.sanitize = vi.fn((html) => sanitizeForTest(html));
 
