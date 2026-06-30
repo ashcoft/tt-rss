@@ -1,0 +1,18 @@
+# CodeQL Configuration for tt-rss-non-dockerize
+# This configuration enables CodeQL security analysis for the repository
+
+name: codeql-configuration
+
+# Languages to analyze
+languages:
+  - javascript-typescript
+  - php
+  - python
+  - github-actions
+
+# Paths to exclude from analysis (vendor directories, build artifacts, etc.)
+paths-ignore:
+
+# Queries to run (security-and-quality is the default set for security-focused analysis)
+queries:
+  - uses: security-and-quality
