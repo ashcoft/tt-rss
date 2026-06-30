@@ -384,7 +384,18 @@ describe('Article.pack() -> Article.unpack() round-trip', () => {
 		row.setAttribute('data-content', '<script>evil()</script>');
 
 		const prevSanitize = globalThis.DOMPurify.sanitize;
-		globalThis.DOMPurify.sanitize = vi.fn((html) => html.replace(/onerror\s*=\s*[^ >]+/gi, '').replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, ''));
+		const sanitizeForTest = (html) => {
+			let previous;
+			let current = html;
+			do {
+				previous = current;
+				current = current
+					.replace(/onerror\s*=\s*[^ >]+/gi, '')
+					.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
+			} while (current !== previous);
+			return current;
+		};
+		globalThis.DOMPurify.sanitize = vi.fn((html) => sanitizeForTest(html));
 
 		Article.unpack(row);
 
