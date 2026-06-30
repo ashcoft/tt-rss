@@ -256,9 +256,7 @@ const Article = {
 
 			const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
 			const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
-			const safePackedContent = DOMPurify.sanitize(packedContent);
-			const safePackedEnclosures = DOMPurify.sanitize(packedEnclosures);
-			container.innerHTML = safePackedContent + safePackedEnclosures;
+			container.innerHTML = packedContent + packedEnclosures;
 
 			dojo.parser.parse(container);
 
