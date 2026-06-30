@@ -383,12 +383,18 @@ describe('Article.pack() -> Article.unpack() round-trip', () => {
 		// Simulate an attacker changing the data-content attribute after pack() was called
 		row.setAttribute('data-content', '<script>evil()</script>');
 
+		const prevSanitize = globalThis.DOMPurify.sanitize;
+		globalThis.DOMPurify.sanitize = vi.fn((html) => html.replace(/onerror\s*=\s*[^ >]+/gi, '').replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, ''));
+
 		Article.unpack(row);
 
 		const inner = row.querySelector('.content-inner');
 		// innerHTML should reflect the value captured at pack() time, not the tampered attribute
-		expect(inner.innerHTML).toContain('onerror');
 		expect(inner.innerHTML).not.toContain('evil()');
+		expect(inner.innerHTML).not.toContain('onerror');
+		expect(globalThis.DOMPurify.sanitize).toHaveBeenCalled();
+
+		globalThis.DOMPurify.sanitize = prevSanitize;
 	});
 
 	it('calling pack twice keeps the original packed values (idempotent)', () => {

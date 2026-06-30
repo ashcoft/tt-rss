@@ -1,6 +1,6 @@
 'use strict'
 
-/* global __, ngettext, App, Headlines, xhr, PluginHost, Notify, fox */
+/* global __, ngettext, App, Headlines, xhr, PluginHost, Notify, fox, DOMPurify */
 
 const Article = {
 	_scroll_reset_timeout: false,
@@ -256,7 +256,9 @@ const Article = {
 
 			const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
 			const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
-			container.innerHTML = packedContent + packedEnclosures;
+			const safePackedContent = DOMPurify.sanitize(packedContent);
+			const safePackedEnclosures = DOMPurify.sanitize(packedEnclosures);
+			container.innerHTML = safePackedContent + safePackedEnclosures;
 
 			dojo.parser.parse(container);
 
