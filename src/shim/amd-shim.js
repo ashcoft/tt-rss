@@ -1,25 +1,19 @@
 /**
  * AMD (Asynchronous Module Definition) Shim for Vite
- * 
+ *
  * This module provides compatibility between Dojo 1.x's AMD format and
  * Vite's ES Module system. It allows existing Dojo AMD modules to be
  * imported and used within Vite's development and build process.
- * 
+ *
  * The shim works by:
  * 1. Intercepting require() calls from Dojo
  * 2. Converting AMD-style define() exports
  * 3. Making the dojo global available for legacy code
- * 
+ *
  * Usage:
  *   import 'src/shim/amd-shim.js';
  *   // Now AMD modules can be imported via Vite
  */
-
-// Store original globals if they exist
-const originalDefine = window.define;
-const originalRequire = window.require;
-const originalDojo = window.dojo;
-const originalDijit = window.dijit;
 
 /**
  * AMD Shim Configuration
@@ -77,10 +71,12 @@ const AMDShim = {
       return moduleId;
     }
     
-    // Handle dojo:* plugin syntax
+    // Handle dojo/text! plugin syntax
+    // The text plugin loads template resources, so we return the template path itself
     if (moduleId.startsWith('dojo/text!')) {
       const templatePath = moduleId.replace('dojo/text!', '');
-      return `/lib/dojo/text.js`;
+      // Return the actual template resource, not the text.js plugin
+      return templatePath.startsWith('/') ? templatePath : `/${templatePath}`;
     }
     
     // Handle relative paths
@@ -180,13 +176,13 @@ const AMDShim = {
       dependencies = ['require', 'exports', 'module'];
       moduleId = AMDShim.currentModuleId;
     }
-    
+
     // Normalize arguments
     if (typeof dependencies === 'function') {
       factory = dependencies;
       dependencies = ['require', 'exports', 'module'];
     }
-    
+
     // Store the definition
     AMDShim.definitions.set(moduleId, {
       id: moduleId,
@@ -194,6 +190,78 @@ const AMDShim = {
       factory: factory,
       resolved: false
     });
+
+    // If this is being called during module loading, execute it immediately
+    if (moduleId && factory) {
+      this.executeModule(moduleId);
+    }
+  },
+
+  /**
+   * Execute a module's factory function with its dependencies
+   */
+  executeModule(moduleId) {
+    const def = AMDShim.definitions.get(moduleId);
+    if (!def || def.resolved) {
+      return;
+    }
+
+    // Create module entry
+    const moduleEntry = {
+      id: moduleId,
+      exports: {}
+    };
+    AMDShim.modules.set(moduleId, moduleEntry);
+
+    // Set current module context
+    const previousModuleId = AMDShim.currentModuleId;
+    AMDShim.currentModuleId = moduleId;
+
+    try {
+      // Resolve dependencies
+      const resolvedDeps = (def.dependencies || []).map(dep => {
+        if (dep === 'require') {
+          return {
+            resolve: (id) => AMDShim.resolveModuleId(id),
+            toUrl: (id) => AMDShim.resolveModuleId(id)
+          };
+        }
+        if (dep === 'exports') {
+          return moduleEntry.exports;
+        }
+        if (dep === 'module') {
+          return {
+            id: moduleId,
+            exports: moduleEntry.exports
+          };
+        }
+
+        // Return cached module or stub
+        const cached = AMDShim.modules.get(dep);
+        return cached ? cached.exports : createLazyModuleStub(dep);
+      });
+
+      // Execute factory
+      if (typeof def.factory === 'function') {
+        const result = def.factory.apply(null, resolvedDeps);
+        // If factory returns a value, use it as the export
+        if (result !== undefined) {
+          moduleEntry.exports = result;
+          AMDShim.modules.set(moduleId, moduleEntry);
+        }
+      } else {
+        // Factory is an object - use it directly
+        moduleEntry.exports = def.factory;
+        AMDShim.modules.set(moduleId, moduleEntry);
+      }
+
+      def.resolved = true;
+    } catch (error) {
+      console.error(`[AMD Shim] Error executing module ${moduleId}:`, error);
+    } finally {
+      // Restore previous module context
+      AMDShim.currentModuleId = previousModuleId;
+    }
   },
   
   /**
@@ -285,48 +353,68 @@ function resolveRelativePath(basePath, relativePath) {
 
 /**
  * Create a lazy module stub that loads the module on first access
+ * Returns a synchronous stub that will be populated once the module loads
  */
 function createLazyModuleStub(moduleId) {
-  const resolvedPath = AMDShim.resolveModuleId(moduleId);
-  let moduleExports = null;
-  let loading = false;
-  const pendingCallbacks = [];
-  
-  return new Proxy({}, {
-    get(target, prop) {
-      if (prop === 'default') {
-        return loadModule(moduleId);
-      }
-      return loadModule(moduleId).then(exports => exports[prop]);
-    },
-    has(target, prop) {
-      return true;
+  // Create a stub object that will be populated with actual exports
+  const stub = {};
+
+  // Trigger async loading in the background
+  loadModule(moduleId).then(exports => {
+    // Copy all exports to the stub
+    if (exports && typeof exports === 'object') {
+      Object.assign(stub, exports);
     }
+  }).catch(error => {
+    console.warn(`[AMD Shim] Failed to load module ${moduleId}:`, error);
   });
+
+  return stub;
 }
 
 /**
  * Dynamically load a module and return its exports
  */
 async function loadModule(moduleId) {
+  // Check if already loaded
+  const cached = AMDShim.modules.get(moduleId);
+  if (cached) {
+    return cached.exports;
+  }
+
   const resolvedPath = AMDShim.resolveModuleId(moduleId);
-  
+
   if (!resolvedPath) {
     console.warn(`[AMD Shim] Cannot resolve module: ${moduleId}`);
     return {};
   }
-  
+
   // Skip external URLs
   if (resolvedPath.startsWith('http') || resolvedPath.startsWith('//')) {
     return {};
   }
-  
+
+  // Set current module context before loading
+  const previousModuleId = AMDShim.currentModuleId;
+  AMDShim.currentModuleId = moduleId;
+
   try {
     const module = await import(/* @vite-ignore */ resolvedPath);
+
+    // Check if the module registered itself via define()
+    const registered = AMDShim.modules.get(moduleId);
+    if (registered) {
+      return registered.exports;
+    }
+
+    // Otherwise return the ES module exports
     return module.default || module;
   } catch (error) {
     console.warn(`[AMD Shim] Failed to load module ${moduleId}:`, error);
     return {};
+  } finally {
+    // Restore previous module context
+    AMDShim.currentModuleId = previousModuleId;
   }
 }
 

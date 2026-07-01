@@ -22,9 +22,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   // Project root (where index.html is located)
   root: '.',
-  
-  // Public directory for static assets that don't need processing
-  publicDir: 'js',
+
+  // Disable publicDir since js/ contains modules that are part of the module graph
+  // Static assets are handled through explicit imports and Vite's asset pipeline
+  publicDir: false,
   
   // Plugins
   plugins: [
@@ -209,10 +210,11 @@ export default defineConfig({
   server: {
     // Port for the dev server
     port: 5173,
-    
-    // Host to bind to
-    host: true,
-    
+
+    // Bind to loopback by default for security
+    // Use --host flag to bind to all interfaces if needed
+    host: '127.0.0.1',
+
     // Open browser on start
     open: false,
     
