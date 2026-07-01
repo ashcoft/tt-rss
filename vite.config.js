@@ -7,11 +7,13 @@
  * - Dev server with HMR for faster development
  * - Proxy to PHP backend for API calls
  * - Asset handling for CSS, fonts, and images
+ * - Vue 3 + Element Plus support for new UI components
  * 
  * The old build system remains functional as a fallback.
  */
 
 import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,6 +25,11 @@ export default defineConfig({
   
   // Public directory for static assets that don't need processing
   publicDir: 'js',
+  
+  // Plugins
+  plugins: [
+    vue(),
+  ],
   
   // Build configuration
   build: {
@@ -69,12 +76,15 @@ export default defineConfig({
       // Legacy module paths
       'lib': path.resolve(__dirname, 'lib'),
       
-      // Ensure consistent paths
-      '@': path.resolve(__dirname, '.'),
+      // Vue 3 aliases
+      '@': path.resolve(__dirname, 'src/vue'),
+      '@/components': path.resolve(__dirname, 'src/vue/components'),
+      '@/composables': path.resolve(__dirname, 'src/vue/composables'),
+      '@/types': path.resolve(__dirname, 'src/vue/types'),
     },
     
     // File extensions to try when resolving imports
-    extensions: ['.js', '.json', '.html', '.htm'],
+    extensions: ['.js', '.ts', '.vue', '.json', '.html', '.htm'],
   },
   
   // Pre-bundling configuration for AMD modules
@@ -86,6 +96,8 @@ export default defineConfig({
       'js/tt-rss.js',
       // Common utilities
       'js/common.js',
+      // Vue app entry
+      'src/vue/main.ts',
     ],
     
     // Force inclusion of Dojo modules for pre-bundling
@@ -184,6 +196,9 @@ export default defineConfig({
       'dojo/dnd/Avatar',
       'dojo/dnd/Manager',
       'dojo/store/Observable',
+      
+      // Element Plus
+      'element-plus',
     ],
     
     // Exclude patterns - Dojo should be pre-bundled, not excluded

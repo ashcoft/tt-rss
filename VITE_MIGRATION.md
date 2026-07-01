@@ -1,25 +1,36 @@
-# Vite Migration Guide for Tiny Tiny RSS
+# Vite + Vue 3 + Element Plus Migration Guide for Tiny Tiny RSS
 
-This document describes the migration from the legacy Dojo build system to Vite while maintaining backward compatibility.
+This document describes the migration from the legacy Dojo build system to Vite with Vue 3 and Element Plus while maintaining backward compatibility.
 
 ## Overview
 
-The frontend build system has been enhanced with Vite to provide:
-- Faster development with Hot Module Replacement (HMR)
-- Modern JavaScript module handling
-- Improved debugging experience
-- Better build performance
+The frontend build system has been enhanced with:
+- **Vite**: Fast development server with HMR
+- **Vue 3**: Modern reactive UI framework
+- **Element Plus**: Enterprise-grade UI component library
+- **TypeScript**: Type-safe JavaScript (optional)
 
 ## Quick Start
+
+### Prerequisites
+
+```bash
+# Install pnpm (if not already installed)
+corepack enable
+corepack prepare pnpm@latest --activate
+
+# Approve build scripts
+pnpm approve-builds esbuild
+```
 
 ### Development Mode
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
-# Start Vite dev server
-npm run dev
+# Start Vite dev server (Vue 3 + Element Plus)
+pnpm run dev
 
 # In another terminal, start your PHP backend
 php -S localhost:8080
@@ -33,17 +44,27 @@ For production, continue using the existing PHP-served pages. The Vite build is 
 
 ```bash
 # Build for production (optional)
-npm run build
+pnpm run build
 ```
 
 ### LESS Compilation
 
 ```bash
 # Compile LESS themes to CSS
-npm run less
+pnpm run less
 
 # Watch and auto-compile LESS files
-npm run less:watch
+pnpm run less:watch
+```
+
+### Type Checking
+
+```bash
+# Run TypeScript type checking
+pnpm run type-check
+
+# Run Vue-specific linting
+pnpm run lint:vue
 ```
 
 ## Architecture
@@ -94,17 +115,26 @@ The dev server proxies the following paths to the PHP backend:
 
 | File | Purpose |
 |------|---------|
-| `vite.config.js` | Vite configuration with AMD support |
-| `index.html` | Vite dev server entry point |
-| `src/main.js` | Main development entry module |
-| `src/shim/amd-shim.js` | AMD compatibility shim |
+| `vite.config.js` | Vite configuration with Vue + Element Plus + AMD support |
+| `tsconfig.json` | TypeScript configuration |
+| `tsconfig.node.json` | TypeScript config for Vite |
+| `src/vue/main.ts` | Vue 3 application entry point |
+| `src/vue/App.vue` | Main Vue application component |
+| `src/vue/types/index.ts` | TypeScript type definitions |
+| `src/vue/components/FeedTree.vue` | Feed tree component (Element Plus el-menu) |
+| `src/vue/components/Toolbar.vue` | Toolbar component (Element Plus buttons) |
+| `src/vue/components/HeadlinesList.vue` | Headlines list (Element Plus el-table) |
+| `src/vue/components/ArticleView.vue` | Article view component |
+| `src/vue/index.html` | Vue app HTML entry |
+| `src/shim/amd-shim.js` | AMD compatibility shim for Dojo |
 | `VITE_MIGRATION.md` | This documentation |
 
 ### Modified Files
 
 | File | Change |
 |------|--------|
-| `package.json` | Added Vite dependency and npm scripts |
+| `package.json` | Added Vue 3, Element Plus, TypeScript, pnpm scripts |
+| `eslint.config.js` | Added Vue linting rules |
 
 ### Unchanged Files
 
@@ -114,6 +144,46 @@ All other files remain unchanged:
 - Application JavaScript files (`js/`)
 - Theme files (`themes/`)
 - Gulp build scripts
+
+## Vue 3 + Element Plus Components
+
+### Component Mapping
+
+The following Dojo/dijit widgets have been mapped to Element Plus components:
+
+| Dojo Widget | Element Plus Component | Vue Component |
+|-------------|----------------------|---------------|
+| `dijit.Tree` | `el-menu` | `FeedTree.vue` |
+| `dijit.Toolbar` | `el-button-group` | `Toolbar.vue` |
+| `dijit.Dialog` | `el-dialog` | Native |
+| `dijit.Menu` | `el-dropdown` | Native |
+| `dijit/form/*` | `el-form`, `el-input`, etc. | Native |
+| `dijit/Tree` | `el-table` | `HeadlinesList.vue` |
+
+### Vue Aliases
+
+The following aliases are configured in `vite.config.js`:
+
+| Alias | Path | Description |
+|-------|------|-------------|
+| `dojo` | `lib/dojo` | Core Dojo 1.x modules |
+| `dijit` | `lib/dijit` | Dojo Dijit UI widgets |
+| `fox` | `js` | Tiny Tiny RSS custom modules |
+| `@` | `src/vue` | Vue source files |
+| `@/components` | `src/vue/components` | Vue components |
+| `@/composables` | `src/vue/composables` | Vue composables |
+| `@/types` | `src/vue/types` | TypeScript types |
+
+## TypeScript Types
+
+Type definitions are located in `src/vue/types/index.ts`:
+
+```typescript
+import type { Feed, Category, Headline, Article } from '@/types';
+
+// Use in components
+const feed = ref<Feed>({ id: 1, title: 'My Feed', unread: 10 });
+```
 
 ## Troubleshooting
 
@@ -154,9 +224,10 @@ For production build issues:
 - [x] Phase 1: Analysis of existing build system
 - [x] Phase 2: Vite configuration with AMD support
 - [x] Phase 3: Entry point and AMD shim
-- [x] Phase 4: npm scripts integration
-- [ ] Phase 5: Testing and validation
-- [ ] Phase 6: Documentation
+- [x] Phase 4: pnpm and TypeScript setup
+- [x] Phase 5: Vue 3 + Element Plus components
+- [x] Phase 6: Testing and validation
+- [x] Phase 7: Documentation
 
 ## Future Enhancements
 
@@ -164,9 +235,11 @@ Potential improvements for future phases:
 
 1. **Full ESM Migration**: Gradually convert Dojo modules to ESM
 2. **HMR for Dojo**: Implement HMR for Dojo widgets
-3. **TypeScript Support**: Add TypeScript with gradual adoption
-4. **Modern Widgets**: Gradually replace dijit components with modern UI libraries
-5. **Bundle Optimization**: Analyze and optimize the production bundle
+3. **Complete Component Migration**: Migrate remaining Dojo components to Vue
+4. **Vue Router Integration**: Add client-side routing
+5. **Pinia State Management**: Replace Dojo stores with Pinia
+6. **Bundle Optimization**: Analyze and optimize the production bundle
+7. **Full TypeScript Adoption**: Convert all Vue components to TypeScript
 
 ## Contributing
 
