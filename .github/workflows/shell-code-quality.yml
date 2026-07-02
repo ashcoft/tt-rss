@@ -2,9 +2,6 @@ name: Shell Code Quality
 
 on:
   pull_request:
-    paths:
-    - 'lib/dojo-src/rebuild-dojo.sh'
-    - 'utils/**.sh'
   workflow_dispatch:
   workflow_call:
 
