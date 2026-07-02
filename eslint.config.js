@@ -1,9 +1,13 @@
 import globals from 'globals';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
+import vue from 'eslint-plugin-vue';
 
 export default [
   js.configs.recommended,
+
+  // Vue files
+  ...vue.configs['vue3-recommended'],
 
   {
     files: ['js/**/*.js', 'plugins/**/*.js'],
@@ -12,7 +16,6 @@ export default [
       sourceType: 'script',
       globals: {
         ...globals.browser,
-
         // Dojo
         dojo: 'readonly',
         dijit: 'readonly'
@@ -28,15 +31,11 @@ export default [
       'prefer-const': 'error',
       'eqeqeq': ['error', 'always'],
       'no-empty': ['error', { 'allowEmptyCatch': true }],
-
-      // Security — block the eval family and javascript: URLs
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-script-url': 'error',
       'no-extend-native': 'error',
-
-      // Correctness / bug catchers
       'array-callback-return': 'error',
       'no-return-assign': 'error',
       'no-self-compare': 'error',
@@ -44,14 +43,10 @@ export default [
       'no-unreachable-loop': 'error',
       'no-constructor-return': 'error',
       'no-new-wrappers': 'error',
-
-      // Modernization (companions to prefer-const)
       'no-var': 'error',
       'prefer-spread': 'error',
       'prefer-object-spread': 'error',
       'no-useless-rename': 'error',
-
-      // Stylistic rules (replacing those deprecated in ESLint)
       '@stylistic/js/linebreak-style': ['error', 'unix'],
       '@stylistic/js/eol-last': 'error',
       '@stylistic/js/no-trailing-spaces': 'error',
@@ -60,6 +55,110 @@ export default [
       '@stylistic/js/block-spacing': ['error', 'always'],
       '@stylistic/js/computed-property-spacing': ['error', 'never'],
       '@stylistic/js/max-statements-per-line': ['warn', { 'max': 2 }]
+    }
+  },
+
+  // Vite migration: browser-based shim files with relaxed rules
+  {
+    files: ['src/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'script',
+      globals: {
+        ...globals.browser,
+        console: 'readonly',
+        // Dojo globals
+        dojo: 'readonly',
+        dijit: 'readonly',
+        // AMD Shim globals
+        AMDShim: 'readonly',
+        __amdShim: 'readonly'
+      }
+    },
+
+    plugins: {
+      '@stylistic/js': stylistic
+    },
+
+    rules: {
+      'no-console': 'off',
+      'no-unused-vars': ['error', {
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_'
+      }],
+      'prefer-const': 'error',
+      'eqeqeq': ['error', 'always'],
+      'no-empty': ['error', { 'allowEmptyCatch': true }],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+      'no-extend-native': 'error',
+      'array-callback-return': 'error',
+      'no-var': 'error',
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
+      '@stylistic/js/eol-last': 'error',
+      '@stylistic/js/no-trailing-spaces': 'error',
+      '@stylistic/js/no-multiple-empty-lines': ['error', { 'max': 2 }]
+    }
+  },
+
+  // Vue files
+  {
+    files: ['src/**/*.vue'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        console: 'readonly'
+      }
+    },
+    plugins: {
+      vue: vue
+    },
+    rules: {
+      ...vue.configs['vue3-recommended'].rules,
+      'vue/no-v-html': 'off',
+      'vue/require-default-prop': 'off',
+      'vue/require-explicit-emits': 'off',
+      'vue/multi-word-component-names': 'off'
+    }
+  },
+
+  // Vite config: Node.js based
+  {
+    files: ['vite.config.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        __dirname: 'readonly',
+        __filename: 'readonly'
+      }
+    },
+
+    rules: {
+      'no-undef': 'off',
+      'no-console': 'off',
+      'no-unused-vars': 'off'
+    }
+  },
+
+  // TypeScript files
+  {
+    files: ['src/**/*.ts'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        console: 'readonly'
+      }
+    },
+    rules: {
+      'no-undef': 'off',
+      'no-console': 'off'
     }
   }
 ];
