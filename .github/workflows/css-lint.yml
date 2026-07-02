@@ -2,14 +2,6 @@ name: CSS Lint
 
 on:
   pull_request:
-    paths:
-    - 'lib/flat-ttrss/**.css'
-    - 'plugins/**.css'
-    - 'themes/**.css'
-    - 'themes/**.less'
-    - '.stylelintrc.json'
-    - 'package.json'
-    - 'package-lock.json'
   # Allow manual triggering
   workflow_dispatch:
   # Allow other workflows (e.g. Publish) to invoke this one.

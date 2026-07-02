@@ -2,12 +2,6 @@ name: JavaScript Code Quality
 
 on:
   pull_request:
-    paths:
-    - 'js/**.js'
-    - 'plugins/**.js'
-    - 'eslint.config.js'
-    - 'package.json'
-    - 'package-lock.json'
   # Allow manual triggering
   workflow_dispatch:
   # Allow other workflows (e.g. Publish) to invoke this one.
