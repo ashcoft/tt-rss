@@ -2,15 +2,15 @@
   <div class="article-view">
     <header class="article-header">
       <h2 class="article-title">{{ article.title }}</h2>
-      <el-button 
-        :icon="Close" 
-        circle 
+      <el-button
+        :icon="Close"
+        circle
         size="small"
         @click="$emit('close')"
         class="close-button"
       />
     </header>
-    
+
     <div class="article-meta">
       <div class="meta-row">
         <span class="feed">
@@ -22,14 +22,14 @@
           {{ formatDate(article.updated) }}
         </span>
       </div>
-      
+
       <div class="meta-row" v-if="article.author">
         <span class="author">
           <el-icon><User /></el-icon>
           {{ article.author }}
         </span>
       </div>
-      
+
       <div class="labels" v-if="article.labels && article.labels.length > 0">
         <el-tag
           v-for="label in article.labels"
@@ -41,31 +41,31 @@
         </el-tag>
       </div>
     </div>
-    
+
     <div class="article-actions">
       <el-button-group>
-        <el-button 
+        <el-button
           :type="article.is_marked ? 'warning' : ''"
           @click="toggleStar"
           :title="article.is_marked ? 'Remove star' : 'Star'"
         >
           <el-icon><Star /></el-icon>
         </el-button>
-        <el-button 
+        <el-button
           :type="article.is_published ? 'success' : ''"
           @click="togglePublish"
           :title="article.is_published ? 'Unpublish' : 'Publish'"
         >
           <el-icon><Share /></el-icon>
         </el-button>
-        <el-button 
+        <el-button
           :type="article.is_read ? '' : 'primary'"
           @click="toggleRead"
         >
           <el-icon><Document /></el-icon>
         </el-button>
       </el-button-group>
-      
+
       <el-button-group>
         <el-button @click="openArticle" title="Open original article">
           <el-icon><TopRight /></el-icon>
@@ -75,10 +75,10 @@
         </el-button>
       </el-button-group>
     </div>
-    
+
     <div class="article-content" v-html="article.content">
     </div>
-    
+
     <div class="article-tags" v-if="article.tags && article.tags.length > 0">
       <h4>Tags</h4>
       <div class="tags-list">
@@ -92,7 +92,7 @@
         </el-tag>
       </div>
     </div>
-    
+
     <div class="article-attachments" v-if="article.attachments && article.attachments.length > 0">
       <h4>Attachments</h4>
       <ul class="attachments-list">
@@ -104,7 +104,7 @@
         </li>
       </ul>
     </div>
-    
+
     <div class="article-comments" v-if="article.comments_link || article.comments_count > 0">
       <h4>Comments</h4>
       <a :href="article.comments_link" target="_blank" class="comments-link">

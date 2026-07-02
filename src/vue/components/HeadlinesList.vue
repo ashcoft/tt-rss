@@ -11,13 +11,13 @@
       style="width: 100%"
     >
       <el-table-column type="selection" width="40" />
-      
+
       <el-table-column label="Feed" width="120">
         <template #default="{ row }">
           <span class="feed-name">{{ row.feed_title || 'Unknown' }}</span>
         </template>
       </el-table-column>
-      
+
       <el-table-column label="Title" min-width="300">
         <template #default="{ row }">
           <div class="headline-content">
@@ -35,7 +35,7 @@
           </div>
         </template>
       </el-table-column>
-      
+
       <el-table-column label="Labels" width="150">
         <template #default="{ row }">
           <el-tag
@@ -48,23 +48,23 @@
           </el-tag>
         </template>
       </el-table-column>
-      
+
       <el-table-column label="Actions" width="120" align="right">
         <template #default="{ row }">
           <el-button-group size="small">
-            <el-button 
-              :icon="Star" 
+            <el-button
+              :icon="Star"
               :type="row.is_marked ? 'warning' : ''"
               @click.stop="$emit('action', row, 'toggle_star')"
               :title="row.is_marked ? 'Unstar' : 'Star'"
             />
-            <el-button 
-              :icon="Document" 
+            <el-button
+              :icon="Document"
               @click.stop="$emit('action', row, 'mark_read')"
               title="Mark as read"
             />
-            <el-button 
-              :icon="More" 
+            <el-button
+              :icon="More"
               @click.stop="showActions(row)"
               title="More actions"
             />
@@ -72,12 +72,12 @@
         </template>
       </el-table-column>
     </el-table>
-    
-    <el-empty 
-      v-if="!loading && headlines.length === 0" 
+
+    <el-empty
+      v-if="!loading && headlines.length === 0"
       description="No articles found"
     />
-    
+
     <!-- Actions Dropdown -->
     <el-dropdown ref="actionsDropdown" trigger="click" @command="handleCommand">
       <span ref="actionsTarget" style="display: none;"></span>
@@ -145,7 +145,7 @@ const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp * 1000);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
-  
+
   // Less than 24 hours
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
@@ -155,13 +155,13 @@ const formatDate = (timestamp: number): string => {
     }
     return `${hours}h ago`;
   }
-  
+
   // Less than 7 days
   if (diff < 604800000) {
     const days = Math.floor(diff / 86400000);
     return `${days}d ago`;
   }
-  
+
   // Format as date
   return date.toLocaleDateString();
 };

@@ -5,38 +5,38 @@
         <h1>Tiny Tiny RSS</h1>
         <p class="subtitle">Vue 3 + Element Plus Migration</p>
       </header>
-      
+
       <main class="app-main">
         <aside class="sidebar">
-          <FeedTree 
-            :feeds="feeds" 
+          <FeedTree
+            :feeds="feeds"
             :categories="categories"
             @select="handleFeedSelect"
           />
         </aside>
-        
+
         <section class="content">
-          <Toolbar 
+          <Toolbar
             :feed-info="currentFeedInfo"
             @action="handleToolbarAction"
           />
-          
-          <HeadlinesList 
+
+          <HeadlinesList
             :headlines="headlines"
             :loading="loadingHeadlines"
             @select="handleHeadlineSelect"
             @action="handleHeadlineAction"
           />
         </section>
-        
+
         <aside class="article-panel" v-if="selectedArticle">
-          <ArticleView 
+          <ArticleView
             :article="selectedArticle"
             @close="selectedArticle = null"
           />
         </aside>
       </main>
-      
+
       <footer class="app-footer">
         <span class="status">{{ statusMessage }}</span>
       </footer>
@@ -154,7 +154,7 @@ const loadHeadlines = async () => {
       view_mode: 'adaptive',
       csrf_token: 'auto'
     });
-    
+
     const response = await fetch(`/backend.php?${params}`);
     const data = await response.json();
     if (data.status === 0 && data.content) {
@@ -176,7 +176,7 @@ const loadArticle = async (articleId: number) => {
       article_id: String(articleId),
       csrf_token: 'auto'
     });
-    
+
     const response = await fetch(`/backend.php?${params}`);
     const data = await response.json();
     if (data.status === 0 && data.content) {

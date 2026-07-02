@@ -20,13 +20,13 @@ import '../js/tt-rss.js';
 if (import.meta.env.DEV) {
   console.log('[Vite] Development mode active');
   console.log('[Vite] HMR enabled for faster development');
-  
+
   // Setup HMR acceptance
   if (import.meta.hot) {
     import.meta.hot.on('vite:beforeFullReload', () => {
       console.log('[Vite] Reloading application...');
     });
-    
+
     import.meta.hot.on('vite:beforeSnapshotGeneration', () => {
       console.log('[Vite] Generating snapshot...');
     });

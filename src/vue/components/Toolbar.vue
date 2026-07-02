@@ -2,18 +2,18 @@
   <div class="toolbar">
     <div class="toolbar-left">
       <el-button-group>
-        <el-button 
-          :icon="Refresh" 
+        <el-button
+          :icon="Refresh"
           @click="$emit('action', 'refresh')"
           title="Refresh"
         />
-        <el-button 
-          :icon="Check" 
+        <el-button
+          :icon="Check"
           @click="$emit('action', 'catchup')"
           title="Mark all as read"
         />
       </el-button-group>
-      
+
       <el-input
         v-model="searchQuery"
         placeholder="Search articles..."
@@ -23,33 +23,33 @@
         @keyup.enter="$emit('action', 'search', searchQuery)"
       />
     </div>
-    
+
     <div class="toolbar-center">
       <span class="feed-title" v-if="feedInfo">{{ feedInfo.title }}</span>
     </div>
-    
+
     <div class="toolbar-right">
       <el-button-group>
-        <el-button 
-          :icon="ViewList" 
+        <el-button
+          :icon="ViewList"
           :type="viewMode === 'list' ? 'primary' : ''"
           @click="setViewMode('list')"
           title="List view"
         />
-        <el-button 
-          :icon="Grid" 
+        <el-button
+          :icon="Grid"
           :type="viewMode === 'grid' ? 'primary' : ''"
           @click="setViewMode('grid')"
           title="Grid view"
         />
-        <el-button 
-          :icon="Expand" 
+        <el-button
+          :icon="Expand"
           :type="viewMode === 'expanded' ? 'primary' : ''"
           @click="setViewMode('expanded')"
           title="Expanded view"
         />
       </el-button-group>
-      
+
       <el-dropdown @command="handleSort">
         <el-button>
           Sort: {{ sortLabel }}
@@ -63,7 +63,7 @@
           </el-dropdown-menu>
         </template>
       </el-dropdown>
-      
+
       <el-dropdown @command="handleAction">
         <el-button :icon="More" />
         <template #dropdown>
@@ -81,9 +81,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { 
-  Refresh, Check, Search, ViewList, Grid, Expand, 
-  ArrowDown, More 
+import {
+  Refresh, Check, Search, ViewList, Grid, Expand,
+  ArrowDown, More
 } from '@element-plus/icons-vue';
 import type { Feed } from '@/types';
 

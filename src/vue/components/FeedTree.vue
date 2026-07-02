@@ -7,7 +7,7 @@
       clearable
       class="search-input"
     />
-    
+
     <el-menu
       :default-active="activeFeedId"
       class="feed-menu"
@@ -18,8 +18,8 @@
         <template #title>
           <span class="menu-title">Special</span>
         </template>
-        <el-menu-item 
-          v-for="special in specialFeeds" 
+        <el-menu-item
+          v-for="special in specialFeeds"
           :key="special.id"
           :index="String(special.id)"
         >
@@ -28,14 +28,14 @@
           <span class="unread-count" v-if="special.unread > 0">{{ special.unread }}</span>
         </el-menu-item>
       </el-sub-menu>
-      
+
       <!-- Labels -->
       <el-sub-menu index="labels" v-if="labels.length > 0">
         <template #title>
           <span class="menu-title">Labels</span>
         </template>
-        <el-menu-item 
-          v-for="label in filteredLabels" 
+        <el-menu-item
+          v-for="label in filteredLabels"
           :key="'label-' + label.id"
           :index="'label-' + label.id"
         >
@@ -44,10 +44,10 @@
           <span class="unread-count" v-if="label.unread > 0">{{ label.unread }}</span>
         </el-menu-item>
       </el-sub-menu>
-      
+
       <!-- Categories -->
-      <el-sub-menu 
-        v-for="category in categories" 
+      <el-sub-menu
+        v-for="category in categories"
         :key="'cat-' + category.id"
         :index="'cat-' + category.id"
       >
@@ -58,8 +58,8 @@
           </span>
           <span class="unread-count" v-if="category.unread > 0">{{ category.unread }}</span>
         </template>
-        <el-menu-item 
-          v-for="feed in getFeedsByCategory(category.id)" 
+        <el-menu-item
+          v-for="feed in getFeedsByCategory(category.id)"
           :key="feed.id"
           :index="String(feed.id)"
         >
@@ -67,14 +67,14 @@
           <span class="unread-count" v-if="feed.unread > 0">{{ feed.unread }}</span>
         </el-menu-item>
       </el-sub-menu>
-      
+
       <!-- Uncategorized Feeds -->
       <el-sub-menu index="uncategorized" v-if="uncategorizedFeeds.length > 0">
         <template #title>
           <span class="menu-title">Feeds</span>
         </template>
-        <el-menu-item 
-          v-for="feed in filteredUncategorizedFeeds" 
+        <el-menu-item
+          v-for="feed in filteredUncategorizedFeeds"
           :key="feed.id"
           :index="String(feed.id)"
         >
@@ -123,7 +123,7 @@ const specialFeeds = [
 const filteredLabels = computed(() => {
   if (!searchQuery.value) return props.labels;
   const query = searchQuery.value.toLowerCase();
-  return props.labels.filter(label => 
+  return props.labels.filter(label =>
     label.caption.toLowerCase().includes(query)
   );
 });
@@ -146,7 +146,7 @@ const getFeedsByCategory = (categoryId: number) => {
 const handleSelect = (index: string) => {
   const isLabel = index.startsWith('label-');
   const isCategory = index.startsWith('cat-');
-  
+
   if (isLabel) {
     const labelId = parseInt(index.replace('label-', ''));
     emit('select', labelId, false);
