@@ -6,8 +6,8 @@ import vue from 'eslint-plugin-vue';
 export default [
   js.configs.recommended,
 
-  // Vue files
-  ...vue.configs['vue3-recommended'],
+  // Vue files - use flat config
+  ...(vue.configs['flat/recommended'] || []),
 
   {
     files: ['js/**/*.js', 'plugins/**/*.js'],
@@ -116,7 +116,6 @@ export default [
       vue: vue
     },
     rules: {
-      ...vue.configs['vue3-recommended'].rules,
       'vue/no-v-html': 'off',
       'vue/require-default-prop': 'off',
       'vue/require-explicit-emits': 'off',
