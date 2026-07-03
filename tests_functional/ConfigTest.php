@@ -186,4 +186,57 @@ final class ConfigTest extends TestCase {
         $this->assertFalse(Config::cast_to("0", Config::T_BOOL));
         $this->assertFalse(Config::cast_to("", Config::T_BOOL));
     }
+
+    /**
+     * @dataProvider matchesSelfUrlProvider
+     */
+    public function test_matches_self_url(string $self_url, string $input, bool $expected): void {
+        Config::set(Config::SELF_URL_PATH, $self_url);
+        $this->assertSame($expected, Config::matches_self_url($input));
+    }
+
+    public static function matchesSelfUrlProvider(): array {
+        return [
+            // Valid same-origin URLs
+            ['http://example.com', 'http://example.com/', true],
+            ['http://example.com', 'http://example.com/index.php', true],
+            ['http://example.com', 'http://example.com/tt-rss/', true],
+            ['http://example.com/tt-rss', 'http://example.com/tt-rss', true],
+            ['http://example.com/tt-rss', 'http://example.com/tt-rss/index.php', true],
+            ['http://example.com/tt-rss', 'http://example.com/tt-rss/feed/1', true],
+
+            // Valid with port
+            ['http://example.com:8080', 'http://example.com:8080/', true],
+            ['https://example.com:8443', 'https://example.com:8443/api', true],
+
+            // Invalid - different scheme
+            ['http://example.com', 'https://example.com/', false],
+            ['https://example.com', 'http://example.com/', false],
+
+            // Invalid - different host
+            ['http://example.com', 'http://evil.com/', false],
+            ['http://example.com', 'http://example.com.evil.com/', false],
+            ['http://example.com', 'http://user:pass@example.com/', false],
+
+            // Invalid - different port
+            ['http://example.com', 'http://example.com:8080/', false],
+            ['http://example.com:8080', 'http://example.com/', false],
+
+            // Invalid - path traversal
+            ['http://example.com/tt-rss', 'http://example.com/other/', false],
+            ['http://example.com/tt-rss', 'http://example.com/../admin/', false],
+
+            // Invalid - no path prefix match
+            ['http://example.com/tt-rss', 'http://example.com/tt-rsss/', false],
+
+            // Invalid - malformed URLs
+            ['http://example.com', '', false],
+            ['http://example.com', '/relative', false],
+            ['http://example.com', 'ftp://example.com/', false],
+
+            // HTTPS automatic port
+            ['https://example.com', 'https://example.com:443/', true],
+            ['http://example.com', 'http://example.com:80/', true],
+        ];
+    }
 }
