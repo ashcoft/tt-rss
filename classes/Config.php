@@ -575,8 +575,14 @@ class Config {
         $check_url_scheme = strtolower($check_url_parts['scheme']);
         $self_url_scheme = strtolower($self_url_parts['scheme']);
 
-        $check_url_host = idn_to_ascii($check_url_parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
-        $self_url_host  = idn_to_ascii($self_url_parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+        // IDN conversion with fallback when intl extension is not available
+        if (function_exists('idn_to_ascii')) {
+            $check_url_host = idn_to_ascii($check_url_parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+            $self_url_host  = idn_to_ascii($self_url_parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+        } else {
+            $check_url_host = $check_url_parts['host'];
+            $self_url_host = $self_url_parts['host'];
+        }
 
         $check_url_port = $check_url_parts['port'] ?? ($check_url_scheme === 'https' ? 443 : ($check_url_scheme === 'http' ? 80 : null));
         $self_url_port  = $self_url_parts['port']  ?? ($self_url_scheme === 'https' ? 443 : ($self_url_scheme === 'http' ? 80 : null));
