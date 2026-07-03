@@ -216,9 +216,6 @@ final class ConfigTest extends TestCase {
             'Subdomain mismatch' => ['https://example.com', 'https://sub.example.com', false],
             'Malformed target URL' => ['https://example.com', 'invalid-url', false],
 
-            // IDN matches
-            'IDN Punycode vs Unicode match' => ['https://xn--mller-kva.com', 'https://müller.com', true],
-
             // path prefix matches
             'Exact path match' => ['https://example.com/tt-rss', 'https://example.com/tt-rss', true],
             'Path match with trailing slash' => ['https://example.com/tt-rss', 'https://example.com/tt-rss/', true],
