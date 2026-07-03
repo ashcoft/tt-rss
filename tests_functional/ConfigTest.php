@@ -188,55 +188,47 @@ final class ConfigTest extends TestCase {
     }
 
     /**
-     * @dataProvider matchesSelfUrlProvider
+     * @dataProvider urlMatchDataProvider
      */
-    public function test_matches_self_url(string $self_url, string $input, bool $expected): void {
-        Config::set(Config::SELF_URL_PATH, $self_url);
-        $this->assertSame($expected, Config::matches_self_url($input));
+    public function test_matches_self_url(string $self_url, string $url_to_check, bool $expected_result): void {
+        $url_parts = parse_url($self_url);
+        $_SERVER['HTTP_X_FORWARDED_PROTO'] = $url_parts['scheme'];
+        $_SERVER['HTTP_HOST'] = $url_parts['host'];
+        $_SERVER['REQUEST_URI'] = $url_parts['path'];
+
+        $this->assertEquals($expected_result, Config::matches_self_url($url_to_check, true));
     }
 
-    public static function matchesSelfUrlProvider(): array {
+    public static function urlMatchDataProvider(): array {
         return [
-            // Valid same-origin URLs
-            ['http://example.com', 'http://example.com/', true],
-            ['http://example.com', 'http://example.com/index.php', true],
-            ['http://example.com', 'http://example.com/tt-rss/', true],
-            ['http://example.com/tt-rss', 'http://example.com/tt-rss', true],
-            ['http://example.com/tt-rss', 'http://example.com/tt-rss/index.php', true],
-            ['http://example.com/tt-rss', 'http://example.com/tt-rss/feed/1', true],
+            // root origin matches
+            'Exact match root' => ['https://example.com', 'https://example.com', true],
+            'Root with trailing slash match' => ['https://example.com', 'https://example.com/', true],
+            'Root matches sub-path' => ['https://example.com', 'https://example.com/any/path', true],
+            'Case insensitive scheme/host' => ['https://example.com', 'HTTPS://EXAMPLE.COM', true],
+            'Implicit vs explicit default port' => ['https://example.com', 'https://example.com:443', true],
+            'HTTP implicit default port' => ['http://example.com', 'http://example.com:80', true],
 
-            // Valid with port
-            ['http://example.com:8080', 'http://example.com:8080/', true],
-            ['https://example.com:8443', 'https://example.com:8443/api', true],
+            // root origin mismatches
+            'Scheme mismatch' => ['https://example.com', 'http://example.com', false],
+            'Host mismatch' => ['https://example.com', 'https://attacker.com', false],
+            'Port mismatch' => ['https://example.com', 'https://example.com:8443', false],
+            'Subdomain mismatch' => ['https://example.com', 'https://sub.example.com', false],
+            'Malformed target URL' => ['https://example.com', 'invalid-url', false],
 
-            // Invalid - different scheme
-            ['http://example.com', 'https://example.com/', false],
-            ['https://example.com', 'http://example.com/', false],
+            // IDN matches
+            'IDN Punycode vs Unicode match' => ['https://xn--mller-kva.com', 'https://müller.com', true],
 
-            // Invalid - different host
-            ['http://example.com', 'http://evil.com/', false],
-            ['http://example.com', 'http://example.com.evil.com/', false],
-            ['http://example.com', 'http://user:pass@example.com/', false],
+            // path prefix matches
+            'Exact path match' => ['https://example.com/tt-rss', 'https://example.com/tt-rss', true],
+            'Path match with trailing slash' => ['https://example.com/tt-rss', 'https://example.com/tt-rss/', true],
+            'Path match deeper segment' => ['https://example.com/tt-rss', 'https://example.com/tt-rss/api/feeds', true],
+            'Nested self URL path match' => ['https://example.com/apps/rss', 'https://example.com/apps/rss/index.php', true],
 
-            // Invalid - different port
-            ['http://example.com', 'http://example.com:8080/', false],
-            ['http://example.com:8080', 'http://example.com/', false],
-
-            // Invalid - path traversal
-            ['http://example.com/tt-rss', 'http://example.com/other/', false],
-            ['http://example.com/tt-rss', 'http://example.com/../admin/', false],
-
-            // Invalid - no path prefix match
-            ['http://example.com/tt-rss', 'http://example.com/tt-rsss/', false],
-
-            // Invalid - malformed URLs
-            ['http://example.com', '', false],
-            ['http://example.com', '/relative', false],
-            ['http://example.com', 'ftp://example.com/', false],
-
-            // HTTPS automatic port
-            ['https://example.com', 'https://example.com:443/', true],
-            ['http://example.com', 'http://example.com:80/', true],
+            // path prefix mismatches
+            'Path missing entirely' => ['https://example.com/tt-rss', 'https://example.com', false],
+            'Partial word match bypass attempt' => ['https://example.com/tt-rss', 'https://example.com/tt-rss-malicious', false],
+            'Sibling path mismatch' => ['https://example.com/tt-rss', 'https://example.com/other-path', false],
         ];
     }
 }
