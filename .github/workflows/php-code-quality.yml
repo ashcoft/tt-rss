@@ -34,7 +34,7 @@ jobs:
         tools: phpstan/phpstan:^2.2, phpunit/phpunit:^12.4
 
     - name: Install dependencies
-      uses: ramsey/composer-install@v3
+      uses: ramsey/composer-install@v4
 
     # https://phpstan.org/user-guide/result-cache
     - name: Restore result cache
@@ -83,7 +83,7 @@ jobs:
         tools: phpunit/phpunit:^12.4
 
     - name: Install dependencies
-      uses: ramsey/composer-install@v3
+      uses: ramsey/composer-install@v4
 
     - name: Run PHPUnit (standard tests)
       run: phpunit --exclude-group integration
@@ -108,7 +108,7 @@ jobs:
         tools: rector/rector:^2.2
 
     - name: Install dependencies
-      uses: ramsey/composer-install@v3
+      uses: ramsey/composer-install@v4
 
     # https://getrector.com/documentation/cache-in-ci#content-github-actions
     - name: Restore result cache
