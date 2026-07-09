@@ -92,7 +92,7 @@ const handleFeedSelect = async (feedId: number | string, isCat: boolean) => {
 const handleToolbarAction = (action: string) => {
   switch (action) {
     case 'refresh':
-      loadHeadlines();
+      void loadHeadlines();
       break;
     case 'catchup':
       catchupCurrent();
@@ -112,16 +112,16 @@ const handleHeadlineSelect = async (headline: Headline) => {
 const handleHeadlineAction = (headline: Headline, action: string) => {
   switch (action) {
     case 'mark_read':
-      markAsRead(headline.id, true);
+      void markAsRead(headline.id, true);
       break;
     case 'mark_unread':
-      markAsRead(headline.id, false);
+      void markAsRead(headline.id, false);
       break;
     case 'toggle_star':
-      toggleStar(headline.id, !headline.is_marked);
+      void toggleStar(headline.id, !headline.is_marked);
       break;
     case 'toggle_publish':
-      togglePublish(headline.id, !headline.is_published);
+      void togglePublish(headline.id, !headline.is_published);
       break;
     default:
       console.log('Unknown action:', action);
@@ -155,7 +155,7 @@ const loadHeadlines = async () => {
       csrf_token: 'auto'
     });
 
-    const response = await fetch(`/backend.php?${params}`);
+    const response = await fetch(`/backend.php?${params.toString()}`);
     const data = await response.json();
     if (data.status === 0 && data.content) {
       headlines.value = data.content.headlines || [];
@@ -177,7 +177,7 @@ const loadArticle = async (articleId: number) => {
       csrf_token: 'auto'
     });
 
-    const response = await fetch(`/backend.php?${params}`);
+    const response = await fetch(`/backend.php?${params.toString()}`);
     const data = await response.json();
     if (data.status === 0 && data.content) {
       selectedArticle.value = data.content;
@@ -215,7 +215,7 @@ const catchupCurrent = () => {
 
 // Lifecycle
 onMounted(() => {
-  loadFeeds();
+  void loadFeeds();
 });
 </script>
 

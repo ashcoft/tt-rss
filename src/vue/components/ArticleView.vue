@@ -76,7 +76,7 @@
       </el-button-group>
     </div>
 
-    <div class="article-content" v-html="article.content">
+    <div class="article-content" v-html="sanitizedContent">
     </div>
 
     <div class="article-tags" v-if="article.tags && article.tags.length > 0">
@@ -116,12 +116,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import {
   Close, Link, Calendar, User, Star, Share, Document,
   TopRight, Paperclip, ChatLineSquare
 } from '@element-plus/icons-vue';
 import type { Article } from '@/types';
+import DOMPurify from 'dompurify';
 
 interface Props {
   article: Article;
@@ -133,6 +134,14 @@ const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'update', field: string, value: boolean): void;
 }>();
+
+// Sanitize HTML content to prevent XSS
+const sanitizedContent = computed(() => {
+  return DOMPurify.sanitize(props.article.content ?? '', {
+    ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'em', 'strong', 'a', 'img', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class']
+  });
+});
 
 // Methods
 const formatDate = (timestamp: number): string => {
