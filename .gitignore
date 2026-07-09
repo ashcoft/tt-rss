@@ -4,6 +4,7 @@ Thumbs.db
 /.app_is_ready
 /messages.mo
 /node_modules
+/dist
 /locale/**/*.po~
 /plugins.local/*
 /themes.local/*
