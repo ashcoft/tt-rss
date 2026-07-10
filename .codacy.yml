@@ -1,0 +1,5 @@
+---
+exclude:
+  - tests_functional/
+  - vendor/
+  - node_modules/
