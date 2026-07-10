@@ -564,12 +564,13 @@ class Config {
 	/**
 	 * @return bool true if the provided URL has the same origin (scheme+host+port) and path prefix as tt-rss's self URL, otherwise false
 	 */
-	static function matches_self_url(string $url_to_check, bool $always_detect_self_url = false): bool {
+	public static function matchesSelfUrl(string $url_to_check, bool $always_detect_self_url = false): bool {
 		$check_url_parts = parse_url($url_to_check);
 
 		// check the basics first
-		if (!$check_url_parts || !isset($check_url_parts['scheme'], $check_url_parts['host']))
+		if (!$check_url_parts || !isset($check_url_parts['scheme'], $check_url_parts['host'])) {
 			return false;
+		}
 
 		$self_url_parts  = parse_url(self::get_self_url($always_detect_self_url));
 
@@ -580,8 +581,18 @@ class Config {
 		$check_url_host = idn_to_ascii($check_url_parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
 		$self_url_host  = idn_to_ascii($self_url_parts['host'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
 
-		$check_url_port = $check_url_parts['port'] ?? ($check_url_scheme === 'https' ? 443 : ($check_url_scheme === 'http' ? 80 : null));
-		$self_url_port  = $self_url_parts['port']  ?? ($self_url_scheme === 'https' ? 443 : ($self_url_scheme === 'http' ? 80 : null));
+		$default_port = function(string $scheme): int {
+			if ($scheme === 'https') {
+				return 443;
+			}
+			if ($scheme === 'http') {
+				return 80;
+			}
+			return 0;
+		};
+
+		$check_url_port = $check_url_parts['port'] ?? $default_port($check_url_scheme);
+		$self_url_port  = $self_url_parts['port']  ?? $default_port($self_url_scheme);
 
 		// check origin things
 		if (
