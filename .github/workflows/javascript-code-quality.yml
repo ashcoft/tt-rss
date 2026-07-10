@@ -31,7 +31,9 @@ jobs:
         node-version: lts/*
 
     - name: Install pnpm
-      uses: pnpm/action-setup@f3d73ada1fa6e5c0c19973ff70a3f5cabf225cc5 # v6.0.0
+      uses: pnpm/action-setup@v6
+      with:
+        version: 9
 
     - name: Restore Node.js dependencies cache
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
