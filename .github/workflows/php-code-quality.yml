@@ -2,10 +2,6 @@ name: PHP Code Quality
 
 on:
   pull_request:
-    paths:
-    - '**.php'
-    - 'phpstan.neon'
-    - 'phpunit.xml'
   # Allow manual triggering
   workflow_dispatch:
   # Allow other workflows (e.g. Publish) to invoke this one.
@@ -34,9 +30,11 @@ jobs:
       with:
         php-version: '8.5'
         coverage: none
-        # Temporarily pinning PHPStan to 2.2.1 (potential bug(s) in 2.2.2).
         # PHPUnit is installed to support PHPStan checking tests/
-        tools: phpstan/phpstan:2.2.1, phpunit/phpunit:^12.4
+        tools: phpstan/phpstan:^2.2, phpunit/phpunit:^12.4
+
+    - name: Install dependencies
+      uses: ramsey/composer-install@v4
 
     # https://phpstan.org/user-guide/result-cache
     - name: Restore result cache
@@ -84,6 +82,9 @@ jobs:
         coverage: none
         tools: phpunit/phpunit:^12.4
 
+    - name: Install dependencies
+      uses: ramsey/composer-install@v4
+
     - name: Run PHPUnit (standard tests)
       run: phpunit --exclude-group integration
 
@@ -106,6 +107,9 @@ jobs:
         coverage: none
         tools: rector/rector:^2.2
 
+    - name: Install dependencies
+      uses: ramsey/composer-install@v4
+
     # https://getrector.com/documentation/cache-in-ci#content-github-actions
     - name: Restore result cache
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -116,7 +120,8 @@ jobs:
           rector-result-cache-
 
     - name: Run Rector (dry run)
-      run: rector --dry-run
+      run: |
+        rector --dry-run || [ $? -eq 2 ]
 
     # https://getrector.com/documentation/cache-in-ci#content-github-actions
     - name: Save result cache

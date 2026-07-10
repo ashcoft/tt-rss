@@ -1,6 +1,9 @@
 import globals from 'globals';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
+import vueParser from 'vue-eslint-parser';
+import tsParser from '@typescript-eslint/parser';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
   js.configs.recommended,
@@ -60,6 +63,108 @@ export default [
       '@stylistic/js/block-spacing': ['error', 'always'],
       '@stylistic/js/computed-property-spacing': ['error', 'never'],
       '@stylistic/js/max-statements-per-line': ['warn', { 'max': 2 }]
+    }
+  },
+
+  // src directory - ES modules with browser globals
+  {
+    files: ['src/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.browser
+      }
+    },
+    plugins: {
+      '@stylistic/js': stylistic
+    },
+    rules: {
+      'no-console': ['error', { allow: ['error', 'warn'] }],
+      'prefer-const': 'error',
+      'eqeqeq': ['error', 'always'],
+      'no-empty': ['error', { 'allowEmptyCatch': true }],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+    }
+  },
+
+  // TypeScript files
+  {
+    files: ['src/**/*.ts'],
+    plugins: {
+      '@typescript-eslint': tsPlugin
+    },
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        globals: {
+          ...globals.browser,
+          ...globals.node
+        }
+      }
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+    }
+  },
+
+  // Vue files with TypeScript (in src/vue/)
+  {
+    files: ['src/vue/**/*.vue'],
+    plugins: {
+      '@typescript-eslint': tsPlugin
+    },
+    languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        parser: tsParser,
+        ecmaVersion: 2022,
+        sourceType: 'module'
+      },
+      globals: {
+        ...globals.browser,
+        fetch: 'readonly',
+        console: 'readonly',
+        URLSearchParams: 'readonly'
+      }
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-console': ['error', { allow: ['error', 'warn', 'log'] }],
+      'prefer-const': 'error'
+    }
+  },
+
+  // Vue files without TypeScript
+  {
+    files: ['**/*.vue'],
+    ignores: ['src/vue/**/*.vue'],
+    plugins: {
+      '@typescript-eslint': tsPlugin
+    },
+    languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        parser: tsParser,
+        ecmaVersion: 2022,
+        sourceType: 'module',
+        globals: {
+          ...globals.browser,
+          ...globals.node
+        }
+      }
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
     }
   }
 ];
