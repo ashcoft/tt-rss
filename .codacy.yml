@@ -1,5 +1,5 @@
 ---
-exclude:
-  - tests_functional/
-  - vendor/
-  - node_modules/
+exclude_paths:
+  - tests_functional/**
+  - vendor/**
+  - node_modules/**
