@@ -142,12 +142,10 @@ final class ConfigTest extends TestCase {
 
     #[\PHPUnit\Framework\Attributes\DataProvider('urlMatchDataProvider')]
     public function testMatchesSelfUrl(string $self_url, string $url_to_check, bool $expected_result): void {
-        // codacy ignore start
         $url_parts = parse_url($self_url);
         $_SERVER['HTTP_X_FORWARDED_PROTO'] = $url_parts['scheme'];
         $_SERVER['HTTP_HOST'] = $url_parts['host'];
         $_SERVER['REQUEST_URI'] = $url_parts['path'];
-        // codacy ignore stop
 
         $this->assertEquals($expected_result, Config::matchesSelfUrl($url_to_check, true));
     }
