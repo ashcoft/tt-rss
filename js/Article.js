@@ -252,20 +252,18 @@ const Article = {
 	},
 		unpack(row) {
 			if (row.getAttribute("data-is-packed") !== "1") return;
-
 			const container = row.querySelector(".content-inner");
-			container.innerHTML = (row._packedContentHtml || "") + (row._packedEnclosuresHtml || "");
-
+			const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
+			const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
+			container.innerHTML = packedContent + packedEnclosures;
 			dojo.parser.parse(container);
-
-			if (!container.textContent.length) container.innerHTML += "&nbsp;";
-
-			if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
-				row.setAttribute("data-content-original", row.getAttribute("data-content"));
-
-			row.setAttribute("data-is-packed", "0");
-
-			PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
+			const postActions = {
+				emptyContent: container.textContent.length === 0 ? () => { container.innerHTML += "&nbsp;"; } : () => {},
+				saveOriginal: App.isCombinedMode() && document.getElementById('main').classList.contains('expandable') ? () => { row.setAttribute("data-content-original", row.getAttribute("data-content")); } : () => {},
+				updatePacked: () => { row.setAttribute("data-is-packed", "0"); },
+				runPlugin: () => { PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row); }
+			};
+			Object.values(postActions).forEach(fn => fn());
 		},
 	pack(row) {
 		if (row.getAttribute("data-is-packed") !== "1") {
