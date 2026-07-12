@@ -281,8 +281,8 @@ const Article = {
 
 			const dataContent = row.getAttribute("data-content") || "";
 			const dataEnclosures = row.getAttribute("data-rendered-enclosures") || "";
-			row._packedContentHtml = App.unescapeHtml(dataContent);
-			row._packedEnclosuresHtml = App.unescapeHtml(dataEnclosures);
+			row._packedContentHtml = dataContent;
+			row._packedEnclosuresHtml = dataEnclosures;
 
 			// missing in unexpanded mode
 			if (content_inner)
