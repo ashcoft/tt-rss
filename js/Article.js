@@ -254,15 +254,11 @@ const Article = {
 			if (row.getAttribute("data-is-packed") !== "1") return;
 
 			const container = row.querySelector(".content-inner");
-
-			const packedContent = row._packedContentHtml || "";
-			const packedEnclosures = row._packedEnclosuresHtml || "";
-			container.innerHTML = packedContent + packedEnclosures;
+			container.innerHTML = (row._packedContentHtml || "") + (row._packedEnclosuresHtml || "");
 
 			dojo.parser.parse(container);
 
-			if (container.textContent.length === 0)
-				container.innerHTML += "&nbsp;";
+			if (!container.textContent.length) container.innerHTML += "&nbsp;";
 
 			if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
 				row.setAttribute("data-content-original", row.getAttribute("data-content"));
