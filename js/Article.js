@@ -257,15 +257,15 @@ const Article = {
 			const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
 			container.innerHTML = packedContent + packedEnclosures;
 			dojo.parser.parse(container);
-			// deepsource:disable JS-0057
-			const postActions = {
-				emptyContent: container.textContent.length === 0 ? () => { container.innerHTML += "&nbsp;"; } : () => {},
-				saveOriginal: App.isCombinedMode() && document.getElementById('main').classList.contains('expandable') ? () => { row.setAttribute("data-content-original", row.getAttribute("data-content")); } : () => {},
-				updatePacked: () => { row.setAttribute("data-is-packed", "0"); },
-				runPlugin: () => { PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row); }
-			};
-			Object.values(postActions).forEach(fn => fn());
-			// deepsource:enable JS-0057
+
+			if (container.textContent.length === 0) container.innerHTML += "&nbsp;";
+
+			if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
+				row.setAttribute("data-content-original", row.getAttribute("data-content"));
+
+			row.setAttribute("data-is-packed", "0");
+
+			PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
 		},
 	pack(row) {
 		if (row.getAttribute("data-is-packed") !== "1") {
