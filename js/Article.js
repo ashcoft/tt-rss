@@ -250,7 +250,7 @@ const Article = {
 
 		return comments;
 	},
-	unpack(row) {
+          unpack: function(row) {
 		if (row.getAttribute("data-is-packed") === "1") {
 			const container = row.querySelector(".content-inner");
 
