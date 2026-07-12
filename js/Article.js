@@ -250,7 +250,7 @@ const Article = {
 
 		return comments;
 	},
-	unpack: function(row) {
+	unpack(row) {
 		if (row.getAttribute("data-is-packed") === "1") {
 			const container = row.querySelector(".content-inner");
 
@@ -273,7 +273,7 @@ const Article = {
 			PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
 		}
 	},
-	pack: function(row) {
+	pack(row) {
 		if (row.getAttribute("data-is-packed") !== "1") {
 			row.setAttribute("data-is-packed", "1");
 
