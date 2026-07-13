@@ -48,10 +48,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import type { Feed, Category, Headline, Article } from '@/types';
-import FeedTree from '@/components/FeedTree.vue';
-import Toolbar from '@/components/Toolbar.vue';
-import HeadlinesList from '@/components/HeadlinesList.vue';
-import ArticleView from '@/components/ArticleView.vue';
+import { FeedTree } from '@/components/FeedTree.vue';
+import { Toolbar } from '@/components/Toolbar.vue';
+import { HeadlinesList } from '@/components/HeadlinesList.vue';
+import { ArticleView } from '@/components/ArticleView.vue';
 
 // Locale for Element Plus
 import en from 'element-plus/es/locale/lang/en';
@@ -76,7 +76,6 @@ const currentFeedInfo = computed(() => {
   }
   return null;
 });
-
 const statusMessage = computed(() => {
   const unread = headlines.value.filter(h => !h.is_read).length;
   return `${headlines.value.length} articles, ${unread} unread`;
@@ -87,16 +86,25 @@ const loadFeeds = async () => {
   try {
     const response = await fetch('/backend.php?op=feeds&method=getTree&csrf_token=auto');
     const data = await response.json();
-    if (data.status === 0 && data.content) {
-      feeds.value = data.content.feeds || [];
-      categories.value = data.content.categories || [];
-    }
+    const statusHandlers: { [key: number]: (content: any) => void } = {
+      0: content => {
+        feeds.value = content.feeds || [];
+        categories.value = content.categories || [];
+      }
+    };
+    statusHandlers[data.status]?.(data.content);
   } catch (error) {
     console.error('Failed to load feeds:', error);
     ElMessage.error('Failed to load feeds');
   }
 };
 
+/**
+ * Loads the headlines for the current feed.
+ * Fetches headlines from the backend and updates the headlines state.
+ *
+ * @returns {Promise<void>}
+ */
 const loadHeadlines = async () => {
   loadingHeadlines.value = true;
   try {
@@ -111,9 +119,12 @@ const loadHeadlines = async () => {
 
     const response = await fetch(`/backend.php?${params.toString()}`);
     const data = await response.json();
-    if (data.status === 0 && data.content) {
-      headlines.value = data.content.headlines || [];
-    }
+    const statusHandlers: { [key: number]: (content: any) => void } = {
+      0: content => {
+        headlines.value = content.headlines || [];
+      }
+    };
+    statusHandlers[data.status]?.(data.content);
   } catch (error) {
     console.error('Failed to load headlines:', error);
     ElMessage.error('Failed to load headlines');
@@ -122,6 +133,13 @@ const loadHeadlines = async () => {
   }
 };
 
+/**
+ * Loads the article with the given ID.
+ *
+ * @param {number} articleId - ID of the article to load.
+ * @returns {Promise<void>}
+ */
+const loadArticle = async (articleId: number) => {
 const loadArticle = async (articleId: number) => {
   try {
     const params = new URLSearchParams({
@@ -142,6 +160,13 @@ const loadArticle = async (articleId: number) => {
   }
 };
 
+/**
+ * Marks an article as read or unread.
+ *
+ * @param {number} articleId - ID of the article.
+ * @param {boolean} isRead - True to mark as read, false to mark as unread.
+ * @returns {Promise<void>}
+ */
 const markAsRead = async (articleId: number, isRead: boolean) => {
   const headline = headlines.value.find(h => h.id === articleId);
   if (headline) {
@@ -149,20 +174,40 @@ const markAsRead = async (articleId: number, isRead: boolean) => {
   }
 };
 
-const toggleStar = async (articleId: number, starred: boolean) => {
+/**
+ * Toggles the starred state of an article.
+ *
+ * @param {number} articleId - ID of the article.
+ * @param {boolean} starred - True to star the article, false to unstar.
+ * @returns {Promise<void>}
+ */
+const toggleStar = (articleId: number, starred: boolean) => {
   const headline = headlines.value.find(h => h.id === articleId);
   if (headline) {
     headline.is_marked = starred;
   }
 };
 
-const togglePublish = async (articleId: number, published: boolean) => {
+/**
+ * Toggles the published state of an article.
+ *
+ * @param {number} articleId - ID of the article.
+ * @param {boolean} published - True to publish the article, false to unpublish.
+ * @returns {Promise<void>}
+ */
+const togglePublish = (articleId: number, published: boolean) => {
   const headline = headlines.value.find(h => h.id === articleId);
   if (headline) {
     headline.is_published = published;
   }
+  return Promise.resolve();
 };
 
+/**
+ * Displays an informational message about catchup functionality.
+ *
+ * @returns {void}
+ */
 const catchupCurrent = () => {
   ElMessage.info('Catchup functionality coming soon');
 };
@@ -174,6 +219,12 @@ const handleFeedSelect = async (feedId: number | string, isCat: boolean) => {
   await loadHeadlines();
 };
 
+/**
+ * Handles toolbar actions based on the specified action string.
+ *
+ * @param {string} action - The action to perform.
+ * @returns {void}
+ */
 const handleToolbarAction = (action: string) => {
   switch (action) {
     case 'refresh':
@@ -186,14 +237,27 @@ const handleToolbarAction = (action: string) => {
       ElMessage.info('Search functionality coming soon');
       break;
     default:
-      console.log('Unknown action:', action);
+      ElMessage.warning(`Unknown action: ${action}`);
   }
 };
 
+/**
+ * Handles selection of a headline by loading the associated article.
+ *
+ * @param {Headline} headline - The selected headline object.
+ * @returns {Promise<void>}
+ */
 const handleHeadlineSelect = async (headline: Headline) => {
   await loadArticle(headline.id);
 };
 
+/**
+ * Handles various actions on a headline such as marking read/unread, starring, or publishing.
+ *
+ * @param {Headline} headline - The headline object to act on.
+ * @param {string} action - The action to perform on the headline.
+ * @returns {void}
+ */
 const handleHeadlineAction = (headline: Headline, action: string) => {
   switch (action) {
     case 'mark_read':
@@ -209,7 +273,7 @@ const handleHeadlineAction = (headline: Headline, action: string) => {
       void togglePublish(headline.id, !headline.is_published);
       break;
     default:
-      console.log('Unknown action:', action);
+      ElMessage.warning(`Unknown action: ${action}`);
   }
 };
 
@@ -219,6 +283,7 @@ onMounted(() => {
 });
 </script>
 
+<style scoped>
 <style scoped>
 .ttrss-app {
   display: flex;

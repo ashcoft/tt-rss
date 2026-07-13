@@ -68,17 +68,6 @@
         <el-button :icon="More" />
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item command="select-all">Select All</el-dropdown-item>
-            <el-dropdown-item command="select-unread">Select Unread</el-dropdown-item>
-            <el-dropdown-item command="select-starred">Select Starred</el-dropdown-item>
-            <el-dropdown-item divided command="preferences">Preferences</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
@@ -92,9 +81,7 @@ interface Props {
 
 defineProps<Props>();
 
-const emit = defineEmits<{
-  (e: 'action', action: string, payload?: string | number): void;
-}>();
+const emit = defineEmits<(e: 'action', action: string, payload?: string | number) => void>();
 
 // State
 const searchQuery = ref('');
@@ -113,16 +100,28 @@ const sortLabel = computed(() => {
 });
 
 // Methods
+/**
+ * Sets the view mode and emits an action event.
+ * @param mode - The view mode to set ('list', 'grid', or 'expanded').
+ */
 const setViewMode = (mode: 'list' | 'grid' | 'expanded') => {
   viewMode.value = mode;
   emit('action', 'viewMode', mode);
 };
 
+/**
+ * Handles sorting by updating sortBy and emitting a sort action.
+ * @param command - The command indicating the sort criterion.
+ */
 const handleSort = (command: string) => {
   sortBy.value = command;
   emit('action', 'sort', { by: command, order: sortOrder.value });
 };
 
+/**
+ * Handles a generic action by emitting an action event.
+ * @param command - The action command to emit.
+ */
 const handleAction = (command: string) => {
   emit('action', command);
 };

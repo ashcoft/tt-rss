@@ -105,6 +105,7 @@
 import { ref } from 'vue';
 import { Star, Document, More, ChatLineSquare } from '@element-plus/icons-vue';
 import type { Headline } from '@/types';
+<script>
 
 interface Props {
   headlines: Headline[];
@@ -129,11 +130,19 @@ const actionsTarget = ref<HTMLElement>();
 const handleRowClick = (row: Headline) => {
   emit('select', row);
 };
-
+/**
+ * Handles selection change events.
+ * @param {Headline[]} selection - The array of selected headlines.
+ */
 const handleSelectionChange = (selection: Headline[]) => {
-  console.log('Selected:', selection);
 };
 
+/**
+ * Determines the CSS classes for a table row based on its headline properties.
+ * @param {{ row: Headline }} param0 - Object containing the headline row.
+ * @param {Headline} param0.row - The headline object.
+ * @returns {string} The CSS classes to apply to the row.
+ */
 const getRowClass = ({ row }: { row: Headline }) => {
   const classes = [];
   if (!row.is_read) classes.push('unread-row');
@@ -141,6 +150,11 @@ const getRowClass = ({ row }: { row: Headline }) => {
   return classes.join(' ');
 };
 
+/**
+ * Formats a Unix timestamp into a relative time string or date.
+ * @param {number} timestamp - The Unix timestamp in seconds.
+ * @returns {string} The formatted date string.
+ */
 const formatDate = (timestamp: number): string => {
   const date = new Date(timestamp * 1000);
   const now = new Date();
@@ -166,11 +180,19 @@ const formatDate = (timestamp: number): string => {
   return date.toLocaleDateString();
 };
 
+/**
+ * Shows available actions for a given headline.
+ * @param {Headline} row - The headline object to show actions for.
+ */
 const showActions = (row: Headline) => {
   currentHeadline.value = row;
   // Actions dropdown logic would go here
 };
 
+/**
+ * Executes a command for the current headline.
+ * @param {string} command - The action command to perform.
+ */
 const handleCommand = (command: string) => {
   if (currentHeadline.value) {
     emit('action', currentHeadline.value, command);

@@ -101,9 +101,7 @@ const props = withDefaults(defineProps<Props>(), {
   labels: () => []
 });
 
-const emit = defineEmits<{
-  (e: 'select', feedId: number | string, isCat: boolean): void;
-}>();
+const emit = defineEmits<(e: 'select', feedId: number | string, isCat: boolean) => void>();
 
 // State
 const searchQuery = ref('');
@@ -120,6 +118,10 @@ const specialFeeds = [
 ];
 
 // Computed
+/**
+ * Computes the list of labels filtered by the current search query.
+ * @returns The filtered array of labels.
+ */
 const filteredLabels = computed(() => {
   if (!searchQuery.value) return props.labels;
   const query = searchQuery.value.toLowerCase();
@@ -127,14 +129,21 @@ const filteredLabels = computed(() => {
     label.caption.toLowerCase().includes(query)
   );
 });
-
+/**
+ * Computes the list of uncategorized feeds filtered by the current search query.
+ * @returns The filtered array of uncategorized feeds.
+ */
 const filteredUncategorizedFeeds = computed(() => {
   const feeds = props.feeds.filter(f => !f.cat_id);
   if (!searchQuery.value) return feeds;
   const query = searchQuery.value.toLowerCase();
   return feeds.filter(feed => feed.title.toLowerCase().includes(query));
 });
-
+/**
+ * Filters feeds by the given category ID and current search query.
+ * @param {number} categoryId - The ID of the category to filter feeds by.
+ * @returns The filtered array of feeds belonging to the specified category.
+ */
 const getFeedsByCategory = (categoryId: number) => {
   const feeds = props.feeds.filter(f => f.cat_id === categoryId);
   if (!searchQuery.value) return feeds;
@@ -143,6 +152,10 @@ const getFeedsByCategory = (categoryId: number) => {
 };
 
 // Handlers
+/**
+ * Handles selection events from the feed tree.
+ * @param {string} index - The index string indicating the selected item (label-, cat-, or feed ID).
+ */
 const handleSelect = (index: string) => {
   const isLabel = index.startsWith('label-');
   const isCategory = index.startsWith('cat-');
@@ -160,6 +173,7 @@ const handleSelect = (index: string) => {
 };
 </script>
 
+<style scoped>
 <style scoped>
 .feed-tree {
   display: flex;

@@ -15,7 +15,7 @@
       <div class="meta-row">
         <span class="feed">
           <el-icon><Link /></el-icon>
-          <a :href="article.link" target="_blank">{{ article.feed_title || 'Unknown feed' }}</a>
+          <a :href="article.link" target="_blank" rel="noopener noreferrer">{{ article.feed_title || 'Unknown feed' }}</a>
         </span>
         <span class="date">
           <el-icon><Calendar /></el-icon>
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Content sanitized by DOMPurify with XSS protection -->
-    <div class="article-content" v-html="safeHtmlContent"></div>
+    <div class="article-content">{{ safeHtmlContent }}</div>
 
     <div class="article-tags" v-if="article.tags && article.tags.length > 0">
       <h4>Tags</h4>
@@ -97,17 +97,16 @@
       <h4>Attachments</h4>
       <ul class="attachments-list">
         <li v-for="attachment in article.attachments" :key="attachment.id">
-          <a :href="attachment.content_url" target="_blank">
+          <a :href="attachment.content_url" target="_blank" rel="noopener noreferrer">
             <el-icon><Paperclip /></el-icon>
             {{ attachment.title || 'Attachment' }}
           </a>
         </li>
-      </ul>
     </div>
 
     <div class="article-comments" v-if="article.comments_link || article.comments_count > 0">
       <h4>Comments</h4>
-      <a :href="article.comments_link" target="_blank" class="comments-link">
+      <a :href="article.comments_link" target="_blank" rel="noopener noreferrer" class="comments-link">
         <el-icon><ChatLineSquare /></el-icon>
         {{ article.comments_count }} comments
       </a>
@@ -124,6 +123,7 @@ import {
 import type { Article } from '@/types';
 import DOMPurify from 'dompurify';
 
+<script setup lang="ts">
 interface Props {
   article: Article;
 }
@@ -149,25 +149,41 @@ const formatDate = (timestamp: number): string => {
   return date.toLocaleString();
 };
 
+/**
+ * Toggles the starred state of the article.
+ * @returns {void}
+ */
 const toggleStar = () => {
   emit('update', 'is_marked', !props.article.is_marked);
 };
 
+<script setup lang="js">
+/**
+ * Toggles the published state of the article.
+ * @returns {void}
+ */
 const togglePublish = () => {
   emit('update', 'is_published', !props.article.is_published);
 };
 
+/**
+ * Toggles the read state of the article.
+ * @returns {void}
+ */
 const toggleRead = () => {
   emit('update', 'is_read', !props.article.is_read);
 };
 
+/**
+ * Opens the article link in a new browser tab.
+ * @returns {void}
+ */
 const openArticle = () => {
   window.open(props.article.link, '_blank');
 };
 
 const openFeed = () => {
   // Navigate to feed - would need router or emit to parent
-  console.log('Open feed:', props.article.feed_id);
 };
 </script>
 
@@ -186,13 +202,13 @@ const openFeed = () => {
   align-items: flex-start;
   margin-bottom: 1rem;
 }
-
 .article-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: #333;
   flex: 1;
+}
   padding-right: 1rem;
 }
 

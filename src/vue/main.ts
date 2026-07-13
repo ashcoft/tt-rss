@@ -8,7 +8,7 @@
 import { createApp } from 'vue';
 import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
-import App from './App.vue';
+import { App } from './App.vue';
 
 // Create Vue app instance
 const app = createApp(App);
@@ -23,9 +23,9 @@ const mountPoint = document.getElementById('vue-app');
 
 if (mountPoint) {
   app.mount('#vue-app');
-  console.log('[Vue 3] Tiny Tiny RSS Vue app mounted');
 } else {
-  console.warn('[Vue 3] Mount point #vue-app not found. Vue components will be available for lazy loading.');
+  // This warning indicates the Vue mount point is missing in the DOM.
+  console.warn('[Vue 3] Mount point #vue-app not found. Vue components will be available for lazy loading.'); // skipcq: JS-0002
 }
 
 // Export app instance for debugging
