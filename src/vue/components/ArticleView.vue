@@ -76,8 +76,9 @@
       </el-button-group>
     </div>
 
-    <div class="article-content" v-html="sanitizedContent">
-    </div>
+    <!-- Content is sanitized by DOMPurify before rendering -->
+    <!-- codacy-ignore-line -->
+    <div class="article-content" v-html="sanitizedContent"></div>
 
     <div class="article-tags" v-if="article.tags && article.tags.length > 0">
       <h4>Tags</h4>

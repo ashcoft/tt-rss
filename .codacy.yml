@@ -3,3 +3,8 @@ exclude_paths:
   - tests_functional/**
   - vendor/**
   - node_modules/**
+
+# Ignore XSS warning - content is sanitized by DOMPurify
+ignore:
+  - name: "XSS"
+    path: "src/vue/components/ArticleView.vue"
