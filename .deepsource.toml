@@ -1,7 +1,6 @@
 version = 1
 
-# Exclude JavaScript/Vue/TypeScript files that are handled by ESLint in GitHub Actions
-[fileilters.default]
+[[fileilters]]
 exclude = ["**/*.js", "**/*.vue", "**/*.ts"]
 
 [[analyzers]]
