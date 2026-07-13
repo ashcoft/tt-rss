@@ -30,6 +30,7 @@
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
     "@vitejs/plugin-vue": "^5.2.0",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
     "eslint": "^10.6.0",
     "eslint-plugin-vue": "^10.9.2",
     "globals": "^17.7.0",
