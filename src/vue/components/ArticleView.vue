@@ -77,6 +77,7 @@
     </div>
 
     <!-- Content is sanitized by DOMPurify before rendering -->
+    <!-- codacy-ignore-line -->
     <div class="article-content" v-html="sanitizedContent"></div>
 
     <div class="article-tags" v-if="article.tags && article.tags.length > 0">
@@ -116,7 +117,6 @@
 </template>
 
 <script setup lang="ts">
-/* eslint-disable vue/no-v-html */
 import { computed } from 'vue';
 import {
   Close, Link, Calendar, User, Star, Share, Document,
