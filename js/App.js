@@ -1465,6 +1465,7 @@ const App = {
    initLongPressContextMenu: function() {
       const LONG_PRESS_MS = 600;  // above Android's native long-press delay on purpose
       const MOVE_SLOP_PX = 10;    // finger drift allowed before it counts as a scroll
+      const RELEASE_COMPAT_DELAY_MS = 150;  // delay before removing compatibility event handlers
 
       ["feeds-holder", "headlines-frame"].forEach((container_id) => {
          const container = document.getElementById(container_id);
@@ -1497,7 +1498,7 @@ const App = {
                // anything later is a new, deliberate tap
                window.setTimeout(() => {
                   types.forEach((t) => document.removeEventListener(t, swallow, {capture: true}));
-               }, 150);
+               }, RELEASE_COMPAT_DELAY_MS);
             };
             container.addEventListener("pointerup", disarm);
             container.addEventListener("pointercancel", disarm);
