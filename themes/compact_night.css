@@ -1511,6 +1511,15 @@ body.ttrss_utility hr {
   margin: 0 4px;
   vertical-align: middle;
 }
+.cdm .cdm-preview-image {
+  max-width: 100px;
+  max-height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin: 0 4px;
+  vertical-align: middle;
+  cursor: pointer;
+}
 .cdm .header-sticky-guard {
   height: 0;
 }

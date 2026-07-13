@@ -212,6 +212,25 @@ const Article = {
 				</div>` : ''}
 			`
 	},
+	renderPreviewImage: function (enclosures) {
+		if (!enclosures || !enclosures.entries || enclosures.entries.length === 0) {
+			return '';
+		}
+
+		const image = enclosures.entries.find((enc) =>
+			enc.content_type && enc.content_type.indexOf("image/") !== -1);
+
+		if (image) {
+			return `<img class="cdm-preview-image" loading="lazy"
+				width="${image.width ? image.width : ''}"
+				height="${image.height ? image.height : ''}"
+				src="${App.escapeHtml(image.content_url)}"
+				title="${App.escapeHtml(image.title ? image.title : image.content_url)}"
+				onclick="App.openUrl('${App.escapeHtml(image.content_url)}')"/>`;
+		}
+
+		return '';
+	},
 	render: function (article) {
 		App.cleanupMemory("content-insert");
 

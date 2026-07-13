@@ -502,6 +502,7 @@ const Headlines = {
 			row_class += App.getInitParam("cdm_expanded") ? " expanded" : " expandable";
 
 			const comments = Article.formatComments(hl);
+			const previewImage = Article.renderPreviewImage(hl.enclosures);
 
 			row = `<div class="cdm ${row_class} ${Article.getScoreClass(hl.score)}"
 						id="RROW-${hl.id}"
@@ -531,6 +532,8 @@ const Headlines = {
 								${Article.renderLabels(hl.id, hl.labels)}
 								${hl.cdm_excerpt ? hl.cdm_excerpt : ""}
 							</span>
+
+							${previewImage}
 
 							<a class="feed vfeedMenuAttach" style="background-color: ${hl.feed_bg_color}" data-feed-id="${hl.feed_id}"
 								title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
