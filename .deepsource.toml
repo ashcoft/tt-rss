@@ -1,8 +1,11 @@
 version = 1
 
-[[fileilters]]
-exclude = ["**/*.js", "**/*.vue", "**/*.ts"]
-
 [[analyzers]]
 name = "javascript"
-enabled = false
+enabled = true
+
+  [analyzers.javascript]
+  plugins = ["eslint"]
+  
+  [analyzers.javascript.plugins.eslint]
+  config_path = ".eslintrc.json"
