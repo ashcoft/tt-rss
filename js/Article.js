@@ -250,33 +250,37 @@ const Article = {
 
 		return comments;
 	},
-		unpack(row) {
-			if (row.getAttribute("data-is-packed") !== "1") return;
+	unpack: function(row) {
+		if (row.getAttribute("data-is-packed") === "1") {
 			const container = row.querySelector(".content-inner");
+
 			const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
 			const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
 			container.innerHTML = packedContent + packedEnclosures;
+
 			dojo.parser.parse(container);
 
-			if (container.textContent.length === 0) container.innerHTML += "&nbsp;";
+			// blank content element might screw up onclick selection and keyboard moving
+			if (container.textContent.length === 0)
+				container.innerHTML += "&nbsp;";
 
+			// in expandable mode, save content for later, so that we can pack unfocused rows back
 			if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
 				row.setAttribute("data-content-original", row.getAttribute("data-content"));
 
 			row.setAttribute("data-is-packed", "0");
 
 			PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
-		},
-	pack(row) {
+		}
+	},
+	pack: function(row) {
 		if (row.getAttribute("data-is-packed") !== "1") {
 			row.setAttribute("data-is-packed", "1");
 
 			const content_inner = row.querySelector(".content-inner");
 
-			const dataContent = row.getAttribute("data-content") || "";
-			const dataEnclosures = row.getAttribute("data-rendered-enclosures") || "";
-			row._packedContentHtml = dataContent;
-			row._packedEnclosuresHtml = dataEnclosures;
+			row._packedContentHtml = row.getAttribute("data-content") || "";
+			row._packedEnclosuresHtml = row.getAttribute("data-rendered-enclosures") || "";
 
 			// missing in unexpanded mode
 			if (content_inner)
