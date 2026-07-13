@@ -1,25 +1,6 @@
 version = 1
 
-[[fileilters]]
-pattern = "**/*.js"
-exclude = ["node_modules/**", "src/**/*.js", "vite.config.js", "eslint.config.js"]
-
-[[fileilters]]
-pattern = "**/*.vue"
-exclude = ["node_modules/**", "src/vue/**"]
-
-[[fileilters]]
-pattern = "**/*.ts"
-exclude = ["node_modules/**", "src/**/*.ts"]
-
+# Disable JavaScript analyzer - use ESLint in GitHub Actions for JS/Vue/TS validation
 [[analyzers]]
 name = "javascript"
-enabled = true
-
-  [analyzers.javascript]
-  plugins = ["eslint"]
-  environment = ["browser", "es2022"]
-  runtime = "v8"
-  
-  [analyzers.javascript.plugins.eslint]
-  config_path = ".eslintrc.json"
+enabled = false
