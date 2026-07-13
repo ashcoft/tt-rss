@@ -116,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import {
   Close, Link, Calendar, User, Star, Share, Document,
   TopRight, Paperclip, ChatLineSquare

@@ -169,9 +169,9 @@ export interface TreeNode {
 }
 
 // Event handler types
-export type HeadlineSelectHandler = (headline: Headline) => void;
-export type FeedSelectHandler = (feedId: number, isCat: boolean) => void;
-export type ArticleActionHandler = (articleId: number, action: string) => void;
+export type HeadlineSelectHandler = (_headline: Headline) => void;
+export type FeedSelectHandler = (_feedId: number, _isCat: boolean) => void;
+export type ArticleActionHandler = (_articleId: number, _action: string) => void;
 
 // Preference types
 export interface UserPreferences {

@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Search, Folder, Star, Bookmark, Clock, Check, Globe } from '@element-plus/icons-vue';
+import { Folder, Star, Bookmark, Clock, Check } from '@element-plus/icons-vue';
 import type { Feed, Category, Label } from '@/types';
 
 interface Props {

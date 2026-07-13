@@ -82,8 +82,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import {
-  Refresh, Check, Search, ViewList, Grid, Expand,
-  ArrowDown, More
+  Refresh, Check, ViewList, Grid, Expand, ArrowDown, More
 } from '@element-plus/icons-vue';
 import type { Feed } from '@/types';
 
@@ -91,7 +90,7 @@ interface Props {
   feedInfo: Feed | null;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'action', action: string, payload?: string | number): void;
