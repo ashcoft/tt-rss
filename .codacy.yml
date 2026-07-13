@@ -5,9 +5,3 @@ exclude_paths:
   - node_modules/**
   - '*.spec.ts'
   - '*.test.ts'
-
-# Patterns to ignore
-ignore:
-  - pattern: "v-html"
-    path: 'src/vue/components/ArticleView.vue'
-    message: "Content is sanitized by DOMPurify before rendering"
