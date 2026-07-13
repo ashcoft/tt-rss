@@ -19,6 +19,7 @@ enabled = true
   [analyzers.javascript]
   plugins = ["eslint"]
   environment = ["browser", "es2022"]
+  runtime = "v8"
   
   [analyzers.javascript.plugins.eslint]
-  config_path = "eslint.config.js"
+  config_path = ".eslintrc.json"
