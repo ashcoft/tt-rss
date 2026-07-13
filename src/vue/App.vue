@@ -82,52 +82,6 @@ const statusMessage = computed(() => {
   return `${headlines.value.length} articles, ${unread} unread`;
 });
 
-// Handlers
-const handleFeedSelect = async (feedId: number | string, isCat: boolean) => {
-  currentFeedId.value = feedId;
-  currentIsCat.value = isCat;
-  await loadHeadlines();
-};
-
-const handleToolbarAction = (action: string) => {
-  switch (action) {
-    case 'refresh':
-      void loadHeadlines();
-      break;
-    case 'catchup':
-      catchupCurrent();
-      break;
-    case 'search':
-      ElMessage.info('Search functionality coming soon');
-      break;
-    default:
-      console.log('Unknown action:', action);
-  }
-};
-
-const handleHeadlineSelect = async (headline: Headline) => {
-  await loadArticle(headline.id);
-};
-
-const handleHeadlineAction = (headline: Headline, action: string) => {
-  switch (action) {
-    case 'mark_read':
-      void markAsRead(headline.id, true);
-      break;
-    case 'mark_unread':
-      void markAsRead(headline.id, false);
-      break;
-    case 'toggle_star':
-      void toggleStar(headline.id, !headline.is_marked);
-      break;
-    case 'toggle_publish':
-      void togglePublish(headline.id, !headline.is_published);
-      break;
-    default:
-      console.log('Unknown action:', action);
-  }
-};
-
 // API Functions
 const loadFeeds = async () => {
   try {
@@ -211,6 +165,52 @@ const togglePublish = async (articleId: number, published: boolean) => {
 
 const catchupCurrent = () => {
   ElMessage.info('Catchup functionality coming soon');
+};
+
+// Handlers
+const handleFeedSelect = async (feedId: number | string, isCat: boolean) => {
+  currentFeedId.value = feedId;
+  currentIsCat.value = isCat;
+  await loadHeadlines();
+};
+
+const handleToolbarAction = (action: string) => {
+  switch (action) {
+    case 'refresh':
+      void loadHeadlines();
+      break;
+    case 'catchup':
+      catchupCurrent();
+      break;
+    case 'search':
+      ElMessage.info('Search functionality coming soon');
+      break;
+    default:
+      console.log('Unknown action:', action);
+  }
+};
+
+const handleHeadlineSelect = async (headline: Headline) => {
+  await loadArticle(headline.id);
+};
+
+const handleHeadlineAction = (headline: Headline, action: string) => {
+  switch (action) {
+    case 'mark_read':
+      void markAsRead(headline.id, true);
+      break;
+    case 'mark_unread':
+      void markAsRead(headline.id, false);
+      break;
+    case 'toggle_star':
+      void toggleStar(headline.id, !headline.is_marked);
+      break;
+    case 'toggle_publish':
+      void togglePublish(headline.id, !headline.is_published);
+      break;
+    default:
+      console.log('Unknown action:', action);
+  }
 };
 
 // Lifecycle
