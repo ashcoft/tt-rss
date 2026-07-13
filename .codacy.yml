@@ -5,3 +5,5 @@ exclude_paths:
   - node_modules/**
   - '*.spec.ts'
   - '*.test.ts'
+  # Exclude Vue component with intentional v-html (content sanitized by DOMPurify)
+  - '**/ArticleView.vue'

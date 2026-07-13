@@ -77,11 +77,7 @@
     </div>
 
     <!-- Content sanitized by DOMPurify with XSS protection -->
-    <!-- eslint-disable vue/no-v-html, security/potential-xss-via-html -->
-    <!-- codacy:disable -->
     <div class="article-content" v-html="safeHtmlContent"></div>
-    <!-- codacy:enable -->
-    <!-- eslint-enable vue/no-v-html, security/potential-xss-via-html -->
 
     <div class="article-tags" v-if="article.tags && article.tags.length > 0">
       <h4>Tags</h4>
