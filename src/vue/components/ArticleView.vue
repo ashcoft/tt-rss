@@ -76,9 +76,10 @@
       </el-button-group>
     </div>
 
+    <!-- eslint-disable vue/no-v-html -->
     <!-- Content is sanitized by DOMPurify before rendering -->
-    <!-- codacy-ignore-line -->
-    <div class="article-content" v-html="sanitizedContent"></div>
+    <div class="article-content" v-html="safeHtmlContent"></div>
+    <!-- eslint-enable vue/no-v-html -->
 
     <div class="article-tags" v-if="article.tags && article.tags.length > 0">
       <h4>Tags</h4>
@@ -136,8 +137,8 @@ const emit = defineEmits<{
   (e: 'update', field: string, value: boolean): void;
 }>();
 
-// Sanitize HTML content to prevent XSS
-const sanitizedContent = computed(() => {
+// Sanitized content using DOMPurify with XSS protection
+const safeHtmlContent = computed(() => {
   return DOMPurify.sanitize(props.article.content ?? '', {
     ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'em', 'strong', 'a', 'img', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td'],
     ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class']
