@@ -1,6 +1,9 @@
 version = 1
 
-# Disable JavaScript analyzer - use ESLint in GitHub Actions for JS/Vue/TS validation
+# Exclude JavaScript/Vue/TypeScript files that are handled by ESLint in GitHub Actions
+[fileilters.default]
+exclude = ["**/*.js", "**/*.vue", "**/*.ts"]
+
 [[analyzers]]
 name = "javascript"
 enabled = false
