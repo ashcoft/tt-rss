@@ -1,12 +1,13 @@
 import globals from 'globals';
 import js from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
-import vueParser from 'vue-eslint-parser';
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
+import vue from 'eslint-plugin-vue';
 
 export default [
   js.configs.recommended,
+
+  // Vue files - use flat config
+  ...(vue.configs['flat/recommended'] || []),
 
   {
     files: ['js/**/*.js', 'plugins/**/*.js'],
@@ -15,7 +16,6 @@ export default [
       sourceType: 'script',
       globals: {
         ...globals.browser,
-
         // Dojo
         dojo: 'readonly',
         dijit: 'readonly'
@@ -31,15 +31,11 @@ export default [
       'prefer-const': 'error',
       'eqeqeq': ['error', 'always'],
       'no-empty': ['error', { 'allowEmptyCatch': true }],
-
-      // Security — block the eval family and javascript: URLs
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-script-url': 'error',
       'no-extend-native': 'error',
-
-      // Correctness / bug catchers
       'array-callback-return': 'error',
       'no-return-assign': 'error',
       'no-self-compare': 'error',
@@ -47,14 +43,10 @@ export default [
       'no-unreachable-loop': 'error',
       'no-constructor-return': 'error',
       'no-new-wrappers': 'error',
-
-      // Modernization (companions to prefer-const)
       'no-var': 'error',
       'prefer-spread': 'error',
       'prefer-object-spread': 'error',
       'no-useless-rename': 'error',
-
-      // Stylistic rules (replacing those deprecated in ESLint)
       '@stylistic/js/linebreak-style': ['error', 'unix'],
       '@stylistic/js/eol-last': 'error',
       '@stylistic/js/no-trailing-spaces': 'error',
@@ -66,21 +58,34 @@ export default [
     }
   },
 
-  // src directory - ES modules with browser globals
+  // Vite migration: browser-based shim files with relaxed rules
   {
     files: ['src/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: 'script',
       globals: {
-        ...globals.browser
+        ...globals.browser,
+        console: 'readonly',
+        // Dojo globals
+        dojo: 'readonly',
+        dijit: 'readonly',
+        // AMD Shim globals
+        AMDShim: 'readonly',
+        __amdShim: 'readonly'
       }
     },
+
     plugins: {
       '@stylistic/js': stylistic
     },
+
     rules: {
-      'no-console': ['error', { allow: ['error', 'warn'] }],
+      'no-console': 'off',
+      'no-unused-vars': ['error', {
+        'argsIgnorePattern': '^_',
+        'varsIgnorePattern': '^_'
+      }],
       'prefer-const': 'error',
       'eqeqeq': ['error', 'always'],
       'no-empty': ['error', { 'allowEmptyCatch': true }],
@@ -88,83 +93,71 @@ export default [
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-script-url': 'error',
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+      'no-extend-native': 'error',
+      'array-callback-return': 'error',
+      'no-var': 'error',
+      '@stylistic/js/linebreak-style': ['error', 'unix'],
+      '@stylistic/js/eol-last': 'error',
+      '@stylistic/js/no-trailing-spaces': 'error',
+      '@stylistic/js/no-multiple-empty-lines': ['error', { 'max': 2 }]
+    }
+  },
+
+  // Vue files
+  {
+    files: ['src/**/*.vue'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        console: 'readonly'
+      }
+    },
+    plugins: {
+      vue: vue
+    },
+    rules: {
+      'vue/no-v-html': 'off',
+      'vue/require-default-prop': 'off',
+      'vue/require-explicit-emits': 'off',
+      'vue/multi-word-component-names': 'off'
+    }
+  },
+
+  // Vite config: Node.js based
+  {
+    files: ['vite.config.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        __dirname: 'readonly',
+        __filename: 'readonly'
+      }
+    },
+
+    rules: {
+      'no-undef': 'off',
+      'no-console': 'off',
+      'no-unused-vars': 'off'
     }
   },
 
   // TypeScript files
   {
     files: ['src/**/*.ts'],
-    plugins: {
-      '@typescript-eslint': tsPlugin
-    },
     languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
-        globals: {
-          ...globals.browser,
-          ...globals.node
-        }
-      }
-    },
-    rules: {
-      ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
-    }
-  },
-
-  // Vue files with TypeScript (in src/vue/)
-  {
-    files: ['src/vue/**/*.vue'],
-    plugins: {
-      '@typescript-eslint': tsPlugin
-    },
-    languageOptions: {
-      parser: vueParser,
-      parserOptions: {
-        parser: tsParser,
-        ecmaVersion: 2022,
-        sourceType: 'module'
-      },
+      ecmaVersion: 2022,
+      sourceType: 'module',
       globals: {
         ...globals.browser,
-        fetch: 'readonly',
-        console: 'readonly',
-        URLSearchParams: 'readonly'
+        ...globals.node,
+        console: 'readonly'
       }
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-console': ['error', { allow: ['error', 'warn', 'log'] }],
-      'prefer-const': 'error'
-    }
-  },
-
-  // Vue files without TypeScript
-  {
-    files: ['**/*.vue'],
-    ignores: ['src/vue/**/*.vue'],
-    plugins: {
-      '@typescript-eslint': tsPlugin
-    },
-    languageOptions: {
-      parser: vueParser,
-      parserOptions: {
-        parser: tsParser,
-        ecmaVersion: 2022,
-        sourceType: 'module',
-        globals: {
-          ...globals.browser,
-          ...globals.node
-        }
-      }
-    },
-    rules: {
-      ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+      'no-undef': 'off',
+      'no-console': 'off'
     }
   }
 ];

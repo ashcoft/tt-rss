@@ -1,25 +1,31 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "strict": true,
-    "esModuleInterop": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "dojo/*": ["lib/dojo/*"],
-      "dijit/*": ["lib/dijit/*"],
-      "dojox/*": ["lib/dojox/*"],
-      "fox/*": ["js/*"]
-    }
+      "@/*": ["src/vue/*"],
+      "@/components/*": ["src/vue/components/*"],
+      "@/composables/*": ["src/vue/composables/*"],
+      "@/types/*": ["src/vue/types/*"]
+    },
+    "types": ["vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"],
-  "exclude": ["node_modules", "dist", "lib/dojo", "lib/dijit", "lib/dojox", "js"]
+  "include": ["src/vue/**/*.ts", "src/vue/**/*.tsx", "src/vue/**/*.vue"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
