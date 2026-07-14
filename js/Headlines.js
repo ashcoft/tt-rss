@@ -113,23 +113,27 @@ const Headlines = {
 		return ops;
 	},
 	processModified(m, ops) {
-		if (m.old.marked !== m.new.marked) ops.tmark.push(m.id);
-		if (m.old.published !== m.new.published) ops.tpub.push(m.id);
+		this.updateOp(ops, 'tmark', m.id, m.old.marked, m.new.marked);
+		this.updateOp(ops, 'tpub', m.id, m.old.published, m.new.published);
 
 		if (m.old.unread !== m.new.unread)
-			m.new.unread ? ops.unread.push(m.id) : ops.read.push(m.id);
+			this.updateOp(ops, m.new.unread ? 'unread' : 'read', m.id);
 
 		if (m.old.selected !== m.new.selected)
-			m.new.selected ? ops.select.push(m.row) : ops.deselect.push(m.row);
+			this.updateOp(ops, m.new.selected ? 'select' : 'deselect', m.row);
 
 		if (m.old.active !== m.new.active)
-			m.new.active ? ops.activate.push(m.row) : ops.deactivate.push(m.row);
+			this.updateOp(ops, m.new.active ? 'activate' : 'deactivate', m.row);
 
-		if (m.old.score !== m.new.score) {
-			const score = m.new.score;
-			ops.rescore[score] = ops.rescore[score] || [];
-			ops.rescore[score].push(m.id);
-		}
+		if (m.old.score !== m.new.score)
+			this.addRescore(ops, m.id, m.new.score);
+	},
+	updateOp(ops, opName, id, oldVal, newVal) {
+		if (oldVal !== newVal) ops[opName].push(id);
+	},
+	addRescore(ops, id, score) {
+		ops.rescore[score] = ops.rescore[score] || [];
+		ops.rescore[score].push(id);
 	},
 	applyCheckboxOps(ops) {
 		ops.select.forEach((row) => this.setCheckbox(row, true, false));
