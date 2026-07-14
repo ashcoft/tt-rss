@@ -213,12 +213,8 @@ const Article = {
 		`;
 	},
 	renderPreviewImage(enclosures) {
-		if (!enclosures?.entries?.length) {
-			return '';
-		}
-
-		const imageEntry = enclosures.entries.find((enc) =>
-			enc.content_type && /^image\//i.test(enc.content_type)
+		const imageEntry = enclosures?.entries?.find((enc) =>
+			enc?.content_type && /^image\//i.test(enc.content_type)
 		);
 
 		if (!imageEntry) {
@@ -226,7 +222,7 @@ const Article = {
 		}
 
 		const escapedUrl = App.escapeHtml(imageEntry.content_url);
-		const altText = imageEntry.title ? App.escapeHtml(imageEntry.title) : 'Preview image';
+		const altText = App.escapeHtml(imageEntry.title || 'Preview image');
 
 		return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" title="${altText}">
 			<img class="cdm-preview-image" loading="lazy" tabindex="0" role="button"
