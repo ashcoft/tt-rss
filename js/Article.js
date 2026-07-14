@@ -187,51 +187,54 @@ const Article = {
 										<a target="_blank" href="${App.escapeHtml(enc.content_url)}"
 											title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}"
 											rel="noopener noreferrer">${App.escapeHtml(enc.content_url)}</a>
-										</p>`
-								}
-							} else {
-								return `<p>
-									<a target="_blank" href="${App.escapeHtml(enc.content_url)}"
-										title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}"
-										rel="noopener noreferrer">${App.escapeHtml(enc.content_url)}</a>
-									</p>`
-							}
-						}).join("")}
-					</div>` : ''}
-			${enclosures.entries.length > 0 ?
-				`<div class="attachments" dojoType="fox.form.DropDownButton">
-					<span>${__('Attachments')}</span>
-					<div dojoType="dijit.Menu" style="display: none">
-					${enclosures.entries.map((enc) => `
-							<div onclick='App.openUrl(${JSON.stringify(enc.content_url)})'
-								title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}" dojoType="dijit.MenuItem">
-									${enc.title ? enc.title : enc.filename}
-							</div>
-						`).join("")}
-					</div>
-				</div>` : ''}
-			`
+							</p>`
+						}
+					} else {
+						return `<p>
+							<a target="_blank" href="${App.escapeHtml(enc.content_url)}"
+								title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}"
+								rel="noopener noreferrer">${App.escapeHtml(enc.content_url)}</a>
+						</p>`
+					}
+				}).join("")}
+			</div>` : ''}
+		${enclosures.entries.length > 0 ?
+			`<div class="attachments" dojoType="fox.form.DropDownButton">
+				<span>${__('Attachments')}</span>
+				<div dojoType="dijit.Menu" style="display: none">
+				${enclosures.entries.map((enc) => `
+						<div onclick='App.openUrl(${JSON.stringify(enc.content_url)})'
+							title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}" dojoType="dijit.MenuItem">
+								${enc.title ? enc.title : enc.filename}
+						</div>
+					`).join("")}
+				</div>
+			</div>` : ''}
+		`;
 	},
-	renderPreviewImage: function (enclosures) {
+	renderPreviewImage(enclosures) {
 		if (!enclosures || !enclosures.entries || enclosures.entries.length === 0) {
 			return '';
 		}
 
-		const image = enclosures.entries.find((enc) =>
-			enc.content_type && enc.content_type.indexOf("image/") !== -1);
+		const typeHandlers = {
+			image: (enc) => `<img class="cdm-preview-image" loading="lazy"
+				width="${enc.width || ''}"
+				height="${enc.height || ''}"
+				src="${App.escapeHtml(enc.content_url)}"
+				title="${App.escapeHtml(enc.title || enc.content_url)}"
+				onclick="App.openUrl('${App.escapeHtml(enc.content_url)}')"/>`
+		};
 
-		if (image) {
-			return `<img class="cdm-preview-image" loading="lazy"
-				width="${image.width ? image.width : ''}"
-				height="${image.height ? image.height : ''}"
-				src="${App.escapeHtml(image.content_url)}"
-				title="${App.escapeHtml(image.title ? image.title : image.content_url)}"
-				onclick="App.openUrl('${App.escapeHtml(image.content_url)}')"/>`;
-		}
+		const imageEntry = enclosures.entries.find((enc) =>
+			enc.content_type && Object.keys(typeHandlers).some((key) =>
+				enc.content_type.indexOf(`${key}/`) !== -1
+			)
+		);
 
-		return '';
+		return imageEntry ? typeHandlers.image(imageEntry) : '';
 	},
-	render: function (article) {
+	render(article) {
 		App.cleanupMemory("content-insert");
 
 		dijit.byId("headlines-wrap-inner").addChild(

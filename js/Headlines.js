@@ -462,7 +462,7 @@ const Headlines = {
 	// CheckBox widget (pinned by dijit.registry) plus every row the
 	// MutationObserver still references — DOM nodes and listeners then grow
 	// unbounded across navigation.
-	teardownRows: function () {
+	teardownRows() {
 		dijit.registry.findWidgets(document.getElementById("headlines-frame"))
 			.forEach((w) => w.destroyRecursive());
 		this.row_observer.disconnect();
@@ -470,7 +470,7 @@ const Headlines = {
 		this.sticky_content_observer.disconnect();
 		this.unpack_observer.disconnect();
 	},
-	render: function (headlines, hl) {
+	render(headlines, hl) {
 		let row_class = "";
 
 		if (hl.marked) row_class += " marked";
@@ -480,13 +480,13 @@ const Headlines = {
 
 		if (headlines.vfeed_group_enabled && hl.feed_title && this.vgroup_last_feed !== hl.feed_id) {
 			const vgrhdr = `<div data-feed-id='${hl.feed_id}' class='feed-title'>
-									<div class="pull-right icon-feed" title="${App.escapeHtml(hl.feed_title)}"
-										onclick="Feeds.open({feed:${hl.feed_id}})">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</div>
-									<a class="title" title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
-									<a class="catchup" title="${__('mark feed as read')}" onclick="Feeds.catchupFeedInGroup(${hl.feed_id})" href="#">
-										<i class="icon-done material-icons">done_all</i>
-									</a>
-								</div>`
+								<div class="pull-right icon-feed" title="${App.escapeHtml(hl.feed_title)}"
+								onclick="Feeds.open({feed:${hl.feed_id}})">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</div>
+							<a class="title" title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
+							<a class="catchup" title="${__('mark feed as read')}" onclick="Feeds.catchupFeedInGroup(${hl.feed_id})" href="#">
+								<i class="icon-done material-icons">done_all</i>
+							</a>
+						</div>`
 
 			const tmp = document.createElement("div");
 			tmp.innerHTML = vgrhdr;
