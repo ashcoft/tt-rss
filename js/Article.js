@@ -451,10 +451,23 @@ const Article = {
 
 		if (!ctr || !row) return;
 
-		const grid_gap = parseInt(window.getComputedStyle(ctr).gridGap) || 0;
+		const scrollTop = this.calculateScrollTop(row, ctr, params.force_to_top);
 
-		if (params.force_to_top || !App.Scrollable.fitsInContainer(row, ctr))
-			ctr.scrollTop = row.offsetTop - grid_gap;
+		if (scrollTop !== null)
+			ctr.scrollTop = scrollTop;
+	},
+	calculateScrollTop(row, ctr, forceToTop) {
+		if (forceToTop) {
+			const grid_gap = parseInt(window.getComputedStyle(ctr).gridGap) || 0;
+			return row.offsetTop - grid_gap;
+		}
+
+		if (!App.Scrollable.fitsInContainer(row, ctr)) {
+			const grid_gap = parseInt(window.getComputedStyle(ctr).gridGap) || 0;
+			return row.offsetTop - grid_gap;
+		}
+
+		return null;
 	},
 	setActive(id) {
 		if (id !== Article.getActive()) {
