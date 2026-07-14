@@ -187,54 +187,57 @@ const Article = {
 										<a target="_blank" href="${App.escapeHtml(enc.content_url)}"
 											title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}"
 											rel="noopener noreferrer">${App.escapeHtml(enc.content_url)}</a>
-										</p>`
-								}
-							} else {
-								return `<p>
-									<a target="_blank" href="${App.escapeHtml(enc.content_url)}"
-										title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}"
-										rel="noopener noreferrer">${App.escapeHtml(enc.content_url)}</a>
-									</p>`
-							}
-						}).join("")}
-					</div>` : ''}
-			${enclosures.entries.length > 0 ?
-				`<div class="attachments" dojoType="fox.form.DropDownButton">
-					<span>${__('Attachments')}</span>
-					<div dojoType="dijit.Menu" style="display: none">
-					${enclosures.entries.map((enc) => `
-							<div onclick='App.openUrl(${JSON.stringify(enc.content_url)})'
-								title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}" dojoType="dijit.MenuItem">
-									${enc.title ? enc.title : enc.filename}
-							</div>
-						`).join("")}
-					</div>
-				</div>` : ''}
-			`
+							</p>`
+						}
+					} else {
+						return `<p>
+							<a target="_blank" href="${App.escapeHtml(enc.content_url)}"
+								title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}"
+								rel="noopener noreferrer">${App.escapeHtml(enc.content_url)}</a>
+						</p>`
+					}
+				}).join("")}
+			</div>` : ''}
+		${enclosures.entries.length > 0 ?
+			`<div class="attachments" dojoType="fox.form.DropDownButton">
+				<span>${__('Attachments')}</span>
+				<div dojoType="dijit.Menu" style="display: none">
+				${enclosures.entries.map((enc) => `
+						<div onclick='App.openUrl(${JSON.stringify(enc.content_url)})'
+							title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}" dojoType="dijit.MenuItem">
+								${enc.title ? enc.title : enc.filename}
+						</div>
+					`).join("")}
+				</div>
+			</div>` : ''}
+		`;
 	},
-	renderPreviewImage: function (enclosures) {
+	renderPreviewImage(enclosures) {
 		if (!enclosures || !enclosures.entries || enclosures.entries.length === 0) {
 			return '';
 		}
 
-		const image = enclosures.entries.find((enc) =>
-			enc.content_type && /^image\//i.test(enc.content_type));
+		const typeHandlers = {
+			image: (enc) => {
+				const escapedUrl = App.escapeHtml(enc.content_url);
+				const altText = enc.title ? App.escapeHtml(enc.title) : 'Preview image';
+				return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" title="${altText}">
+					<img class="cdm-preview-image" loading="lazy"
+						width="${enc.width || ''}"
+						height="${enc.height || ''}"
+						src="${escapedUrl}"
+						alt="${altText}"/>
+				</a>`;
+			}
+		};
 
-		if (image) {
-			const escapedUrl = App.escapeHtml(image.content_url);
-			const altText = image.title ? App.escapeHtml(image.title) : 'Preview image';
-			return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" title="${altText}">
-				<img class="cdm-preview-image" loading="lazy"
-					width="${image.width ? image.width : ''}"
-					height="${image.height ? image.height : ''}"
-					src="${escapedUrl}"
-					alt="${altText}"/>
-			</a>`;
-		}
+		const imageEntry = enclosures.entries.find((enc) =>
+			enc.content_type && /^image\//i.test(enc.content_type)
+		);
 
-		return '';
+		return imageEntry ? typeHandlers.image(imageEntry) : '';
 	},
-	render: function (article) {
+	render(article) {
 		App.cleanupMemory("content-insert");
 
 		dijit.byId("headlines-wrap-inner").addChild(
