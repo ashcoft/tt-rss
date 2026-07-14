@@ -164,7 +164,7 @@ const Headlines = {
 
 		Object.keys(ops.rescore).forEach((score) => {
 			promises.push(xhr.post("backend.php",
-				{op: "Article", method: "setScore", "ids[]": ops.rescore[score], score: score}));
+				{op: "Article", method: "setScore", "ids[]": ops.rescore[score], score}));
 		});
 
 		return promises;
@@ -305,6 +305,8 @@ const Headlines = {
 				return parseInt(row.getAttribute('data-article-id'));
 			}
 		}
+
+		return undefined;
 	},
 	unpackVisible(container) {
 		const rows = document.querySelectorAll('#headlines-frame > div[id*=RROW][data-content].cdm');

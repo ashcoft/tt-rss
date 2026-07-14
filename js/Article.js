@@ -446,16 +446,14 @@ const Article = {
 
 	},
 	cdmMoveToId(id, params = {}) {
-		const force_to_top = params.force_to_top || false;
 		const ctr = document.getElementById("headlines-frame");
 		const row = document.getElementById(`RROW-${id}`);
 
 		if (!ctr || !row) return;
 
 		const grid_gap = parseInt(window.getComputedStyle(ctr).gridGap) || 0;
-		const needsScroll = force_to_top || !App.Scrollable.fitsInContainer(row, ctr);
 
-		if (needsScroll)
+		if (params.force_to_top || !App.Scrollable.fitsInContainer(row, ctr))
 			ctr.scrollTop = row.offsetTop - grid_gap;
 	},
 	setActive(id) {
