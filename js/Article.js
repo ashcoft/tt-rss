@@ -203,9 +203,9 @@ const Article = {
 				<span>${__('Attachments')}</span>
 				<div dojoType="dijit.Menu" style="display: none">
 				${enclosures.entries.map((enc) => `
-						<div onclick='App.openUrl(${JSON.stringify(enc.content_url)})'
-							title="${App.escapeHtml(enc.title ? enc.title : enc.content_url)}" dojoType="dijit.MenuItem">
-								${enc.title ? enc.title : enc.filename}
+						<div data-url="${App.escapeHtml(enc.content_url)}" onclick="App.openUrl(this.getAttribute('data-url'))"
+							title="${App.escapeHtml(enc.title || enc.content_url)}" dojoType="dijit.MenuItem">
+							${App.escapeHtml(enc.title || enc.filename || '')}
 						</div>
 					`).join("")}
 				</div>
