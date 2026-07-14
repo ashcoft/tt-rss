@@ -218,15 +218,18 @@ const Article = {
 		}
 
 		const image = enclosures.entries.find((enc) =>
-			enc.content_type && enc.content_type.indexOf("image/") !== -1);
+			enc.content_type && /^image\//i.test(enc.content_type));
 
 		if (image) {
-			return `<img class="cdm-preview-image" loading="lazy"
-				width="${image.width ? image.width : ''}"
-				height="${image.height ? image.height : ''}"
-				src="${App.escapeHtml(image.content_url)}"
-				title="${App.escapeHtml(image.title ? image.title : image.content_url)}"
-				onclick="App.openUrl('${App.escapeHtml(image.content_url)}')"/>`;
+			const escapedUrl = App.escapeHtml(image.content_url);
+			const altText = image.title ? App.escapeHtml(image.title) : 'Preview image';
+			return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" title="${altText}">
+				<img class="cdm-preview-image" loading="lazy"
+					width="${image.width ? image.width : ''}"
+					height="${image.height ? image.height : ''}"
+					src="${escapedUrl}"
+					alt="${altText}"/>
+			</a>`;
 		}
 
 		return '';
