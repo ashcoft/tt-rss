@@ -25,55 +25,55 @@ const App = {
 	},
    _translations: {},
    Hash: {
-      get: function() {
+      get() {
          return dojo.queryToObject(window.location.hash.substring(1));
       },
-      set: function(params) {
+      set(params) {
          const obj = dojo.queryToObject(window.location.hash.substring(1));
          window.location.hash = dojo.objectToQuery({...obj, ...params});
       }
    },
    l10n: {
-      ngettext: function(msg1, msg2, n) {
+      ngettext(msg1, msg2, n) {
          return self.__((parseInt(n) > 1) ? msg2 : msg1);
       },
-      __: function(msg) {
+      __(msg) {
          return App._translations[msg] ? App._translations[msg] : msg;
       }
    },
    FormFields: {
-      attributes_to_string: function(attributes) {
+      attributes_to_string(attributes) {
          return Object.keys(attributes).map((k) =>
             `${App.escapeHtml(k)}="${App.escapeHtml(attributes[k])}"`)
             .join(" ");
       },
-      hidden_tag: function(name, value, attributes = {}, id = "") {
+      hidden_tag(name, value, attributes = {}, id = "") {
          return `<input id="${App.escapeHtml(id)}" dojoType="dijit.form.TextBox" ${this.attributes_to_string(attributes)}
             style="display : none" name="${name}" value="${App.escapeHtml(value)}"></input>`
       },
       // allow html inside because of icons
-      button_tag: function(value, type, attributes = {}) {
+      button_tag(value, type, attributes = {}) {
          return `<button dojoType="dijit.form.Button" ${this.attributes_to_string(attributes)}
             type="${type}">${value}</button>`
 
       },
-      icon: function(icon, attributes = {}) {
+      icon(icon, attributes = {}) {
          return `<i class="material-icons" ${this.attributes_to_string(attributes)}>${icon}</i>`;
       },
-      submit_tag: function(value, attributes = {}) {
+      submit_tag(value, attributes = {}) {
          return this.button_tag(value, "submit", {...{class: "alt-primary"}, ...attributes});
       },
-      cancel_dialog_tag: function(value, attributes = {}) {
+      cancel_dialog_tag(value, attributes = {}) {
          return this.button_tag(value, "", {...{onclick: "App.dialogOf(this).hide()"}, ...attributes});
       },
-      checkbox_tag: function(name, checked = false, value = "", attributes = {}, id = "") {
+      checkbox_tag(name, checked = false, value = "", attributes = {}, id = "") {
          // checked !== '0' prevents mysql "boolean" false to be implicitly cast as true
          return `<input dojoType="dijit.form.CheckBox" type="checkbox" name="${App.escapeHtml(name)}"
                      ${checked !== '0' && checked ? "checked" : ""}
                      ${value ? `value="${App.escapeHtml(value)}"` : ""}
                      ${this.attributes_to_string(attributes)} id="${App.escapeHtml(id)}">`
       },
-      select_tag: function(name, value, values = [], attributes = {}, id = "") {
+      select_tag(name, value, values = [], attributes = {}, id = "") {
          value = String(value);
 
          return `
@@ -85,7 +85,7 @@ const App = {
             </select>
          `
       },
-      select_hash: function(name, value, values = {}, attributes = {}, id = "", params = {}) {
+      select_hash(name, value, values = {}, attributes = {}, id = "", params = {}) {
 			let keys = Object.keys(values);
 			value = String(value);
 
@@ -102,7 +102,7 @@ const App = {
       }
    },
    Scrollable: {
-		scrollByPages: function (elem, page_offset) {
+		scrollByPages(elem, page_offset) {
 			if (!elem) return;
 
 			/* keep a line or so from the previous page  */
@@ -110,12 +110,12 @@ const App = {
 
 			this.scroll(elem, offset);
 		},
-		scroll: function(elem, offset) {
+		scroll(elem, offset) {
 			if (!elem) return;
 
 			elem.scrollTop += offset;
 		},
-		isChildVisible: function(elem, ctr) {
+		isChildVisible(elem, ctr) {
 			if (!elem) return;
 
 			const ctop = ctr.scrollTop;
@@ -127,13 +127,13 @@ const App = {
 			return etop >= ctop && ebottom <= cbottom ||
 				etop < ctop && ebottom > ctop || ebottom > cbottom && etop < cbottom;
 		},
-		fitsInContainer: function (elem, ctr) {
+		fitsInContainer(elem, ctr) {
 			if (!elem) return;
 
 			return elem.offsetTop + elem.offsetHeight <= ctr.scrollTop + ctr.offsetHeight &&
 				elem.offsetTop >= ctr.scrollTop;
 		},
-      scrollTo: function (elem, ctr, params = {}) {
+      scrollTo(elem, ctr, params = {}) {
          const force_to_top = params.force_to_top || false;
 
          if (!elem || !ctr) return;
@@ -144,18 +144,18 @@ const App = {
       }
    },
    /** @deprecated use document.getElementById */
-   byId: function(id) {
+   byId(id) {
       return document.getElementById(id);
    },
    /** @deprecated use document.querySelector */
-   find: function(query) {
+   find(query) {
       return document.querySelector(query)
    },
    /** @deprecated use document.querySelectorAll */
-   findAll: function(query) {
+   findAll(query) {
       return document.querySelectorAll(query);
    },
-   dialogOf: function (elem) {
+   dialogOf(elem) {
 
       // elem could be a Dijit widget
       elem = elem.domNode ? elem.domNode : elem;
@@ -165,19 +165,19 @@ const App = {
    getPhArgs(plugin, method, args = {}) {
       return {...{op: "PluginHandler", plugin: plugin, method: method}, ...args};
    },
-   label_to_feed_id: function(label) {
+   label_to_feed_id(label) {
       return this.LABEL_BASE_INDEX - 1 - Math.abs(label);
    },
-   feed_to_label_id: function(feed) {
+   feed_to_label_id(feed) {
       return this.LABEL_BASE_INDEX - 1 + Math.abs(feed);
    },
-   getInitParam: function(k) {
+   getInitParam(k) {
 		return this._initParams[k];
 	},
-	setInitParam: function(k, v) {
+	setInitParam(k, v) {
 		this._initParams[k] = v;
 	},
-	nightModeChanged: function(is_night, link, retry = 0) {
+	nightModeChanged(is_night, link, retry = 0) {
 		if (link) {
 			if (retry < 15) {
 				window.clearTimeout(this._night_mode_retry_timeout);
@@ -196,7 +196,7 @@ const App = {
 			});
 		}
 	},
-	setupNightModeDetection: function(callback) {
+	setupNightModeDetection(callback) {
 		if (!document.getElementById("theme_css")) {
 			const mql = window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -232,7 +232,7 @@ const App = {
 			if (callback) callback();
 		}
 	},
-   postCurrentWindow: function(target, params) {
+   postCurrentWindow(target, params) {
       const form = document.createElement("form");
 
       form.setAttribute("method", "post");
@@ -254,7 +254,7 @@ const App = {
 
       form.parentNode.removeChild(form);
    },
-   postOpenWindow: function(target, params) {
+   postOpenWindow(target, params) {
       const w = window.open("");
 
 		if (w) {
@@ -280,7 +280,7 @@ const App = {
 		}
 
    },
-	urlParam: function(name) {
+	urlParam(name) {
 		try {
          const results = new RegExp('[?&]' + name + '=([^&#]*)').exec(window.location.href);
          return decodeURIComponent(results[1].replace(/\+/g, " ")) || 0;
@@ -288,14 +288,14 @@ const App = {
          return 0;
       }
 	},
-	next_seq: function() {
+	next_seq() {
 		this._rpc_seq += 1;
 		return this._rpc_seq;
 	},
-	get_seq: function() {
+	get_seq() {
 		return this._rpc_seq;
 	},
-	setLoadingProgress: function(p) {
+	setLoadingProgress(p) {
 		this._loading_progress += p;
 
 		if (dijit.byId("loading_bar"))
@@ -306,10 +306,10 @@ const App = {
 		}
 
 	},
-	isCombinedMode: function() {
+	isCombinedMode() {
 		return !!this.getInitParam("combined_display_mode");
 	},
-	setCombinedMode: function(combined) {
+	setCombinedMode(combined) {
 		const value = combined ? "true" : "false";
 
 		xhr.post("backend.php", {op: "RPC", method: "setpref", key: "COMBINED_DISPLAY_MODE", value: value}, () => {
@@ -320,10 +320,10 @@ const App = {
 			Headlines.renderAgain();
 		})
 	},
-	isExpandedMode: function() {
+	isExpandedMode() {
 		return !!this.getInitParam("cdm_expanded");
 	},
-	setExpandedMode: function(expand) {
+	setExpandedMode(expand) {
 		if (App.isCombinedMode()) {
 			const value = expand ? "true" : "false";
 
@@ -335,7 +335,7 @@ const App = {
 			alert(__("This function is only available in combined mode."));
 		}
 	},
-	getActionByHotkeySequence: function(sequence) {
+	getActionByHotkeySequence(sequence) {
 		const hotkeys_map = this.getInitParam("hotkeys");
 
 		for (const seq in hotkeys_map[1]) {
@@ -346,7 +346,7 @@ const App = {
 			}
 		}
 	},
-	keyeventToAction: function(event) {
+	keyeventToAction(event) {
 
 		const hotkeys_map = this.getInitParam("hotkeys");
 		const keycode = event.which;
@@ -403,7 +403,7 @@ const App = {
 
 		return action_name;
 	},
-	cleanupMemory: function(root) {
+	cleanupMemory(root) {
 		const dijits = dojo.query("[widgetid]", dijit.byId(root).domNode).map(dijit.byNode);
 
 		dijits.forEach(function (d) {
@@ -415,7 +415,7 @@ const App = {
 		});
    },
    // htmlspecialchars()-alike for headlines data-content attribute
-   escapeHtml: function(p) {
+   escapeHtml(p) {
       if (typeof p !== 'string')
          return p;
 
@@ -436,7 +436,7 @@ const App = {
     * @param {string} fallback - Optional fallback value if URL is invalid (default: empty string)
     * @return {string} Safe URL or fallback
     */
-   sanitizeUrl: function(url, fallback = '') {
+   sanitizeUrl(url, fallback = '') {
       if (!url || typeof url !== 'string') return fallback;
 
       // Remove NULL bytes and other control characters
@@ -448,14 +448,14 @@ const App = {
 
       return /^https?:\/\/.+/i.test(trimmed) ? trimmed : fallback;
    },
-   openUrl: function(url) {
+   openUrl(url) {
       const sanitized = this.sanitizeUrl(url);
       if (sanitized) {
          const w = window.open(sanitized);
          w.opener = null;
       }
    },
-   unescapeHtml: function(p) {
+   unescapeHtml(p) {
       if (typeof p !== 'string' || p.indexOf('&') === -1)
          return p;
 
@@ -471,18 +471,18 @@ const App = {
          }
       });
    },
-   getSelectedText: function() {
+   getSelectedText() {
       const sel = window.getSelection();
       return sel ? sel.toString().trim() : "";
    },
-   displayIfChecked: function(checkbox, elemId) {
+   displayIfChecked(checkbox, elemId) {
       if (checkbox.checked) {
          Element.show(elemId);
       } else {
          Element.hide(elemId);
       }
    },
-   hotkeyHelp: function() {
+   hotkeyHelp() {
       xhr.post("backend.php", {op: "RPC", method: "hotkeyHelp"}, (reply) => {
          const dialog = new fox.SingleUseDialog({
             title: __("Keyboard shortcuts"),
@@ -492,7 +492,7 @@ const App = {
          dialog.show();
       });
    },
-	handleRpcJson: function(reply) {
+	handleRpcJson(reply) {
 
 		const netalert = document.querySelector('.net-alert');
 
@@ -538,7 +538,7 @@ const App = {
          return false;
 		}
 	},
-	parseRuntimeInfo: function(data) {
+	parseRuntimeInfo(data) {
 		Object.keys(data).forEach((k) => {
          const v = data[k];
 
@@ -573,7 +573,7 @@ const App = {
 
 		PluginHost.run(PluginHost.HOOK_RUNTIME_INFO_LOADED, data);
 	},
-	backendSanityCallback: function(reply) {
+	backendSanityCallback(reply) {
 		console.log("sanity check ok");
 
 		const params = reply['init-params'];
@@ -631,7 +631,7 @@ const App = {
       E_UNAUTHORIZED: "E_UNAUTHORIZED",
       E_SCHEMA_MISMATCH: "E_SCHEMA_MISMATCH",
       E_URL_SCHEME_MISMATCH: "E_URL_SCHEME_MISMATCH",
-		fatal: function (error, params = {}) {
+		fatal(error, params = {}) {
          if (error === App.Error.E_UNAUTHORIZED) {
             window.location.href = "index.php";
             return;
@@ -648,7 +648,7 @@ const App = {
 			return this.report(error,
 				{...{title: __("Fatal error")}, ...params});
 		},
-		report: function(error, params = {}) {
+		report(error, params = {}) {
 			if (!error) return;
 
 			console.error("error.report:", error, params);
@@ -705,7 +705,7 @@ const App = {
 			}
 
 		},
-		onWindowError: function (message, filename, lineno, colno, error) {
+		onWindowError(message, filename, lineno, colno, error) {
 			// called without context (this) from window.onerror
 			App.Error.report(error,
 				{message: message, filename: filename, lineno: lineno, colno: colno});
@@ -714,11 +714,11 @@ const App = {
 	isPrefs() {
 		return this.is_prefs;
    },
-   audioCanPlay: function(ctype) {
+   audioCanPlay(ctype) {
       const a = document.createElement('audio');
       return a.canPlayType(ctype);
    },
-	init: function(parser, is_prefs) {
+	init(parser, is_prefs) {
 		require(['dojo/aspect'], function(aspect) {
 			aspect.before(dojo, 'xhrPost', function(args) {
 				return [{...args, content: { ...args?.content, csrf_token: __csrf_token }}];
@@ -759,7 +759,7 @@ const App = {
          });
       });
    },
-   checkBrowserFeatures: function() {
+   checkBrowserFeatures() {
       let errorMsg = "";
 
       ['MutationObserver', 'requestIdleCallback'].forEach((t) => {
@@ -776,12 +776,12 @@ const App = {
 
       return errorMsg === "";
    },
-   updateRuntimeInfo: function() {
+   updateRuntimeInfo() {
       xhr.json("backend.php", {op: "RPC", method: "getruntimeinfo"}, () => {
          // handled by xhr.json()
       });
    },
-   initSecondStage: function() {
+   initSecondStage() {
 
       document.onkeydown = (event) => this.hotkeyHandler(event);
       document.onkeypress = (event) => this.hotkeyHandler(event);
@@ -998,7 +998,7 @@ const App = {
       console.log("second stage ok");
 
    },
-	checkForUpdates: function() {
+	checkForUpdates() {
 		xhr.json("backend.php", {op: 'RPC', method: 'checkforupdates'})
 			.then((reply) => {
 				const ttrss_icon_a = document.getElementById('updates-available');
@@ -1017,7 +1017,7 @@ const App = {
 					plugin_icon_a.hide();
 			});
 	},
-   updateTitle: function() {
+   updateTitle() {
       let tmp = "Tiny Tiny RSS";
 
       if (this.global_unread > 0) {
@@ -1026,7 +1026,7 @@ const App = {
 
       document.title = tmp;
    },
-	hotkeyHandler: function(event) {
+	hotkeyHandler(event) {
 		if (event.target.nodeName === 'TEXTAREA')
 			return;
 
@@ -1055,10 +1055,10 @@ const App = {
 			}
 		}
 	},
-	isWideScreenMode: function() {
+	isWideScreenMode() {
 		return !!this._widescreen_mode;
 	},
-   setWideScreenMode: function(wide, quiet = false) {
+   setWideScreenMode(wide, quiet = false) {
 
 		if (this.isCombinedMode() && !quiet) {
 			alert(__("Widescreen is not available in combined mode."));
@@ -1115,7 +1115,7 @@ const App = {
    // True on the narrow/phone layout, where the hamburger toggle is visible.
    // Mirrors the media query that drives the responsive styles, so we use it
    // to gate phone-only behaviour (e.g. the Back gesture closing an article).
-   isNarrowLayout: function() {
+   isNarrowLayout() {
       const toggle = document.querySelector(".sidebar-toggle");
       return !!toggle && window.getComputedStyle(toggle).display !== "none";
    },
@@ -1124,7 +1124,7 @@ const App = {
    // the menu instead of falling through to the app. dijit.popup._stack is the
    // set of currently-open popups; submenus keep it non-empty so the backdrop
    // stays put until the last one closes.
-   _syncPopupBackdrop: function() {
+   _syncPopupBackdrop() {
       const open = this.isNarrowLayout() && !!dijit.popup && dijit.popup._stack.length > 0;
       document.body.classList.toggle("popup-backdrop-open", open);
    },
@@ -1139,7 +1139,7 @@ const App = {
    // any overlay's state can change (Article.setActive/cdmUnsetActive,
    // toggleSidebar, and the dijit.popup open hook); a lingering popup entry left
    // after Dijit dismisses a menu on its own is pruned here on the next change.
-   reconcileOverlayHistory: function() {
+   reconcileOverlayHistory() {
       if (this._suppress_reconcile)
          return;
 
@@ -1171,7 +1171,7 @@ const App = {
    // Open/close the feed sidebar drawer (narrow/phone layout only). The
    // .feeds-drawer-open styles that slide the sidebar in are gated behind a
    // media query, so toggling the class is a no-op on the docked desktop layout.
-   toggleSidebar: function(force) {
+   toggleSidebar(force) {
       const open = typeof force === "boolean" ?
          force : !document.body.classList.contains("feeds-drawer-open");
 
@@ -1191,7 +1191,7 @@ const App = {
    // lives in #headlines-wrap-inner rather than #headlines-frame because the
    // latter's innerHTML is rebuilt on every feed load (Headlines.onLoaded), which
    // would delete a child of it.
-   initPullToRefresh: function() {
+   initPullToRefresh() {
       const frame = document.getElementById("headlines-frame");
       const wrap = document.getElementById("headlines-wrap-inner");
       if (!frame || !wrap)
@@ -1314,7 +1314,7 @@ const App = {
    // the row (no second transform to keep in sync). #headlines-frame clips its
    // horizontal overflow (overflow-x:hidden in the narrow theme) so the parked
    // affordance and the slid-off content stay hidden until revealed.
-   initSwipeToRead: function() {
+   initSwipeToRead() {
       const frame = document.getElementById("headlines-frame");
       if (!frame)
          return;
@@ -1462,7 +1462,7 @@ const App = {
    // events are swallowed at the document, armed only until just after this
    // pointer's release so the next deliberate tap (e.g. on a menu item) is
    // unaffected.
-   initLongPressContextMenu: function() {
+   initLongPressContextMenu() {
       const LONG_PRESS_MS = 600;  // above Android's native long-press delay on purpose
       const MOVE_SLOP_PX = 10;    // finger drift allowed before it counts as a scroll
       const RELEASE_COMPAT_DELAY_MS = 150;  // delay before removing compatibility event handlers
@@ -1604,7 +1604,7 @@ const App = {
          }, {capture: true});
       });
    },
-   initHotkeyActions: function() {
+   initHotkeyActions() {
       if (this.is_prefs) {
 
          this.hotkey_actions["feed_subscribe"] = () => {
@@ -1901,10 +1901,10 @@ const App = {
          };
       }
    },
-   openPreferences: function(tab) {
+   openPreferences(tab) {
       document.location.href = "prefs.php" + (tab ? "?tab=" + tab : "");
    },
-   onActionSelected: function(opid) {
+   onActionSelected(opid) {
       switch (opid) {
          case "qmcPrefs":
             App.openPreferences();

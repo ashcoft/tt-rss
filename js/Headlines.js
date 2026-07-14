@@ -91,7 +91,7 @@ const Headlines = {
 			Headlines.syncModified(modified);
 		});
 	}),
-	syncModified: function (modified) {
+	syncModified(modified) {
 		const ops = {
 			tmark: [],
 			tpub: [],
@@ -211,7 +211,7 @@ const Headlines = {
 			PluginHost.run(PluginHost.HOOK_HEADLINE_MUTATIONS_SYNCED, results);
 		});
 	},
-	click: function (event, id, in_body) {
+	click(event, id, in_body) {
 		in_body = in_body || false;
 
 		if (event.shiftKey && Article.getActive()) {
@@ -276,7 +276,7 @@ const Headlines = {
 
 		return false;
 	},
-	initScrollHandler: function () {
+	initScrollHandler() {
 		document.getElementById("headlines-frame").onscroll = (event) => {
 			clearTimeout(this._headlines_scroll_timeout);
 			this._headlines_scroll_timeout = window.setTimeout(function () {
@@ -285,7 +285,7 @@ const Headlines = {
 			}, 50);
 		}
 	},
-	loadMore: function () {
+	loadMore() {
 		const view_mode = dijit.byId("toolbar-main").getValues().view_mode;
 		const unread_in_buffer = document.querySelectorAll('#headlines-frame > div[id*=RROW][class*=Unread]').length;
 		const num_all = document.querySelectorAll('#headlines-frame > div[id*=RROW]').length;
@@ -314,10 +314,10 @@ const Headlines = {
 
 		Feeds.open({feed: Feeds.getActive(), is_cat: Feeds.activeIsCat(), offset: offset, append: true});
 	},
-	isChildVisible: function (elem) {
+	isChildVisible(elem) {
 		return App.Scrollable.isChildVisible(elem, document.getElementById("headlines-frame"));
 	},
-	firstVisible: function () {
+	firstVisible() {
 		const rows = document.querySelectorAll('#headlines-frame > div[id*=RROW]');
 
 		for (let i = 0; i < rows.length; i++) {
@@ -328,7 +328,7 @@ const Headlines = {
 			}
 		}
 	},
-	unpackVisible: function(container) {
+	unpackVisible(container) {
 		const rows = document.querySelectorAll('#headlines-frame > div[id*=RROW][data-content].cdm');
 
 		for (let i = 0; i < rows.length; i++) {
@@ -337,7 +337,7 @@ const Headlines = {
 			}
 		}
 	},
-	scrollHandler: function (/*event*/) {
+	scrollHandler(/*event*/) {
 		try {
 			if (!Feeds.infscroll_disabled && !Feeds.infscroll_in_progress) {
 				const hsp = document.getElementById("headlines-spacer");
@@ -386,10 +386,10 @@ const Headlines = {
 			console.error('scrollHandler error:', e);
 		}
 	},
-	objectById: function (id) {
+	objectById(id) {
 		return this.headlines[id];
 	},
-	setCommonClasses: function (headlines_count) {
+	setCommonClasses(headlines_count) {
 		const container = document.getElementById("headlines-frame");
 
 		container.classList.remove('cdm', 'normal');
@@ -406,7 +406,7 @@ const Headlines = {
 		if (App.isCombinedMode())
 			document.getElementById('main').classList.add(App.getInitParam('cdm_expanded') ? 'expanded' : 'expandable');
 	},
-	renderAgain: function () {
+	renderAgain() {
 		// TODO: wrap headline elements into a knockoutjs model to prevent all this stuff
 		Headlines.setCommonClasses(this.headlines.filter((h) => h.id).length);
 
@@ -627,7 +627,7 @@ const Headlines = {
 
 		return tmp.firstChild;
 	},
-	updateCurrentUnread: function () {
+	updateCurrentUnread() {
 		if (document.getElementById("feed_current_unread")) {
 			const feed_unread = Feeds.getUnread(Feeds.getActive(), Feeds.activeIsCat());
 
@@ -639,7 +639,7 @@ const Headlines = {
 			}
 		}
 	},
-	renderToolbar: function(headlines) {
+	renderToolbar(headlines) {
 
 		const tb = headlines['toolbar'];
 		const search_query = Feeds._search_query ? Feeds._search_query.query : "";
@@ -756,7 +756,7 @@ const Headlines = {
 			}
 		);
 	},
-	onLoaded: function (reply, offset, append) {
+	onLoaded(reply, offset, append) {
 		let is_cat;
 		let feed_id;
 
@@ -945,7 +945,7 @@ const Headlines = {
 
 		Notify.close();
 	},
-	reverse: function () {
+	reverse() {
 		const toolbar = dijit.byId("toolbar-main");
 		let order_by = toolbar.getValues().order_by;
 
@@ -956,7 +956,7 @@ const Headlines = {
 
 		toolbar.setValues({order_by: order_by});
 	},
-	selectionToggleUnread: function (params = {}) {
+	selectionToggleUnread(params = {}) {
 		const cmode = params.cmode !== undefined ? params.cmode : 2;
 		const no_error = params.no_error || false;
 		const ids = params.ids || Headlines.getSelected();
@@ -985,7 +985,7 @@ const Headlines = {
 			}
 		});
 	},
-	selectionToggleMarked: function (ids) {
+	selectionToggleMarked(ids) {
 		ids = ids || Headlines.getSelected();
 
 		if (ids.length === 0) {
@@ -997,7 +997,7 @@ const Headlines = {
 			this.toggleMark(id);
 		});
 	},
-	selectionTogglePublished: function (ids) {
+	selectionTogglePublished(ids) {
 		ids = ids || Headlines.getSelected();
 
 		if (ids.length === 0) {
@@ -1007,14 +1007,14 @@ const Headlines = {
 
 		ids.forEach(id => this.togglePub(id));
 	},
-	toggleMark: function (id) {
+	toggleMark(id) {
 		document.getElementById(`RROW-${id}`)?.classList.toggle('marked');
 
 	},
-	togglePub: function (id) {
+	togglePub(id) {
 		document.getElementById(`RROW-${id}`)?.classList.toggle('published');
 	},
-	move: function (mode, params = {}) {
+	move(mode, params = {}) {
 		const no_expand = params.no_expand || false;
 		const force_previous = params.force_previous || this.default_force_previous;
 		const force_to_top = params.force_to_top || this.default_force_to_top;
@@ -1097,7 +1097,7 @@ const Headlines = {
 			}
 		}
 	},
-	updateSelectedPrompt: function () {
+	updateSelectedPrompt() {
 		const count = Headlines.getSelected().length;
 		const elem = document.getElementById("selected_prompt");
 
@@ -1108,7 +1108,7 @@ const Headlines = {
 			count > 0 ? Element.show(elem) : Element.hide(elem);
 		}
 	},
-	toggleUnread: function (id, cmode) {
+	toggleUnread(id, cmode) {
 		const row = document.getElementById(`RROW-${id}`);
 
 		if (row) {
@@ -1127,7 +1127,7 @@ const Headlines = {
 			}
 		}
 	},
-	selectionRemoveLabel: function (id, ids) {
+	selectionRemoveLabel(id, ids) {
 		if (!ids) ids = Headlines.getSelected();
 
 		if (ids.length === 0) {
@@ -1144,7 +1144,7 @@ const Headlines = {
 			this.onLabelsUpdated(reply);
 		});
 	},
-	selectionAssignLabel: function (id, ids) {
+	selectionAssignLabel(id, ids) {
 		if (!ids) ids = Headlines.getSelected();
 
 		if (ids.length === 0) {
@@ -1161,7 +1161,7 @@ const Headlines = {
 			this.onLabelsUpdated(reply);
 		});
 	},
-	deleteSelection: function () {
+	deleteSelection() {
 		const rows = Headlines.getSelected();
 
 		if (rows.length === 0) {
@@ -1191,7 +1191,7 @@ const Headlines = {
 			Feeds.reloadCurrent();
 		});
 	},
-	getSelected: function () {
+	getSelected() {
 		const selected = Array.from(document.querySelectorAll('#headlines-frame > div[id*=RROW][class*=Selected]'),
 			child => parseInt(child.getAttribute('data-article-id')));
 
@@ -1203,7 +1203,7 @@ const Headlines = {
 
 		return [...new Set(selected)];
 	},
-	getLoaded: function () {
+	getLoaded() {
 		const rv = [];
 
 		const children = document.querySelectorAll('#headlines-frame > div[id*=RROW-]');
@@ -1216,7 +1216,7 @@ const Headlines = {
 
 		return rv;
 	},
-	onRowChecked: function (elem) {
+	onRowChecked(elem) {
 		const row = elem.domNode.closest("div[id*=RROW]");
 
 		// do not allow unchecking active article checkbox
@@ -1231,7 +1231,7 @@ const Headlines = {
 			row.classList.remove('Selected');
 		}
 	},
-	getRange: function (start, stop) {
+	getRange(start, stop) {
 		if (start === stop)
 			return [start];
 
@@ -1258,7 +1258,7 @@ const Headlines = {
 
 		return results;
 	},
-	select: function (mode, articleId) {
+	select(mode, articleId) {
 		// mode = all,none,unread,invert,marked,published
 		let query = "#headlines-frame > div[id*=RROW]";
 
@@ -1296,7 +1296,7 @@ const Headlines = {
 			}
 		});
 	},
-	catchupSelection: function () {
+	catchupSelection() {
 		const rows = Headlines.getSelected();
 
 		if (rows.length === 0) {
@@ -1317,7 +1317,7 @@ const Headlines = {
 
 		Headlines.selectionToggleUnread({ids: rows, cmode: 0});
 	},
-	catchupRelativeTo: function (below, id) {
+	catchupRelativeTo(below, id) {
 
 		if (!id) id = Article.getActive();
 
@@ -1370,7 +1370,7 @@ const Headlines = {
 			}
 		}
 	},
-	onTagsUpdated: function (data) {
+	onTagsUpdated(data) {
 		if (data) {
 			if (this.headlines[data.id]) {
 				this.headlines[data.id].tags = data.tags;
@@ -1382,7 +1382,7 @@ const Headlines = {
 		}
 	},
 	// TODO: maybe this should cause article to be rendered again, although it might cause flicker etc
-	onLabelsUpdated: function (data) {
+	onLabelsUpdated(data) {
 		if (data) {
 			data["labels-for"].forEach((row) => {
 				if (this.headlines[row.id]) {
@@ -1395,7 +1395,7 @@ const Headlines = {
 			});
 		}
 	},
-	scrollToArticleId: function (id) {
+	scrollToArticleId(id) {
 		const container = document.getElementById("headlines-frame");
 		const row = document.getElementById(`RROW-${id}`);
 
@@ -1415,11 +1415,11 @@ const Headlines = {
 			container.scrollTop = row.offsetTop + row.offsetHeight - viewport;
 		}
 	},
-	headlinesMenuCommon: function (menu) {
+	headlinesMenuCommon(menu) {
 
 		menu.addChild(new dijit.MenuItem({
 			label: __("Open original article"),
-			onClick: function (/* event */) {
+			onClick(/* event */) {
 				const id = parseInt(this.getParent().currentTarget.getAttribute('data-article-id'));
 				Article.openInNewWindow(id);
 			}
@@ -1427,7 +1427,7 @@ const Headlines = {
 
 		menu.addChild(new dijit.MenuItem({
 			label: __('Copy article URL'),
-			onClick: function (/* event */) {
+			onClick(/* event */) {
 				const id = parseInt(this.getParent().currentTarget.getAttribute('data-article-id'));
 				Article.copyUrl(id);
 			}
@@ -1437,7 +1437,7 @@ const Headlines = {
 
 		menu.addChild(new dijit.MenuItem({
 			label: __("Toggle unread"),
-			onClick: function () {
+			onClick() {
 				const id = parseInt(this.getParent().currentTarget.getAttribute('data-article-id'));
 
 				let ids = Headlines.getSelected();
@@ -1449,7 +1449,7 @@ const Headlines = {
 
 		menu.addChild(new dijit.MenuItem({
 			label: __("Toggle starred"),
-			onClick: function () {
+			onClick() {
 				const id = parseInt(this.getParent().currentTarget.getAttribute('data-article-id'));
 
 				let ids = Headlines.getSelected();
@@ -1461,7 +1461,7 @@ const Headlines = {
 
 		menu.addChild(new dijit.MenuItem({
 			label: __("Toggle published"),
-			onClick: function () {
+			onClick() {
 				const id = parseInt(this.getParent().currentTarget.getAttribute('data-article-id'));
 
 				let ids = Headlines.getSelected();
@@ -1475,14 +1475,14 @@ const Headlines = {
 
 		menu.addChild(new dijit.MenuItem({
 			label: __("Mark above as read"),
-			onClick: function () {
+			onClick() {
 				Headlines.catchupRelativeTo(0, parseInt(this.getParent().currentTarget.getAttribute('data-article-id')));
 			}
 		}));
 
 		menu.addChild(new dijit.MenuItem({
 			label: __("Mark below as read"),
-			onClick: function () {
+			onClick() {
 				Headlines.catchupRelativeTo(1, parseInt(this.getParent().currentTarget.getAttribute('data-article-id')));
 			}
 		}));
@@ -1504,7 +1504,7 @@ const Headlines = {
 				labelAddMenu.addChild(new dijit.MenuItem({
 					label: name,
 					labelId: bare_id,
-					onClick: function () {
+					onClick() {
 						const id = parseInt(this.getParent().ownerMenu.currentTarget.getAttribute('data-article-id'));
 
 						let ids = Headlines.getSelected();
@@ -1517,7 +1517,7 @@ const Headlines = {
 				labelDelMenu.addChild(new dijit.MenuItem({
 					label: name,
 					labelId: bare_id,
-					onClick: function () {
+					onClick() {
 						const id = parseInt(this.getParent().ownerMenu.currentTarget.getAttribute('data-article-id'));
 
 						let ids = Headlines.getSelected();
@@ -1541,13 +1541,13 @@ const Headlines = {
 
 		}
 	},
-	scrollByPages: function (page_offset) {
+	scrollByPages(page_offset) {
 		App.Scrollable.scrollByPages(document.getElementById("headlines-frame"), page_offset);
 	},
-	scroll: function (offset) {
+	scroll(offset) {
 		App.Scrollable.scroll(document.getElementById("headlines-frame"), offset);
 	},
-	initHeadlinesMenu: function () {
+	initHeadlinesMenu() {
 		if (!dijit.byId("headlinesMenu")) {
 
 			const menu = new dijit.Menu({
@@ -1573,19 +1573,19 @@ const Headlines = {
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Mark as read"),
-				onClick: function() {
+				onClick() {
 					Feeds.catchupFeed(this.getParent().currentTarget.getAttribute("data-feed-id"));
 				}}));
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Edit feed"),
-				onClick: function() {
+				onClick() {
 					CommonDialogs.editFeed(this.getParent().currentTarget.getAttribute("data-feed-id"), false);
 				}}));
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Open site"),
-				onClick: function() {
+				onClick() {
 					App.postOpenWindow("backend.php", {op: "Feeds", method: "opensite",
 						feed_id: this.getParent().currentTarget.getAttribute("data-feed-id"), csrf_token: __csrf_token});
 				}}));
@@ -1594,7 +1594,7 @@ const Headlines = {
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Debug feed"),
-				onClick: function() {
+				onClick() {
 					/* global __csrf_token */
 					App.postOpenWindow("backend.php", {op: "Feeds", method: "updatedebugger",
 						feed_id: this.getParent().currentTarget.getAttribute("data-feed-id"), csrf_token: __csrf_token});
@@ -1615,7 +1615,7 @@ const Headlines = {
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Select articles in group"),
-				onClick: function (/* event */) {
+				onClick(/* event */) {
 					Headlines.select("all",
 						"#headlines-frame > div[id*=RROW]" +
 						"[data-orig-feed-id='" + this.getParent().currentTarget.getAttribute("data-feed-id") + "']");
@@ -1625,7 +1625,7 @@ const Headlines = {
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Mark group as read"),
-				onClick: function () {
+				onClick() {
 					Headlines.select("none");
 					Headlines.select("all",
 						"#headlines-frame > div[id*=RROW]" +
@@ -1637,14 +1637,14 @@ const Headlines = {
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Mark feed as read"),
-				onClick: function () {
+				onClick() {
 					Feeds.catchupFeedInGroup(this.getParent().currentTarget.getAttribute("data-feed-id"));
 				}
 			}));
 
 			menu.addChild(new dijit.MenuItem({
 				label: __("Edit feed"),
-				onClick: function () {
+				onClick() {
 					CommonDialogs.editFeed(this.getParent().currentTarget.getAttribute("data-feed-id"));
 				}
 			}));

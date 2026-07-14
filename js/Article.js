@@ -4,7 +4,7 @@
 
 const Article = {
 	_scroll_reset_timeout: false,
-	getScoreClass: function (score) {
+	getScoreClass(score) {
 		if (score > 500) {
 			return "score-high";
 		} else if (score > 0) {
@@ -17,7 +17,7 @@ const Article = {
 			return "score-neutral";
 		}
 	},
-	getScorePic: function (score) {
+	getScorePic(score) {
 		if (score > 500) {
 			return "trending_up";
 		} else if (score > 0) {
@@ -28,7 +28,7 @@ const Article = {
 			return "trending_neutral";
 		}
 	},
-	selectionSetScore: function () {
+	selectionSetScore() {
 		const ids = Headlines.getSelected();
 
 		if (ids.length > 0) {
@@ -56,7 +56,7 @@ const Article = {
 			alert(__("No articles selected."));
 		}
 	},
-	setScore: function (id, pic) {
+	setScore(id, pic) {
 		const row = pic.closest("div[id*=RROW]");
 
 		if (row) {
@@ -76,7 +76,7 @@ const Article = {
 			}
 		}
 	},
-	cdmToggleGridSpan: function(id) {
+	cdmToggleGridSpan(id) {
 		const row = document.getElementById(`RROW-${id}`);
 
 		if (row) {
@@ -86,7 +86,7 @@ const Article = {
 			this.cdmMoveToId(id);
 		}
 	},
-	cdmUnsetActive: function (event) {
+	cdmUnsetActive(event) {
 		const row = document.getElementById(`RROW-${Article.getActive()}`);
 
 		if (row) {
@@ -101,7 +101,7 @@ const Article = {
 			return false;
 		}
 	},
-	close: function () {
+	close() {
 		if (dijit.byId("content-insert"))
 			dijit.byId("headlines-wrap-inner").removeChild(
 				dijit.byId("content-insert"));
@@ -120,14 +120,14 @@ const Article = {
 			}
 		}
 	},
-	openInNewWindow: function (id) {
+	openInNewWindow(id) {
 		/* global __csrf_token */
 		App.postOpenWindow("backend.php",
 			{ "op": "Article", "method": "redirect", "id": id, "csrf_token": __csrf_token });
 
 		Headlines.toggleUnread(id, 0);
 	},
-    selectionOpenInNewWindow: function () {
+    selectionOpenInNewWindow() {
         const ids = Headlines.getSelected();
 
         if (ids.length > 0) {
@@ -138,18 +138,18 @@ const Article = {
             alert(__("No articles selected."));
         }
     },
-	renderNote: function (id, note) {
+	renderNote(id, note) {
 		return `<div class="article-note" data-note-for="${id}" style="display : ${note ? "" : "none"}">
 				${App.FormFields.icon('note')} <div onclick class='body'>${note ? App.escapeHtml(note) : ""}</div>
 			</div>`;
 	},
-	renderTags: function (id, tags) {
+	renderTags(id, tags) {
 		return `<span class="tags" title="${tags.join(", ")}" data-tags-for="${id}">
 			${tags.length > 0 ? tags.map((tag) => `
 				<a href="#" onclick='Feeds.open({feed: ${JSON.stringify(tag.trim())}})' class="tag">${tag}</a>`
 			).join(", ") : `${__("no tags")}`}</span>`;
 	},
-	renderLabels: function(id, labels) {
+	renderLabels(id, labels) {
 		return `<span class="labels" data-labels-for="${id}">
 			${labels.map((label) => `
 				<a href="#" class="label" data-label-id="${label[0]}"
@@ -160,7 +160,7 @@ const Article = {
 			).join("")}
 		</span>`;
 	},
-	renderEnclosures: function (enclosures) {
+	renderEnclosures(enclosures) {
 		return `
 				${enclosures.formatted}
 				${enclosures.can_inline ?
@@ -260,7 +260,7 @@ const Article = {
 		} catch {
 		}
 	},
-	formatComments: function(hl) {
+	formatComments(hl) {
 		let comments = "";
 
 		if (hl.comments || hl.num_comments > 0) {
@@ -275,7 +275,7 @@ const Article = {
 
 		return comments;
 	},
-	unpack: function(row) {
+	unpack(row) {
 		if (row.getAttribute("data-is-packed") === "1") {
 			const container = row.querySelector(".content-inner");
 
@@ -298,7 +298,7 @@ const Article = {
 			PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
 		}
 	},
-	pack: function(row) {
+	pack(row) {
 		if (row.getAttribute("data-is-packed") !== "1") {
 			row.setAttribute("data-is-packed", "1");
 
@@ -314,7 +314,7 @@ const Article = {
 				</div>`
 		}
 	},
-	view: function (id, no_expand) {
+	view(id, no_expand) {
 		this.setActive(id);
 		Headlines.scrollToArticleId(id);
 
@@ -358,7 +358,7 @@ const Article = {
 
 		return false;
 	},
-	autocompleteInject: function(elem, targetId) {
+	autocompleteInject(elem, targetId) {
 		const target = document.getElementById(targetId);
 
 		if (!target)
@@ -372,7 +372,7 @@ const Article = {
 
 		target.focus();
 	},
-	editTags: function (id) {
+	editTags(id) {
 		const dialog = new fox.SingleUseDialog({
 			title: __("Article tags"),
 			content: `
@@ -399,7 +399,7 @@ const Article = {
 					</button>
 				</footer>
 			`,
-			execute: function () {
+			execute() {
 				if (this.validate()) {
 					Notify.progress("Saving article tags...", true);
 
@@ -441,7 +441,7 @@ const Article = {
 		dialog.show();
 
 	},
-	cdmMoveToId: function (id, params = {}) {
+	cdmMoveToId(id, params = {}) {
 		const force_to_top = params.force_to_top || false;
 
 		const ctr = document.getElementById("headlines-frame");
@@ -455,7 +455,7 @@ const Article = {
 			}
 		}
 	},
-	setActive: function (id) {
+	setActive(id) {
 		if (id !== Article.getActive()) {
 			document.querySelectorAll('div[id*=RROW][class*=active]').forEach((row) => {
 				row.classList.remove('active');
@@ -479,23 +479,23 @@ const Article = {
 		// Reconcile the Back-gesture history entries with the open/closed state.
 		App.reconcileOverlayHistory();
 	},
-	getActive: function () {
+	getActive() {
 		const row = document.querySelector("#headlines-frame > div[id*=RROW][class*=active]");
 		return row ? parseInt(row.getAttribute('data-article-id')) : 0;
 	},
-	scrollByPages: function (page_offset) {
+	scrollByPages(page_offset) {
 		App.Scrollable.scrollByPages(document.getElementById("content-insert"), page_offset);
 	},
-	scroll: function (offset) {
+	scroll(offset) {
 		App.Scrollable.scroll(document.getElementById("content-insert"), offset);
 	},
-	mouseIn: function (id) {
+	mouseIn(id) {
 		this.post_under_pointer = id;
 	},
-	mouseOut: function (/* id */) {
+	mouseOut(/* id */) {
 		this.post_under_pointer = false;
 	},
-	getUnderPointer: function () {
+	getUnderPointer() {
 		return this.post_under_pointer;
 	}
 }
