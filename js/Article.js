@@ -212,25 +212,30 @@ const Article = {
 			</div>` : ''}
 		`;
 	},
-	renderPreviewImage(enclosures) {
-		const imageEntry = enclosures?.entries?.find((enc) =>
+	findFirstImageEnclosure(enclosures) {
+		if (!enclosures?.entries) return null;
+
+		return enclosures.entries.find((enc) =>
 			enc?.content_type && /^image\//i.test(enc.content_type)
 		);
-
-		if (!imageEntry) {
-			return '';
-		}
-
-		const escapedUrl = App.escapeHtml(imageEntry.content_url);
-		const altText = App.escapeHtml(imageEntry.title || 'Preview image');
+	},
+	buildPreviewImageElement(enclosure) {
+		const escapedUrl = App.escapeHtml(enclosure.content_url);
+		const altText = App.escapeHtml(enclosure.title || 'Preview image');
 
 		return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" title="${altText}">
 			<img class="cdm-preview-image" loading="lazy" tabindex="0" role="button"
-				width="${imageEntry.width || ''}"
-				height="${imageEntry.height || ''}"
+				width="${enclosure.width || ''}"
+				height="${enclosure.height || ''}"
 				src="${escapedUrl}"
 				alt="${altText}"/>
 		</a>`;
+	},
+	renderPreviewImage(enclosures) {
+		const imageEntry = this.findFirstImageEnclosure(enclosures);
+		if (!imageEntry) return '';
+
+		return this.buildPreviewImageElement(imageEntry);
 	},
 	render(article) {
 		App.cleanupMemory("content-insert");

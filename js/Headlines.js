@@ -470,52 +470,39 @@ const Headlines = {
 		this.sticky_content_observer.disconnect();
 		this.unpack_observer.disconnect();
 	},
-	render(headlines, hl) {
-		let row_class = "";
-
-		if (hl.marked) row_class += " marked";
-		if (hl.published) row_class += " published";
-		if (hl.unread) row_class += " Unread";
-		if (headlines.vfeed_group_enabled) row_class += " vgrlf";
-
-		if (headlines.vfeed_group_enabled && hl.feed_title && this.vgroup_last_feed !== hl.feed_id) {
-			const vgrhdr = `<div data-feed-id='${hl.feed_id}' class='feed-title'>
-								<div class="pull-right icon-feed" title="${App.escapeHtml(hl.feed_title)}"
-								onclick="Feeds.open({feed:${hl.feed_id}})">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</div>
-							<a class="title" title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
-							<a class="catchup" title="${__('mark feed as read')}" onclick="Feeds.catchupFeedInGroup(${hl.feed_id})" href="#">
-								<i class="icon-done material-icons">done_all</i>
-							</a>
-						</div>`
-
-			const tmp = document.createElement("div");
-			tmp.innerHTML = vgrhdr;
-
-			document.getElementById("headlines-frame").appendChild(tmp.firstChild);
-
-			this.vgroup_last_feed = hl.feed_id;
+	renderVgroupHeader(headlines, hl) {
+		if (!headlines.vfeed_group_enabled || !hl.feed_title || this.vgroup_last_feed === hl.feed_id) {
+			return;
 		}
 
-		let row;
+		const vgrhdr = `<div data-feed-id='${hl.feed_id}' class='feed-title'>
+						<div class="pull-right icon-feed" title="${App.escapeHtml(hl.feed_title)}"
+						onclick="Feeds.open({feed:${hl.feed_id}})">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</div>
+					<a class="title" title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
+					<a class="catchup" title="${__('mark feed as read')}" onclick="Feeds.catchupFeedInGroup(${hl.feed_id})" href="#">
+						<i class="icon-done material-icons">done_all</i>
+					</a>
+				</div>`;
 
-		if (App.isCombinedMode()) {
-			row_class += App.getInitParam("cdm_expanded") ? " expanded" : " expandable";
+		const tmp = document.createElement("div");
+		tmp.innerHTML = vgrhdr;
+		document.getElementById("headlines-frame").appendChild(tmp.firstChild);
 
-			const comments = Article.formatComments(hl);
-			const previewImage = Article.renderPreviewImage(hl.enclosures);
-
-			row = `<div class="cdm ${row_class} ${Article.getScoreClass(hl.score)}"
-						id="RROW-${hl.id}"
-						data-article-id="${hl.id}"
-						data-orig-feed-id="${hl.feed_id}"
-						data-orig-feed-title="${App.escapeHtml(hl.feed_title)}"
-						data-is-packed="1"
-						data-content="${App.escapeHtml(hl.content)}"
-						data-rendered-enclosures="${App.escapeHtml(Article.renderEnclosures(hl.enclosures))}"
-						data-score="${hl.score}"
-						data-article-title="${App.escapeHtml(hl.title)}"
-						onmouseover="Article.mouseIn(${hl.id})"
-						onmouseout="Article.mouseOut(${hl.id})">
+		this.vgroup_last_feed = hl.feed_id;
+	},
+	renderCombinedRow(hl, row_class, comments, previewImage) {
+		return `<div class="cdm ${row_class} ${Article.getScoreClass(hl.score)}"
+								id="RROW-${hl.id}"
+								data-article-id="${hl.id}"
+								data-orig-feed-id="${hl.feed_id}"
+								data-orig-feed-title="${App.escapeHtml(hl.feed_title)}"
+								data-is-packed="1"
+								data-content="${App.escapeHtml(hl.content)}"
+								data-rendered-enclosures="${App.escapeHtml(Article.renderEnclosures(hl.enclosures))}"
+								data-score="${hl.score}"
+								data-article-title="${App.escapeHtml(hl.title)}"
+								onmouseover="Article.mouseIn(${hl.id})"
+								onmouseout="Article.mouseOut(${hl.id})">
 						<div class="header-sticky-guard"></div>
 						<div class="header">
 							<div class="left">
@@ -524,65 +511,64 @@ const Headlines = {
 								<i class="pub-pic pub-${hl.id} material-icons" onclick="Headlines.togglePub(${hl.id})">rss_feed</i>
 							</div>
 
-							<span onclick="return Headlines.click(event, ${hl.id});" data-article-id="${hl.id}" class="titleWrap hlMenuAttach">
-								${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
-								<a class="title" title="${App.escapeHtml(hl.title)}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">
-									${hl.title}</a>
-								<span class="author">${hl.author}</span>
-								${Article.renderLabels(hl.id, hl.labels)}
-								${hl.cdm_excerpt ? hl.cdm_excerpt : ""}
+						<span onclick="return Headlines.click(event, ${hl.id});" data-article-id="${hl.id}" class="titleWrap hlMenuAttach">
+							${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
+							<a class="title" title="${App.escapeHtml(hl.title)}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">
+								${hl.title}</a>
+							<span class="author">${hl.author}</span>
+							${Article.renderLabels(hl.id, hl.labels)}
+							${hl.cdm_excerpt ? hl.cdm_excerpt : ""}
+						</span>
+
+						${previewImage}
+
+						<a class="feed vfeedMenuAttach" style="background-color: ${hl.feed_bg_color}" data-feed-id="${hl.feed_id}"
+							title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
+
+						<span class="updated" title="${hl.imported}">${hl.updated}</span>
+
+						<div class="right">
+							<i class="material-icons icon-grid-span" title="${__("Span all columns")}" onclick="Article.cdmToggleGridSpan(${hl.id})">fullscreen</i>
+							<i class="material-icons icon-score" title="${hl.score}" onclick="Article.setScore(${hl.id}, this)">${Article.getScorePic(hl.score)}</i>
+
+							<span class="icon-feed" title="${App.escapeHtml(hl.feed_title)}" onclick="Feeds.open({feed:${hl.feed_id}})">
+								${Feeds.renderIcon(hl.feed_id, hl.has_icon)}
 							</span>
-
-							${previewImage}
-
-							<a class="feed vfeedMenuAttach" style="background-color: ${hl.feed_bg_color}" data-feed-id="${hl.feed_id}"
-								title="${__('Open site')}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
-
-							<span class="updated" title="${hl.imported}">${hl.updated}</span>
-
-							<div class="right">
-								<i class="material-icons icon-grid-span" title="${__("Span all columns")}" onclick="Article.cdmToggleGridSpan(${hl.id})">fullscreen</i>
-								<i class="material-icons icon-score" title="${hl.score}" onclick="Article.setScore(${hl.id}, this)">${Article.getScorePic(hl.score)}</i>
-
-								<span class="icon-feed" title="${App.escapeHtml(hl.feed_title)}" onclick="Feeds.open({feed:${hl.feed_id}})">
-									${Feeds.renderIcon(hl.feed_id, hl.has_icon)}
-								</span>
-							</div>
-
 						</div>
 
-						<div class="content" onclick="return Headlines.click(event, ${hl.id}, true);">
-							${Article.renderNote(hl.id, hl.note)}
-							<div class="content-inner" lang="${hl.lang ? App.escapeHtml(hl.lang) : 'en'}">
-								<div class="text-center text-muted">
-									${__("Loading, please wait...")}
-								</div>
-							</div>
+					</div>
 
-							<!-- intermediate: unstyled, kept for compatibility -->
-							<div class="intermediate"></div>
-
-							<div class="footer" onclick="event.stopPropagation()">
-
-								<div class="left">
-									${hl.buttons_left}
-									<i class="material-icons">label_outline</i>
-									${Article.renderTags(hl.id, hl.tags)}
-									<a title="${__("Edit tags for this article")}" href="#"
-										onclick="Article.editTags(${hl.id})">(+)</a>
-									${comments}
-								</div>
-
-								<div class="right">
-									${hl.buttons}
-								</div>
+					<div class="content" onclick="return Headlines.click(event, ${hl.id}, true);">
+						${Article.renderNote(hl.id, hl.note)}
+						<div class="content-inner" lang="${hl.lang ? App.escapeHtml(hl.lang) : 'en'}">
+							<div class="text-center text-muted">
+								${__("Loading, please wait...")}
 							</div>
 						</div>
-					</div>`;
 
+					<!-- intermediate: unstyled, kept for compatibility -->
+					<div class="intermediate"></div>
 
-		} else {
-			row = `<div class="hl ${row_class} ${Article.getScoreClass(hl.score)}"
+					<div class="footer" onclick="event.stopPropagation()">
+
+						<div class="left">
+							${hl.buttons_left}
+							<i class="material-icons">label_outline</i>
+							${Article.renderTags(hl.id, hl.tags)}
+							<a title="${__("Edit tags for this article")}" href="#"
+								onclick="Article.editTags(${hl.id})">(+)</a>
+							${comments}
+						</div>
+
+						<div class="right">
+							${hl.buttons}
+						</div>
+					</div>
+				</div>
+			</div>`;
+	},
+	renderClassicRow(hl, row_class) {
+		return `<div class="hl ${row_class} ${Article.getScoreClass(hl.score)}"
 				id="RROW-${hl.id}"
 				data-orig-feed-id="${hl.feed_id}"
 				data-orig-feed-title="${App.escapeHtml(hl.feed_title)}"
@@ -591,32 +577,45 @@ const Headlines = {
 				data-article-title="${App.escapeHtml(hl.title)}"
 				onmouseover="Article.mouseIn(${hl.id})"
 				onmouseout="Article.mouseOut(${hl.id})">
-			<div class="left">
-				<input dojoType="dijit.form.CheckBox" type="checkbox" onclick="Headlines.onRowChecked(this)" class='rchk'>
-					<i class="marked-pic marked-${hl.id} material-icons" onclick="Headlines.toggleMark(${hl.id})">star</i>
-					<i class="pub-pic pub-${hl.id} material-icons" onclick="Headlines.togglePub(${hl.id})">rss_feed</i>
-			</div>
-			<div onclick="return Headlines.click(event, ${hl.id})" class="title">
-				${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
-				<span data-article-id="${hl.id}" class="hl-content hlMenuAttach">
-					<a class="title" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title} <span class="preview">${hl.content_preview}</span></a>
-					<span class="author">${hl.author}</span>
-					${Article.renderLabels(hl.id, hl.labels)}
-				</span>
-			</div>
-			<span class="feed vfeedMenuAttach" data-feed-id="${hl.feed_id}">
-				<a title="${__('Open site')}" style="background : ${hl.feed_bg_color}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
+		<div class="left">
+			<input dojoType="dijit.form.CheckBox" type="checkbox" onclick="Headlines.onRowChecked(this)" class='rchk'>
+				<i class="marked-pic marked-${hl.id} material-icons" onclick="Headlines.toggleMark(${hl.id})">star</i>
+				<i class="pub-pic pub-${hl.id} material-icons" onclick="Headlines.togglePub(${hl.id})">rss_feed</i>
+		</div>
+		<div onclick="return Headlines.click(event, ${hl.id})" class="title">
+			${App.getInitParam("debug_headline_ids") ? `<span class="text-muted small">A: ${hl.id} F: ${hl.feed_id}</span>` : ""}
+			<span data-article-id="${hl.id}" class="hl-content hlMenuAttach">
+				<a class="title" href="${App.escapeHtml(App.sanitizeUrl(hl.link))}">${hl.title} <span class="preview">${hl.content_preview}</span></a>
+				<span class="author">${hl.author}</span>
+				${Article.renderLabels(hl.id, hl.labels)}
 			</span>
-			<div title="${hl.imported}">
-				<span class="updated">${hl.updated}</span>
-			</div>
-			<div class="right">
-				<i class="material-icons icon-score" title="${hl.score}" onclick="Article.setScore(${hl.id}, this)">${Article.getScorePic(hl.score)}</i>
-				<span onclick="Feeds.open({feed:${hl.feed_id}})" class="icon-feed" title="${App.escapeHtml(hl.feed_title)}">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</span>
-			</div>
-			</div>
-		`;
-		}
+		</div>
+		<span class="feed vfeedMenuAttach" data-feed-id="${hl.feed_id}">
+			<a title="${__('Open site')}" style="background : ${hl.feed_bg_color}" target="_blank" rel="noopener noreferrer" href="${App.escapeHtml(App.sanitizeUrl(hl.site_url))}">${hl.feed_title}</a>
+		</span>
+		<div title="${hl.imported}">
+			<span class="updated">${hl.updated}</span>
+		</div>
+		<div class="right">
+			<i class="material-icons icon-score" title="${hl.score}" onclick="Article.setScore(${hl.id}, this)">${Article.getScorePic(hl.score)}</i>
+			<span onclick="Feeds.open({feed:${hl.feed_id}})" class="icon-feed" title="${App.escapeHtml(hl.feed_title)}">${Feeds.renderIcon(hl.feed_id, hl.has_icon)}</span>
+		</div>
+		</div>`;
+	},
+	render(headlines, hl) {
+		let row_class = "";
+
+		if (hl.marked) row_class += " marked";
+		if (hl.published) row_class += " published";
+		if (hl.unread) row_class += " Unread";
+		if (headlines.vfeed_group_enabled) row_class += " vgrlf";
+
+		this.renderVgroupHeader(headlines, hl);
+
+		const row = App.isCombinedMode() ?
+			this.renderCombinedRow(hl, row_class + (App.getInitParam("cdm_expanded") ? " expanded" : " expandable"),
+				Article.formatComments(hl), Article.renderPreviewImage(hl.enclosures)) :
+			this.renderClassicRow(hl, row_class);
 
 		const tmp = document.createElement("div");
 		tmp.innerHTML = row;
