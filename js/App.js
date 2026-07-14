@@ -1462,7 +1462,7 @@ const App = {
    // events are swallowed at the document, armed only until just after this
    // pointer's release so the next deliberate tap (e.g. on a menu item) is
    // unaffected.
-   initLongPressContextMenu: function() {
+   initLongPressContextMenu() {
       const LONG_PRESS_MS = 600;  // above Android's native long-press delay on purpose
       const MOVE_SLOP_PX = 10;    // finger drift allowed before it counts as a scroll
       const RELEASE_COMPAT_DELAY_MS = 150;  // delay before removing compatibility event handlers
@@ -1604,7 +1604,7 @@ const App = {
          }, {capture: true});
       });
    },
-   initHotkeyActions: function() {
+   initHotkeyActions() {
       if (this.is_prefs) {
 
          this.hotkey_actions["feed_subscribe"] = () => {

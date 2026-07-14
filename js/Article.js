@@ -66,10 +66,10 @@ const Article = {
 			if (!isNaN(parseInt(score))) {
 				row.setAttribute("data-score", score);
 
-				const pic = row.querySelector(".icon-score");
+				const picElement = row.querySelector(".icon-score");
 
-				pic.innerHTML = Article.getScorePic(score);
-				pic.setAttribute("title", score);
+				picElement.innerHTML = Article.getScorePic(score);
+				picElement.setAttribute("title", score);
 
 				row.classList.remove('score-low', 'score-high', 'score-half-low', 'score-half-high', 'score-neutral');
 				row.classList.add(Article.getScoreClass(score));
@@ -100,6 +100,8 @@ const Article = {
 
 			return false;
 		}
+
+		return undefined;
 	},
 	close() {
 		if (dijit.byId("content-insert"))
@@ -276,27 +278,29 @@ const Article = {
 		return comments;
 	},
 	unpack(row) {
-		if (row.getAttribute("data-is-packed") === "1") {
-			const container = row.querySelector(".content-inner");
+		if (row.getAttribute("data-is-packed") !== "1") return;
 
-			const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
-			const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
-			container.innerHTML = packedContent + packedEnclosures;
+		const container = row.querySelector(".content-inner");
+		this.unpackContent(row, container);
+		this.unpackEnclosures(row, container);
 
-			dojo.parser.parse(container);
+		row.setAttribute("data-is-packed", "0");
+		PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
+	},
+	unpackContent(row, container) {
+		const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
+		container.innerHTML = packedContent;
+	},
+	unpackEnclosures(row, container) {
+		const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
+		container.innerHTML += packedEnclosures;
+		dojo.parser.parse(container);
 
-			// blank content element might screw up onclick selection and keyboard moving
-			if (container.textContent.length === 0)
-				container.innerHTML += "&nbsp;";
+		if (container.textContent.length === 0)
+			container.innerHTML += "&nbsp;";
 
-			// in expandable mode, save content for later, so that we can pack unfocused rows back
-			if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
-				row.setAttribute("data-content-original", row.getAttribute("data-content"));
-
-			row.setAttribute("data-is-packed", "0");
-
-			PluginHost.run(PluginHost.HOOK_ARTICLE_RENDERED_CDM, row);
-		}
+		if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
+			row.setAttribute("data-content-original", row.getAttribute("data-content"));
 	},
 	pack(row) {
 		if (row.getAttribute("data-is-packed") !== "1") {
@@ -443,17 +447,16 @@ const Article = {
 	},
 	cdmMoveToId(id, params = {}) {
 		const force_to_top = params.force_to_top || false;
-
 		const ctr = document.getElementById("headlines-frame");
 		const row = document.getElementById(`RROW-${id}`);
 
-		if (ctr && row) {
-			const grid_gap = parseInt(window.getComputedStyle(ctr).gridGap) || 0;
+		if (!ctr || !row) return;
 
-			if (force_to_top || !App.Scrollable.fitsInContainer(row, ctr)) {
-				ctr.scrollTop = row.offsetTop - grid_gap;
-			}
-		}
+		const grid_gap = parseInt(window.getComputedStyle(ctr).gridGap) || 0;
+		const needsScroll = force_to_top || !App.Scrollable.fitsInContainer(row, ctr);
+
+		if (needsScroll)
+			ctr.scrollTop = row.offsetTop - grid_gap;
 	},
 	setActive(id) {
 		if (id !== Article.getActive()) {

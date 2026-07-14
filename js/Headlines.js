@@ -92,70 +92,58 @@ const Headlines = {
 		});
 	}),
 	syncModified(modified) {
+		const ops = this.collectModifiedOps(modified);
+
+		this.applyCheckboxOps(ops);
+		const promises = this.buildMutationPromises(ops);
+
+		Promise.allSettled(promises).then((results) => this.handleMutationResults(results));
+	},
+	collectModifiedOps(modified) {
 		const ops = {
-			tmark: [],
-			tpub: [],
-			read: [],
-			unread: [],
-			select: [],
-			deselect: [],
-			activate: [],
-			deactivate: [],
+			tmark: [], tpub: [], read: [], unread: [],
+			select: [], deselect: [], activate: [], deactivate: [],
 			rescore: {},
 		};
 
-		modified.forEach(function (m) {
-			if (m.old.marked !== m.new.marked)
-				ops.tmark.push(m.id);
-
-			if (m.old.published !== m.new.published)
-				ops.tpub.push(m.id);
-
-			if (m.old.unread !== m.new.unread)
-				m.new.unread ? ops.unread.push(m.id) : ops.read.push(m.id);
-
-			if (m.old.selected !== m.new.selected)
-				m.new.selected ? ops.select.push(m.row) : ops.deselect.push(m.row);
-
-			if (m.old.active !== m.new.active)
-				m.new.active ? ops.activate.push(m.row) : ops.deactivate.push(m.row);
-
-			if (m.old.score !== m.new.score) {
-				const score = m.new.score;
-
-				ops.rescore[score] = ops.rescore[score] || [];
-				ops.rescore[score].push(m.id);
-			}
+		modified.forEach((m) => {
+			this.processModified(m, ops);
 		});
 
-		ops.select.forEach((row) => {
+		return ops;
+	},
+	processModified(m, ops) {
+		if (m.old.marked !== m.new.marked) ops.tmark.push(m.id);
+		if (m.old.published !== m.new.published) ops.tpub.push(m.id);
+
+		if (m.old.unread !== m.new.unread)
+			m.new.unread ? ops.unread.push(m.id) : ops.read.push(m.id);
+
+		if (m.old.selected !== m.new.selected)
+			m.new.selected ? ops.select.push(m.row) : ops.deselect.push(m.row);
+
+		if (m.old.active !== m.new.active)
+			m.new.active ? ops.activate.push(m.row) : ops.deactivate.push(m.row);
+
+		if (m.old.score !== m.new.score) {
+			const score = m.new.score;
+			ops.rescore[score] = ops.rescore[score] || [];
+			ops.rescore[score].push(m.id);
+		}
+	},
+	applyCheckboxOps(ops) {
+		const setCheckbox = (row, checked, checkActive = true) => {
 			const cb = dijit.getEnclosingWidget(row.querySelector(".rchk"));
+			if (cb && (!checkActive || !row.classList.contains('Selected')))
+				cb.attr('checked', checked);
+		};
 
-			if (cb)
-				cb.attr('checked', true);
-		});
-
-		ops.deselect.forEach((row) => {
-			const cb = dijit.getEnclosingWidget(row.querySelector(".rchk"));
-
-			if (cb && !row.classList.contains('active'))
-				cb.attr('checked', false);
-		});
-
-		ops.activate.forEach((row) => {
-			const cb = dijit.getEnclosingWidget(row.querySelector(".rchk"));
-
-			if (cb)
-				cb.attr('checked', true);
-		});
-
-		ops.deactivate.forEach((row) => {
-			const cb = dijit.getEnclosingWidget(row.querySelector(".rchk"));
-
-			if (cb && !row.classList.contains('Selected'))
-				cb.attr('checked', false);
-		});
-
+		ops.select.forEach((row) => setCheckbox(row, true, false));
+		ops.deselect.forEach((row) => setCheckbox(row, false, true));
+		ops.activate.forEach((row) => setCheckbox(row, true, false));
+		ops.deactivate.forEach((row) => setCheckbox(row, false, true));
+	},
+	buildMutationPromises(ops) {
 		const promises = [];
 
 		if (ops.tmark.length !== 0)
@@ -174,42 +162,32 @@ const Headlines = {
 			promises.push(xhr.post("backend.php",
 				{op: "RPC", method: "catchupSelected", "ids[]": ops.unread, cmode: 1}));
 
-		const scores = Object.keys(ops.rescore);
-
-		if (scores.length !== 0) {
-			scores.forEach((score) => {
-				promises.push(xhr.post("backend.php",
-					{op: "Article", method: "setScore", "ids[]": ops.rescore[score], score: score}));
-			});
-		}
-
-		Promise.allSettled(promises).then((results) => {
-			let feeds = [];
-			let labels = [];
-
-			results.forEach((res) => {
-				if (res) {
-					try {
-						const obj = JSON.parse(res.value);
-
-						if (obj.feeds)
-							feeds = feeds.concat(obj.feeds);
-
-						if (obj.labels)
-							labels = labels.concat(obj.labels);
-
-					} catch (e) {
-						console.warn('Error parsing mutation result:', e, res);
-					}
-				}
-			});
-
-			if (feeds.length > 0) {
-				Feeds.requestCounters(feeds, labels);
-			}
-
-			PluginHost.run(PluginHost.HOOK_HEADLINE_MUTATIONS_SYNCED, results);
+		Object.keys(ops.rescore).forEach((score) => {
+			promises.push(xhr.post("backend.php",
+				{op: "Article", method: "setScore", "ids[]": ops.rescore[score], score: score}));
 		});
+
+		return promises;
+	},
+	handleMutationResults(results) {
+		let feeds = [];
+		let labels = [];
+
+		results.forEach((res) => {
+			if (res) {
+				try {
+					const obj = JSON.parse(res.value);
+					if (obj.feeds) feeds = feeds.concat(obj.feeds);
+					if (obj.labels) labels = labels.concat(obj.labels);
+				} catch (e) {
+					console.warn('Error parsing mutation result:', e, res);
+				}
+			}
+		});
+
+		if (feeds.length > 0) Feeds.requestCounters(feeds, labels);
+
+		PluginHost.run(PluginHost.HOOK_HEADLINE_MUTATIONS_SYNCED, results);
 	},
 	click(event, id, in_body) {
 		in_body = in_body || false;
