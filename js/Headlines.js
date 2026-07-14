@@ -116,17 +116,24 @@ const Headlines = {
 		this.updateOp(ops, 'tmark', m.id, m.old.marked, m.new.marked);
 		this.updateOp(ops, 'tpub', m.id, m.old.published, m.new.published);
 
-		if (m.old.unread !== m.new.unread)
-			this.updateOp(ops, m.new.unread ? 'unread' : 'read', m.id);
-
-		if (m.old.selected !== m.new.selected)
-			this.updateOp(ops, m.new.selected ? 'select' : 'deselect', m.row);
-
-		if (m.old.active !== m.new.active)
-			this.updateOp(ops, m.new.active ? 'activate' : 'deactivate', m.row);
+		this.updateUnreadOp(ops, m);
+		this.updateSelectedOp(ops, m);
+		this.updateActiveOp(ops, m);
 
 		if (m.old.score !== m.new.score)
 			this.addRescore(ops, m.id, m.new.score);
+	},
+	updateUnreadOp(ops, m) {
+		if (m.old.unread !== m.new.unread)
+			ops[m.new.unread ? 'unread' : 'read'].push(m.id);
+	},
+	updateSelectedOp(ops, m) {
+		if (m.old.selected !== m.new.selected)
+			ops[m.new.selected ? 'select' : 'deselect'].push(m.row);
+	},
+	updateActiveOp(ops, m) {
+		if (m.old.active !== m.new.active)
+			ops[m.new.active ? 'activate' : 'deactivate'].push(m.row);
 	},
 	updateOp(ops, opName, id, oldVal, newVal) {
 		if (oldVal !== newVal) ops[opName].push(id);
