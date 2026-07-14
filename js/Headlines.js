@@ -132,16 +132,15 @@ const Headlines = {
 		}
 	},
 	applyCheckboxOps(ops) {
-		const setCheckbox = (row, checked, checkActive = true) => {
-			const cb = dijit.getEnclosingWidget(row.querySelector(".rchk"));
-			if (cb && (!checkActive || !row.classList.contains('Selected')))
-				cb.attr('checked', checked);
-		};
-
-		ops.select.forEach((row) => setCheckbox(row, true, false));
-		ops.deselect.forEach((row) => setCheckbox(row, false, true));
-		ops.activate.forEach((row) => setCheckbox(row, true, false));
-		ops.deactivate.forEach((row) => setCheckbox(row, false, true));
+		ops.select.forEach((row) => this.setCheckbox(row, true, false));
+		ops.deselect.forEach((row) => this.setCheckbox(row, false, true));
+		ops.activate.forEach((row) => this.setCheckbox(row, true, false));
+		ops.deactivate.forEach((row) => this.setCheckbox(row, false, true));
+	},
+	setCheckbox(row, checked, checkActive = true) {
+		const cb = dijit.getEnclosingWidget(row.querySelector(".rchk"));
+		if (cb && (!checkActive || !row.classList.contains('Selected')))
+			cb.attr('checked', checked);
 	},
 	buildMutationPromises(ops) {
 		const promises = [];
@@ -583,17 +582,13 @@ const Headlines = {
 		</div>`;
 	},
 	render(headlines, hl) {
-		let row_class = "";
-
-		if (hl.marked) row_class += " marked";
-		if (hl.published) row_class += " published";
-		if (hl.unread) row_class += " Unread";
-		if (headlines.vfeed_group_enabled) row_class += " vgrlf";
+		const row_class = this.buildRowClass(hl, headlines.vfeed_group_enabled);
 
 		this.renderVgroupHeader(headlines, hl);
 
+		const cdmMode = App.getInitParam("cdm_expanded") ? " expanded" : " expandable";
 		const row = App.isCombinedMode() ?
-			this.renderCombinedRow(hl, row_class + (App.getInitParam("cdm_expanded") ? " expanded" : " expandable"),
+			this.renderCombinedRow(hl, row_class + cdmMode,
 				Article.formatComments(hl), Article.renderPreviewImage(hl.enclosures)) :
 			this.renderClassicRow(hl, row_class);
 
@@ -606,6 +601,14 @@ const Headlines = {
 		PluginHost.run(PluginHost.HOOK_HEADLINE_RENDERED, tmp.firstChild);
 
 		return tmp.firstChild;
+	},
+	buildRowClass(hl, vfeedEnabled) {
+		const classes = [];
+		if (hl.marked) classes.push("marked");
+		if (hl.published) classes.push("published");
+		if (hl.unread) classes.push("Unread");
+		if (vfeedEnabled) classes.push("vgrlf");
+		return classes.join(" ");
 	},
 	updateCurrentUnread() {
 		if (document.getElementById("feed_current_unread")) {
