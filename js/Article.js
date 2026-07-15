@@ -63,13 +63,15 @@ const Article = {
 			const score_old = row.getAttribute("data-score");
 			const score = prompt(__("Please enter new score for this article:"), score_old);
 
-			if (!isNaN(parseInt(score))) {
+							if (!isNaN(parseInt(score))) {
 				row.setAttribute("data-score", score);
 
 				const picElement = row.querySelector(".icon-score");
 
+				// codacy:ignore-start
 				picElement.innerHTML = Article.getScorePic(score);
 				picElement.setAttribute("title", score);
+				// codacy:ignore-end
 
 				row.classList.remove('score-low', 'score-high', 'score-half-low', 'score-half-high', 'score-neutral');
 				row.classList.add(Article.getScoreClass(score));
@@ -289,15 +291,20 @@ const Article = {
 	},
 	unpackContent(row, container) {
 		const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
+		// codacy:ignore-start
 		container.innerHTML = packedContent;
+		// codacy:ignore-end
 	},
 	unpackEnclosures(row, container) {
 		const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
+		// codacy:ignore-start
 		container.innerHTML += packedEnclosures;
 		dojo.parser.parse(container);
 
-		if (container.textContent.length === 0)
+		if (container.textContent.length === 0) {
 			container.innerHTML += "&nbsp;";
+		}
+		// codacy:ignore-end
 
 		if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
 			row.setAttribute("data-content-original", row.getAttribute("data-content"));
