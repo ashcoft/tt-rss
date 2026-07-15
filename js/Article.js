@@ -68,10 +68,9 @@ const Article = {
 
 				const picElement = row.querySelector(".icon-score");
 
-				// codacy ignore start
-				picElement.innerHTML = Article.getScorePic(score);
+				// codacy ignore next line
+				picElement.innerHTML = Article.getScorePic(score); // codacy ignore line
 				picElement.setAttribute("title", score);
-				// codacy ignore stop
 
 				row.classList.remove('score-low', 'score-high', 'score-half-low', 'score-half-high', 'score-neutral');
 				row.classList.add(Article.getScoreClass(score));
@@ -291,20 +290,17 @@ const Article = {
 	},
 	unpackContent(row, container) {
 		const packedContent = (typeof row._packedContentHtml === "string" ? row._packedContentHtml : "");
-		// codacy ignore start
-		container.innerHTML = packedContent;
-		// codacy ignore stop
+		container.innerHTML = packedContent; // codacy ignore line
 	},
 	unpackEnclosures(row, container) {
 		const packedEnclosures = (typeof row._packedEnclosuresHtml === "string" ? row._packedEnclosuresHtml : "");
-		// codacy ignore start
-		container.innerHTML += packedEnclosures;
+		// codacy ignore next line
+		container.innerHTML += packedEnclosures; // codacy ignore line
 		dojo.parser.parse(container);
 
 		if (container.textContent.length === 0) {
-			container.innerHTML += "&nbsp;";
+			container.innerHTML += "&nbsp;"; // codacy ignore line
 		}
-		// codacy ignore stop
 
 		if (App.isCombinedMode() && document.getElementById('main').classList.contains('expandable'))
 			row.setAttribute("data-content-original", row.getAttribute("data-content"));
