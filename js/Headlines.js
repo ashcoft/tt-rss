@@ -503,6 +503,10 @@ const Headlines = {
 
 			const comments = Article.formatComments(hl);
 
+			const imagePreview = hl.image_preview
+				? `<img class="cdm-image-preview" src="${App.escapeHtml(hl.image_preview)}" alt="" loading="lazy" onclick="Headlines.click(event, ${hl.id})">`
+				: '';
+
 			row = `<div class="cdm ${row_class} ${Article.getScoreClass(hl.score)}"
 						id="RROW-${hl.id}"
 						data-article-id="${hl.id}"
@@ -547,6 +551,8 @@ const Headlines = {
 							</div>
 
 						</div>
+
+						${imagePreview}
 
 						<div class="content" onclick="return Headlines.click(event, ${hl.id}, true);">
 							${Article.renderNote(hl.id, hl.note)}

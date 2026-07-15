@@ -139,6 +139,32 @@
 		}
 	}
 
+	.cdm-image-preview {
+		max-width: 200px;
+		max-height: 150px;
+		width: auto;
+		height: auto;
+		margin: 8px 10px;
+		float: right;
+		border-radius: 4px;
+		object-fit: cover;
+		cursor: pointer;
+		opacity: 0.9;
+		transition: opacity 0.2s ease;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+
+	&.expandable .cdm-image-preview {
+		display: block;
+	}
+
+	&.expanded .cdm-image-preview {
+		display: none;
+	}
+
 	&.expanded {
 
 		.collapse, .excerpt {

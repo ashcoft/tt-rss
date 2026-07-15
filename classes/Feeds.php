@@ -325,6 +325,15 @@ class Feeds extends Handler_Protected {
 					$line["enclosures"] = [ 'formatted' => '', 'entries' => [] ];
 				}
 
+				// Extract article image for preview
+				[$article_image] = Article::_get_image(
+					$line["enclosures"]['entries'],
+					$line["content"],
+					$line["site_url"],
+					$line
+				);
+				$line["image_preview"] = $article_image ?: '';
+
 				$line["updated_long"] = TimeHelper::make_local_datetime($line["updated"]);
 				$line["updated"] = TimeHelper::make_local_datetime($line["updated"], eta_min: true);
 
