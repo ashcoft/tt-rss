@@ -446,6 +446,14 @@ const Headlines = {
 			this.sticky_content_observer.observe(e)
 		});
 
+		if (App.getInitParam("cdm_expanded"))
+			document.querySelectorAll('#headlines-frame > div[id*=RROW].cdm').forEach((e) => {
+				this.unpack_observer.observe(e)
+			});
+
+		dijit.byId('main').resize();
+
+		PluginHost.run(PluginHost.HOOK_HEADLINES_RENDERED);
 	},
 	// Destroy the widgets inside the current headline rows and disconnect the
 	// per-row observers, so the detached rows can be garbage-collected. Callers
