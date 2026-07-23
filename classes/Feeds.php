@@ -329,7 +329,7 @@ class Feeds extends Handler_Protected {
 				[$article_image] = Article::_get_image(
 					$line["enclosures"]['entries'],
 					$line["content"],
-					$line["site_url"],
+					$line["site_url"] ?? '',
 					$line
 				);
 				$line["image_preview"] = $article_image ?: '';
