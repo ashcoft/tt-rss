@@ -1562,7 +1562,10 @@ const App = {
          // End of the gesture: stop timing and forget the opened-menu origin. The
          // menu itself stays open -- the user lifts, then taps an item; only a fresh
          // press or a drag-away (above) dismisses it.
-         const endGesture = () => { cancel(); opened = null; };
+         const endGesture = () => {
+			cancel();
+			opened = null;
+		};
          container.addEventListener("pointerup", endGesture, {passive: true});
          container.addEventListener("pointercancel", endGesture, {passive: true});
 
