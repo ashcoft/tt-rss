@@ -161,19 +161,18 @@ const handleSelect = (index: string) => {
   const isCategory = index.startsWith('cat-');
 
   if (isLabel) {
-    const labelId = parseInt(index.replace('label-', ''));
+    const labelId = Number.parseInt(index.replace('label-', ''));
     emit('select', labelId, false);
   } else if (isCategory) {
-    const catId = parseInt(index.replace('cat-', ''));
+    const catId = Number.parseInt(index.replace('cat-', ''));
     emit('select', catId, true);
   } else {
-    const feedId = parseInt(index);
+    const feedId = Number.parseInt(index);
     emit('select', feedId, false);
   }
 };
 </script>
 
-<style scoped>
 <style scoped>
 .feed-tree {
   display: flex;

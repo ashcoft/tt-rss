@@ -32,6 +32,3 @@ if (import.meta.env.DEV) {
     });
   }
 }
-
-// Export for potential module-level debugging
-export { };

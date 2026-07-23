@@ -72,10 +72,8 @@ const AMDShim = {
     }
 
     // Handle dojo/text! plugin syntax
-    // The text plugin loads template resources, so we return the template path itself
     if (moduleId.startsWith('dojo/text!')) {
       const templatePath = moduleId.replace('dojo/text!', '');
-      // Return the actual template resource, not the text.js plugin
       return templatePath.startsWith('/') ? templatePath : `/${templatePath}`;
     }
 
@@ -85,74 +83,29 @@ const AMDShim = {
       return resolveRelativePath(basePath, moduleId);
     }
 
-    // Handle Dojo module naming (dojo/xxx -> lib/dojo/xxx.js)
-    if (moduleId.startsWith('dojo/')) {
-      return `/lib/dojo/${moduleId.slice(5)}.js`;
-    }
+    // Map prefixes to path patterns
+    const prefixMap = [
+      { prefix: 'dojo/', path: '/lib/dojo/' },
+      { prefix: 'dijit/', path: '/lib/dijit/' },
+      { prefix: 'fox/', path: '/js/' },
+      { prefix: 'dojo/data/', path: '/lib/dojo/data/' },
+      { prefix: 'dojo/store/', path: '/lib/dojo/store/' },
+      { prefix: 'dojo/dnd/', path: '/lib/dojo/dnd/' },
+      { prefix: 'dojo/request/', path: '/lib/dojo/request/' },
+      { prefix: 'dojo/fx/', path: '/lib/dojo/fx/' },
+      { prefix: 'dojo/date/', path: '/lib/dojo/date/' },
+      { prefix: 'dijit/form/', path: '/lib/dijit/form/' },
+      { prefix: 'dijit/layout/', path: '/lib/dijit/layout/' },
+      { prefix: 'dijit/tree/', path: '/lib/dijit/tree/' },
+      { prefix: 'dijit/_', path: '/lib/dijit/' },
+      { prefix: 'dojo/_base/', path: '/lib/dojo/_base/' },
+    ];
 
-    // Handle dijit module naming (dijit/xxx -> lib/dijit/xxx.js)
-    if (moduleId.startsWith('dijit/')) {
-      return `/lib/dijit/${moduleId.slice(6)}.js`;
-    }
-
-    // Handle fox module naming (fox/xxx -> js/xxx.js)
-    if (moduleId.startsWith('fox/')) {
-      return `/js/${moduleId.slice(4)}.js`;
-    }
-
-    // Handle dojo/data/* modules
-    if (moduleId.startsWith('dojo/data/')) {
-      return `/lib/dojo/data/${moduleId.slice(10)}.js`;
-    }
-
-    // Handle dojo/store/* modules
-    if (moduleId.startsWith('dojo/store/')) {
-      return `/lib/dojo/store/${moduleId.slice(11)}.js`;
-    }
-
-    // Handle dojo/dnd/* modules
-    if (moduleId.startsWith('dojo/dnd/')) {
-      return `/lib/dojo/dnd/${moduleId.slice(9)}.js`;
-    }
-
-    // Handle dojo/request/* modules
-    if (moduleId.startsWith('dojo/request/')) {
-      return `/lib/dojo/request/${moduleId.slice(12)}.js`;
-    }
-
-    // Handle dojo/fx/* modules
-    if (moduleId.startsWith('dojo/fx/')) {
-      return `/lib/dojo/fx/${moduleId.slice(8)}.js`;
-    }
-
-    // Handle dojo/date/* modules
-    if (moduleId.startsWith('dojo/date/')) {
-      return `/lib/dojo/date/${moduleId.slice(9)}.js`;
-    }
-
-    // Handle dijit/form/* modules
-    if (moduleId.startsWith('dijit/form/')) {
-      return `/lib/dijit/form/${moduleId.slice(11)}.js`;
-    }
-
-    // Handle dijit/layout/* modules
-    if (moduleId.startsWith('dijit/layout/')) {
-      return `/lib/dijit/layout/${moduleId.slice(13)}.js`;
-    }
-
-    // Handle dijit/tree/* modules
-    if (moduleId.startsWith('dijit/tree/')) {
-      return `/lib/dijit/tree/${moduleId.slice(11)}.js`;
-    }
-
-    // Handle dijit/_* internal modules
-    if (moduleId.startsWith('dijit/_')) {
-      return `/lib/dijit/${moduleId}.js`;
-    }
-
-    // Handle dojo/_base/* modules
-    if (moduleId.startsWith('dojo/_base/')) {
-      return `/lib/dojo/_base/${moduleId.slice(10)}.js`;
+    for (const { prefix, path } of prefixMap) {
+      if (moduleId.startsWith(prefix)) {
+        const sliceLen = prefix.endsWith('/') ? prefix.slice(0, -1).length + 1 : prefix.length;
+        return `${path}${moduleId.slice(sliceLen)}.js`;
+      }
     }
 
     // Unknown module - return as-is
@@ -243,7 +196,7 @@ const AMDShim = {
 
       // Execute factory
       if (typeof def.factory === 'function') {
-        const result = def.factory.apply(null, resolvedDeps);
+        const result = def.factory(...resolvedDeps);
         // If factory returns a value, use it as the export
         if (result !== undefined) {
           moduleEntry.exports = result;
@@ -307,7 +260,7 @@ const AMDShim = {
     // Execute the callback with resolved dependencies
     try {
       if (callback) {
-        callback.apply(null, resolvedDeps);
+        callback(...resolvedDeps);
       }
     } catch (error) {
       if (errback) {
