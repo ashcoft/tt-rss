@@ -42,6 +42,9 @@ export default defineConfig({
     
     // Rollup options for better AMD handling
     rollupOptions: {
+      // Entry point for the application
+      input: path.resolve(__dirname, 'js/index.html'),
+      
       // Keep the existing directory structure for compatibility
       preserveEntrySignatures: 'allow-empty',
       
@@ -56,16 +59,10 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
-      }
+      },
     },
-    
-    // Target browsers for transpilation
-    target: 'es2015',
-    
-    // Generate source maps for debugging
-    sourcemap: true,
   },
-  
+
   // Resolve configuration for module aliases
   resolve: {
     alias: {
