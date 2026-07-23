@@ -105,7 +105,6 @@
 import { ref } from 'vue';
 import { Star, Document, More, ChatLineSquare } from '@element-plus/icons-vue';
 import type { Headline } from '@/types';
-<script>
 
 interface Props {
   headlines: Headline[];
@@ -132,9 +131,9 @@ const handleRowClick = (row: Headline) => {
 };
 /**
  * Handles selection change events.
- * @param {Headline[]} selection - The array of selected headlines.
+ * @param {Headline[]} _selection - The array of selected headlines.
  */
-const handleSelectionChange = (selection: Headline[]) => {
+const handleSelectionChange = (_selection: Headline[]) => {
 };
 
 /**

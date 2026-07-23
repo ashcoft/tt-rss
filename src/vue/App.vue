@@ -86,10 +86,10 @@ const loadFeeds = async () => {
   try {
     const response = await fetch('/backend.php?op=feeds&method=getTree&csrf_token=auto');
     const data = await response.json();
-    const statusHandlers: { [key: number]: (content: any) => void } = {
+    const statusHandlers: { [key: number]: (content: unknown) => void } = {
       0: content => {
-        feeds.value = content.feeds || [];
-        categories.value = content.categories || [];
+        feeds.value = (content as { feeds?: Feed[] }).feeds || [];
+        categories.value = (content as { categories?: Category[] }).categories || [];
       }
     };
     statusHandlers[data.status]?.(data.content);
@@ -119,9 +119,9 @@ const loadHeadlines = async () => {
 
     const response = await fetch(`/backend.php?${params.toString()}`);
     const data = await response.json();
-    const statusHandlers: { [key: number]: (content: any) => void } = {
+    const statusHandlers: { [key: number]: (content: unknown) => void } = {
       0: content => {
-        headlines.value = content.headlines || [];
+        headlines.value = (content as { headlines?: Headline[] }).headlines || [];
       }
     };
     statusHandlers[data.status]?.(data.content);
@@ -139,7 +139,6 @@ const loadHeadlines = async () => {
  * @param {number} articleId - ID of the article to load.
  * @returns {Promise<void>}
  */
-const loadArticle = async (articleId: number) => {
 const loadArticle = async (articleId: number) => {
   try {
     const params = new URLSearchParams({
@@ -283,7 +282,6 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
 <style scoped>
 .ttrss-app {
   display: flex;

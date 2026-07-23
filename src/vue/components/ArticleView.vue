@@ -123,7 +123,6 @@ import {
 import type { Article } from '@/types';
 import DOMPurify from 'dompurify';
 
-<script setup lang="ts">
 interface Props {
   article: Article;
 }
@@ -157,7 +156,6 @@ const toggleStar = () => {
   emit('update', 'is_marked', !props.article.is_marked);
 };
 
-<script setup lang="js">
 /**
  * Toggles the published state of the article.
  * @returns {void}
