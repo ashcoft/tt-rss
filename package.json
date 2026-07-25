@@ -45,7 +45,6 @@
     "stylelint-config-standard": "^40.0.0",
     "typescript": "^5.7.0",
     "vite": "^6.2.0",
-    "vue-eslint-parser": "^10.4.1",
-    "@semantic-release/exec": "^6.0.3"
+    "vue-eslint-parser": "^10.4.1"
   }
 }

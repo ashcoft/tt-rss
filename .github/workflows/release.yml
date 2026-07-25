@@ -1,11 +1,9 @@
 name: Release
-
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
 permissions:
   contents: write
 
@@ -26,7 +24,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Release
+      - name: Run semantic-release
+        id: semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIT_AUTHOR_NAME: github-actions[bot]
@@ -34,3 +33,51 @@ jobs:
           GIT_COMMITTER_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
         run: npx semantic-release
+
+      - name: Get version from tag
+        id: version
+        if: steps.semantic-release.outputs.release_created == 'true'
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Checkout tag for assets
+        if: steps.semantic-release.outputs.release_created == 'true'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: refs/tags/${{ steps.version.outputs.VERSION }}
+          sparse-checkout: |
+            *
+          sparse-checkout-cone-mode: false
+
+      - name: Install zip
+        if: steps.semantic-release.outputs.release_created == 'true'
+        run: sudo apt-get update && sudo apt-get install -y zip
+
+      - name: Create tar.gz
+        if: steps.semantic-release.outputs.release_created == 'true'
+        run: tar --exclude='.git' --exclude='.github' -czf tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz .
+
+      - name: Create zip
+        if: steps.semantic-release.outputs.release_created == 'true'
+        run: zip -r tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip . -x '.git/*' -x '.github/*'
+
+      - name: Upload Release Assets
+        if: steps.semantic-release.outputs.release_created == 'true'
+        uses: actions/upload-release-attachment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.semantic-release.outputs.upload_url }}
+          asset_path: ./tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz
+          asset_name: tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload Release Assets (zip)
+        if: steps.semantic-release.outputs.release_created == 'true'
+        uses: actions/upload-release-attachment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.semantic-release.outputs.upload_url }}
+          asset_path: ./tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip
+          asset_name: tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip
+          asset_content_type: application/zip
