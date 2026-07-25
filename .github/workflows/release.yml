@@ -62,22 +62,11 @@ jobs:
 
       - name: Upload Release Assets
         if: steps.semantic-release.outputs.release_created == 'true'
-        uses: actions/upload-release-attachment@v1
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          files: |
+            tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz
+            tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.semantic-release.outputs.upload_url }}
-          asset_path: ./tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz
-          asset_name: tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz
-          asset_content_type: application/gzip
-
-      - name: Upload Release Assets (zip)
-        if: steps.semantic-release.outputs.release_created == 'true'
-        uses: actions/upload-release-attachment@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.semantic-release.outputs.upload_url }}
-          asset_path: ./tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip
-          asset_name: tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip
-          asset_content_type: application/zip
