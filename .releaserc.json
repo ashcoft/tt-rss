@@ -38,9 +38,18 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "rm -f tt-rss-${nextRelease.version}-complete.tar.gz tt-rss-${nextRelease.version}-complete.zip && tar --exclude='.git' --exclude='.github' -czf tt-rss-${nextRelease.version}-complete.tar.gz . && zip -r tt-rss-${nextRelease.version}-complete.zip . -x '.git/*' -x '.github/*'"
+      }
+    ],
+    [
       "@semantic-release/github",
       {
-        "assets": [],
+        "assets": [
+          { "path": "tt-rss-${nextRelease.version}-complete.tar.gz", "label": "Ready to use (tar.gz)" },
+          { "path": "tt-rss-${nextRelease.version}-complete.zip", "label": "Ready to use (zip)" }
+        ],
         "addChannels": true
       }
     ]
