@@ -43,6 +43,8 @@ jobs:
               --exclude='.*' \
               --exclude='*.log' \
               --exclude='*.tmp' \
+              --exclude='*.ts' \
+              --exclude='*.less' \
               --exclude='package-lock.json' \
               -czf /tmp/tt-rss.tar.gz . && mv /tmp/tt-rss.tar.gz .
 
@@ -55,6 +57,8 @@ jobs:
               -x '.*' \
               -x '*.log' \
               -x '*.tmp' \
+              -x '*.ts' \
+              -x '*.less' \
               -x 'package-lock.json'
 
       - name: Upload build artifacts
