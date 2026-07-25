@@ -38,9 +38,18 @@
       }
     ],
     [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "tar -czf vendor-${nextRelease.version}.tar.gz vendor/ && tar -czf node_modules-${nextRelease.version}.tar.gz node_modules/ pnpm-lock.yaml 2>/dev/null || tar -czf vendor-${nextRelease.version}.tar.gz vendor/"
+      }
+    ],
+    [
       "@semantic-release/github",
       {
-        "assets": [],
+        "assets": [
+          { "path": "vendor-${nextRelease.version}.tar.gz", "label": "PHP Dependencies (vendor)" },
+          { "path": "node_modules-${nextRelease.version}.tar.gz", "label": "Node Dependencies" }
+        ],
         "addChannels": true
       }
     ]
