@@ -36,7 +36,7 @@ jobs:
           fi
 
       - name: Create tar.gz
-        run: tar --exclude='.git' --exclude='.github' -czf tt-rss.tar.gz .
+        run: tar --exclude='.git' --exclude='.github' -czf /tmp/tt-rss.tar.gz . && mv /tmp/tt-rss.tar.gz .
 
       - name: Create zip
         run: zip -r tt-rss.zip . -x '.git/*' -x '.github/*'
