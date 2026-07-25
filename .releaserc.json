@@ -40,15 +40,14 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "tar -czf vendor-${nextRelease.version}.tar.gz vendor/ && tar -czf node_modules-${nextRelease.version}.tar.gz node_modules/ pnpm-lock.yaml 2>/dev/null || tar -czf vendor-${nextRelease.version}.tar.gz vendor/"
+        "prepareCmd": "rm -f tt-rss-${nextRelease.version}-complete.tar.gz && tar --exclude='.git' --exclude='.github' -czf tt-rss-${nextRelease.version}-complete.tar.gz ."
       }
     ],
     [
       "@semantic-release/github",
       {
         "assets": [
-          { "path": "vendor-${nextRelease.version}.tar.gz", "label": "PHP Dependencies (vendor)" },
-          { "path": "node_modules-${nextRelease.version}.tar.gz", "label": "Node Dependencies" }
+          { "path": "tt-rss-${nextRelease.version}-complete.tar.gz", "label": "Ready to use (source + vendor + node_modules)" }
         ],
         "addChannels": true
       }
