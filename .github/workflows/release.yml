@@ -54,19 +54,18 @@ jobs:
 
       - name: Create tar.gz
         if: steps.semantic-release.outputs.release_created == 'true'
-        run: tar --exclude='.git' --exclude='.github' -czf tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz .
+        run: tar --exclude='.git' --exclude='.github' -czf tt-rss.tar.gz .
 
       - name: Create zip
         if: steps.semantic-release.outputs.release_created == 'true'
-        run: zip -r tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip . -x '.git/*' -x '.github/*'
+        run: zip -r tt-rss.zip . -x '.git/*' -x '.github/*'
 
       - name: Upload Release Assets
         if: steps.semantic-release.outputs.release_created == 'true'
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
-        with:
-          tag_name: ${{ steps.version.outputs.VERSION }}
-          files: |
-            tt-rss-${{ steps.version.outputs.VERSION }}-complete.tar.gz
-            tt-rss-${{ steps.version.outputs.VERSION }}-complete.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ steps.version.outputs.VERSION }} \
+            tt-rss.tar.gz \
+            tt-rss.zip \
+            --repo ${{ github.repository }}
