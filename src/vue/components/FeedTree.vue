@@ -159,7 +159,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { Feed, Category, Label } from '@/types';
+import type { Feed, Category } from '../types';
 
 interface Props {
   feeds: Feed[];

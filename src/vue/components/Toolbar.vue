@@ -95,7 +95,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import type { Feed } from '@/types';
+import type { Feed } from '../types';
 
 interface Props {
   feedInfo: Feed | null;
