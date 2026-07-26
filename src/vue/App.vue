@@ -106,16 +106,13 @@ const loadFeeds = async () => {
   try {
     const response = await fetch('/backend.php?op=feeds&method=getTree&csrf_token=auto');
     const data = await response.json();
-    const statusHandlers: { [key: number]: (content: unknown) => void } = {
+    const statusHandlers: Partial<Record<number, (content: unknown) => void>> = {
       0: content => {
         feeds.value = (content as { feeds?: Feed[] }).feeds || [];
         categories.value = (content as { categories?: Category[] }).categories || [];
       }
     };
-    const handler = statusHandlers[data.status as number];
-    if (handler) {
-      handler(data.content);
-    }
+    statusHandlers[data.status]?.(data.content);
   } catch (error) {
     console.error('Failed to load feeds:', error);
     showMessage('Failed to load feeds', 'error');
@@ -142,15 +139,12 @@ const loadHeadlines = async () => {
 
     const response = await fetch(`/backend.php?${params.toString()}`);
     const data = await response.json();
-    const statusHandlers: { [key: number]: (content: unknown) => void } = {
+    const statusHandlers: Partial<Record<number, (content: unknown) => void>> = {
       0: content => {
         headlines.value = (content as { headlines?: Headline[] }).headlines || [];
       }
     };
-    const handler = statusHandlers[data.status as number];
-    if (handler) {
-      handler(data.content);
-    }
+    statusHandlers[data.status]?.(data.content);
   } catch (error) {
     console.error('Failed to load headlines:', error);
     showMessage('Failed to load headlines', 'error');
