@@ -54,6 +54,7 @@
     "gulp-less": "^5.0.0",
     "gulp-touch-fd": "^2.0.0",
     "less": "^4.6.7",
+    "pinia": "^3.0.0",
     "postcss-less": "^6.0.0",
     "sass": "^1.80.0",
     "semantic-release": "^24.2.0",
