@@ -3,7 +3,28 @@
   "description": "A free, flexible, open-source, web-based news feed (RSS/Atom/other) reader and aggregator.",
   "version": "1.0.0",
   "type": "module",
-  "snyk": true,
+  "snyk": {
+    "ignore": {
+      "SNYK-JS-ESBUILD-17750822": {
+        "*": {
+          "reason": "esbuild vulnerability in vite's transitive dependency. Fix requires Vite to update esbuild. Accepted risk for development build tool.",
+          "expires": "2026-12-31T00:00:00.000Z"
+        }
+      },
+      "SNYK-JS-IMAGESIZE-17295814": {
+        "*": {
+          "reason": "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available.",
+          "expires": "2026-12-31T00:00:00.000Z"
+        }
+      },
+      "SNYK-JS-IMAGESIZE-17295816": {
+        "*": {
+          "reason": "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available.",
+          "expires": "2026-12-31T00:00:00.000Z"
+        }
+      }
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
