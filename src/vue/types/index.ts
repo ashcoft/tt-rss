@@ -43,8 +43,10 @@ export interface Article {
   link?: string;
   content?: string;
   author?: string;
-  updated?: number;
+  updated?: number | string;
   feed_id?: number;
+  feed_title?: string;
+  feed?: string;
   is_read: boolean;
   is_marked: boolean;
   is_published: boolean;

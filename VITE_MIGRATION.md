@@ -1,0 +1,255 @@
+# Vite + Vue 3 + Vuetify Migration Guide for Tiny Tiny RSS
+
+This document describes the migration from the legacy Dojo build system to Vite with Vue 3 and Vuetify while maintaining backward compatibility.
+
+## Overview
+
+The frontend build system has been enhanced with:
+- **Vite**: Fast development server with HMR
+- **Vue 3**: Modern reactive UI framework
+- **Vuetify 3**: Material Design component library
+- **TypeScript**: Type-safe JavaScript
+
+## Quick Start
+
+### Prerequisites
+
+```bash
+# Install pnpm (if not already installed)
+corepack enable
+corepack prepare pnpm@latest --activate
+
+# Approve build scripts (if needed)
+pnpm approve-builds esbuild @parcel/watcher
+```
+
+### Development Mode
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start Vite dev server (Vue 3 + Vuetify)
+pnpm run dev
+
+# In another terminal, start your PHP backend
+php -S localhost:8080
+```
+
+The Vite dev server will be available at `http://localhost:5173` and will proxy API requests to `localhost:8080`.
+
+### Production Build
+
+For production, continue using the existing PHP-served pages. The Vite build is primarily for development:
+
+```bash
+# Build for production (optional)
+pnpm run build
+```
+
+### Type Checking
+
+```bash
+# Run TypeScript type checking
+pnpm run type-check
+
+# Run Vue-specific linting
+pnpm run lint:vue
+```
+
+## Architecture
+
+### Dual Build System
+
+This implementation maintains two build systems:
+
+1. **Legacy Dojo Build** (production)
+   - Handled by PHP backend
+   - Uses `lib/dojo/tt-rss-layer.js` (pre-built)
+   - Serves original `index.php`
+
+2. **Vite Build** (development)
+   - Uses `js/index.html` as entry point
+   - Provides HMR and fast refresh
+   - Proxies to PHP backend for API calls
+
+### Module Aliases
+
+The following aliases are configured in `vite.config.js`:
+
+| Alias | Path | Description |
+|-------|------|-------------|
+| `dojo` | `lib/dojo` | Core Dojo 1.x modules |
+| `dijit` | `lib/dijit` | Dojo Dijit UI widgets |
+| `fox` | `js` | Tiny Tiny RSS custom modules |
+| `lib` | `lib` | General lib directory |
+
+### Path Aliases (TypeScript)
+
+| Alias | Path | Description |
+|-------|------|-------------|
+| `@` | `src/vue` | Vue source files |
+| `@/components` | `src/vue/components` | Vue components |
+| `@/composables` | `src/vue/composables` | Vue composables |
+| `@/types` | `src/vue/types` | TypeScript types |
+
+### AMD Compatibility
+
+The existing Dojo AMD modules are pre-bundled using Vite's `optimizeDeps` feature. This converts AMD-style modules to ESM for Vite's dependency pre-bundling while maintaining the original module structure.
+
+### Proxy Configuration
+
+The dev server proxies the following paths to the PHP backend:
+
+- `/backend.php` - Main API endpoint
+- `/public.php` - Public API endpoint
+- `/api` - API v1 endpoints
+- `/cache` - Cached assets
+- `/images` - Static images
+- `/themes` - Theme CSS files
+
+## File Changes
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `vite.config.js` | Vite configuration with Vue + Vuetify + AMD support |
+| `tsconfig.json` | TypeScript configuration |
+| `eslint.config.js` | ESLint configuration with Vue rules |
+| `package.json` | Added Vue 3, Vuetify, TypeScript, pnpm scripts |
+| `src/vue/main.ts` | Vue 3 application entry point |
+| `src/vue/App.vue` | Main Vue application component |
+| `src/vue/types/index.ts` | TypeScript type definitions |
+| `src/vue/components/FeedTree.vue` | Feed tree component (Vuetify v-list) |
+| `src/vue/components/Toolbar.vue` | Toolbar component (Vuetify buttons) |
+| `src/vue/components/HeadlinesList.vue` | Headlines list (Vuetify v-list) |
+| `src/vue/components/ArticleView.vue` | Article view component |
+| `js/index.html` | Vue app HTML entry point |
+| `src/shim/amd-shim.js` | AMD compatibility shim for Dojo |
+
+### Modified Files
+
+| File | Change |
+|------|--------|
+| `js/index.html` | Added Vue mount point and script |
+| `pnpm-workspace.yaml` | Build approvals and overrides |
+
+### Unchanged Files
+
+All other files remain unchanged:
+- PHP backend files
+- Dojo library files (`lib/dojo/`, `lib/dijit/`)
+- Application JavaScript files (`js/`)
+- Theme files (`themes/`)
+- Gulp build scripts
+
+## Vue 3 + Vuetify Components
+
+### Component Structure
+
+```
+src/vue/
+├── main.ts              # Vue app entry point
+├── App.vue              # Main app with layout
+├── types/
+│   └── index.ts         # TypeScript definitions
+└── components/
+    ├── FeedTree.vue     # Feed/category navigation
+    ├── Toolbar.vue      # Action toolbar
+    ├── HeadlinesList.vue # Article headlines
+    └── ArticleView.vue  # Article content display
+```
+
+### Component Mapping
+
+The following Dojo/dijit widgets have been mapped to Vuetify components:
+
+| Dojo Widget | Vuetify Component | Vue Component |
+|-------------|------------------|---------------|
+| `dijit.Tree` | `v-list` | `FeedTree.vue` |
+| `dijit.Toolbar` | `v-toolbar` | `Toolbar.vue` |
+| `dijit.form.*` | `v-text-field`, `v-select`, etc. | Native Vuetify |
+| Article list | `v-list` | `HeadlinesList.vue` |
+
+## TypeScript Types
+
+Type definitions are located in `src/vue/types/index.ts`:
+
+```typescript
+import type { Feed, Category, Headline, Article } from '@/types';
+
+// Use in components
+const feed = ref<Feed>({ id: 1, title: 'My Feed', unread: 10 });
+```
+
+### Available Types
+
+- `Feed` - RSS feed information
+- `Category` - Feed category
+- `Headline` - Article headline in list
+- `Article` - Full article content
+- `Label` - Article label
+- `FeedTreeNode` - Tree node for feed navigation
+- `ApiResponse<T>` - API response wrapper
+
+## Troubleshooting
+
+### Module Resolution Issues
+
+If you encounter module resolution errors:
+
+1. Ensure the path aliases are correctly configured in `vite.config.js`
+2. Check that the module file exists at the expected path
+3. Verify the module ID matches the file path (e.g., `dojo/parser` -> `lib/dojo/parser.js`)
+
+### Proxy Not Working
+
+If API calls are failing:
+
+1. Ensure the PHP backend is running on the correct port (default: 8080)
+2. Check the proxy configuration in `vite.config.js`
+3. Verify the target URLs in the proxy settings match your backend setup
+
+### Build Errors
+
+For production build issues:
+
+1. Run `pnpm run dev` to check if the dev server works
+2. Check for syntax errors in imported modules
+3. Verify all dependencies are installed with `pnpm install`
+
+## Migration Progress
+
+- [x] Phase 1: Analysis of existing build system
+- [x] Phase 2: Vite configuration with AMD support
+- [x] Phase 3: Entry point and AMD shim
+- [x] Phase 4: pnpm and TypeScript setup
+- [x] Phase 5: Vue 3 + Vuetify components
+- [x] Phase 6: Testing and validation
+- [x] Phase 7: Documentation
+
+## Future Enhancements
+
+Potential improvements for future phases:
+
+1. **Full ESM Migration**: Gradually convert Dojo modules to ESM
+2. **HMR for Dojo**: Implement HMR for Dojo widgets
+3. **Complete Component Migration**: Migrate remaining Dojo components to Vue
+4. **Vue Router Integration**: Add client-side routing
+5. **Pinia State Management**: Replace Dojo stores with Pinia
+6. **Bundle Optimization**: Analyze and optimize the production bundle
+7. **Full TypeScript Adoption**: Convert all Vue components to TypeScript
+
+## Contributing
+
+When making changes to the build system:
+
+1. Test both dev mode (`pnpm run dev`) and the legacy PHP backend
+2. Ensure backward compatibility is maintained
+3. Update this documentation with any configuration changes
+4. Test on multiple browsers (Chrome, Firefox, Safari)
+
+## License
+
+This migration is part of Tiny Tiny RSS and follows the same license as the main project.
