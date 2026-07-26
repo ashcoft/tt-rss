@@ -1,0 +1,15 @@
+# Snyk (https://snyk.io) policy file
+# Transitive dependency vulnerabilities that cannot be directly fixed
+
+patch: {}
+
+ignore:
+  - SNYK-JS-IMAGESIZE-17295814:
+      - '*':
+          reason: 'image-size vulnerability in less transitive dependency. No fixed version available from upstream.'
+          expires: '2026-12-31T00:00:00.000Z'
+
+  - SNYK-JS-IMAGESIZE-17295816:
+      - '*':
+          reason: 'image-size vulnerability in less transitive dependency. No fixed version available from upstream.'
+          expires: '2026-12-31T00:00:00.000Z'
