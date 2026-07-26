@@ -77,7 +77,6 @@ const headlinesStore = useHeadlinesStore();
 const snackbar = ref(false);
 const snackbarText = ref('');
 const snackbarColor = ref<'success' | 'error' | 'info' | 'warning'>('info');
-const helpDialog = ref(false);
 
 // Computed
 const statusMessage = computed(() => {
