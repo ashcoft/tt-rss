@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useDisplay } from 'vuetify';
 import type { Feed, Category, Headline, Article } from '@/types';
 import { FeedTree } from '@/components/FeedTree.vue';
 import { Toolbar } from '@/components/Toolbar.vue';
 import { HeadlinesList } from '@/components/HeadlinesList.vue';
 import { ArticleView } from '@/components/ArticleView.vue';
-
-const { mobile } = useDisplay();
 
 // State
 const feeds = ref<Feed[]>([]);
