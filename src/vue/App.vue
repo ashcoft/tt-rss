@@ -112,7 +112,10 @@ const loadFeeds = async () => {
         categories.value = (content as { categories?: Category[] }).categories || [];
       }
     };
-    statusHandlers[data.status]?.(data.content);
+    const handler = statusHandlers[data.status as number];
+    if (handler) {
+      handler(data.content);
+    }
   } catch (error) {
     console.error('Failed to load feeds:', error);
     showMessage('Failed to load feeds', 'error');
@@ -144,7 +147,10 @@ const loadHeadlines = async () => {
         headlines.value = (content as { headlines?: Headline[] }).headlines || [];
       }
     };
-    statusHandlers[data.status]?.(data.content);
+    const handler = statusHandlers[data.status as number];
+    if (handler) {
+      handler(data.content);
+    }
   } catch (error) {
     console.error('Failed to load headlines:', error);
     showMessage('Failed to load headlines', 'error');
