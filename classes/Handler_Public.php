@@ -263,13 +263,12 @@ class Handler_Public extends Handler {
 		$uid = UserHelper::find_user_by_login($login);
 
 		if ($uid !== null) {
-			// These methods return integers - safe to print without XSS risk
 			$unread_count = Feeds::_get_global_unread($uid);
-			print (int) $unread_count;
+			print htmlspecialchars((string) $unread_count, ENT_QUOTES, 'UTF-8');
 
 			if ($fresh) {
 				$counters = Feeds::_get_counters(Feeds::FEED_FRESH, false, true, $uid);
-				print ';' . (int) $counters;
+				print ';' . htmlspecialchars((string) $counters, ENT_QUOTES, 'UTF-8');
 			}
 		} else {
 			print '-1;User not found';
