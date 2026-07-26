@@ -5,23 +5,17 @@
 patch: {}
 
 ignore:
-  - id: SNYK-JS-ESBUILD-17750822
-    reason: "esbuild vulnerability in vite's transitive dependency. Fix requires Vite to update esbuild. Accepted risk for development build tool."
-    expires: '2026-12-31T00:00:00.000Z'
-    created: 2026-07-26
-    users:
-      - ashcoft
+  - SNYK-JS-ESBUILD-17750822:
+      - '*':
+          reason: "esbuild vulnerability in vite's transitive dependency. Fix requires Vite to update esbuild. Accepted risk for development build tool."
+          expires: '2026-12-31T00:00:00.000Z'
 
-  - id: SNYK-JS-IMAGESIZE-17295814
-    reason: "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available. Accepted risk for CSS processing."
-    expires: '2026-12-31T00:00:00.000Z'
-    created: 2026-07-26
-    users:
-      - ashcoft
+  - SNYK-JS-IMAGESIZE-17295814:
+      - '*':
+          reason: "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available. Accepted risk for CSS processing."
+          expires: '2026-12-31T00:00:00.000Z'
 
-  - id: SNYK-JS-IMAGESIZE-17295816
-    reason: "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available. Accepted risk for CSS processing."
-    expires: '2026-12-31T00:00:00.000Z'
-    created: 2026-07-26
-    users:
-      - ashcoft
+  - SNYK-JS-IMAGESIZE-17295816:
+      - '*':
+          reason: "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available. Accepted risk for CSS processing."
+          expires: '2026-12-31T00:00:00.000Z'
