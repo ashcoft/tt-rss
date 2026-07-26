@@ -263,14 +263,13 @@ class Handler_Public extends Handler {
 		$uid = UserHelper::find_user_by_login($login);
 
 		if ($uid !== null) {
-			// codacy ignore start
-			print (string) Feeds::_get_global_unread($uid);
-			// codacy ignore end
+			// These methods return integers - safe to print without XSS risk
+			$unread_count = Feeds::_get_global_unread($uid);
+			print (int) $unread_count;
 
 			if ($fresh) {
-				// codacy ignore start
-				print ';' . Feeds::_get_counters(Feeds::FEED_FRESH, false, true, $uid);
-				// codacy ignore end
+				$counters = Feeds::_get_counters(Feeds::FEED_FRESH, false, true, $uid);
+				print ';' . (int) $counters;
 			}
 		} else {
 			print '-1;User not found';
