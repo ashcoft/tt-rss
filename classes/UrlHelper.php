@@ -392,8 +392,7 @@ class UrlHelper {
 				'on_redirect' => function(RequestInterface $request, ResponseInterface $response, UriInterface $uri) {
 					if (!self::validate($uri, true)) {
 						self::$fetch_effective_url = (string) $uri;
-						throw new GuzzleHttp\Exception\RequestException('URL received during redirection failed extended validation.',
-							$request, $response);
+						throw GuzzleHttp\Exception\RequestException::create($request, $response);
 					}
 				},
 			];
@@ -474,8 +473,9 @@ class UrlHelper {
 
 					if ($type && !str_contains(self::$fetch_last_content_type, "$type"))
 						self::$fetch_last_error_content = (string) $ex->getResponse()->getBody();
-				} elseif (array_key_exists('errno', $ex->getHandlerContext())) {
-					$errno = (int) $ex->getHandlerContext()['errno'];
+				} else {
+					// For non-response exceptions (e.g., connection errors), check the exception code
+					$errno = $ex->getCode();
 
 					// By default, all supported encoding types are sent via `Accept-Encoding` and decoding of
 					// responses with `Content-Encoding` is automatically attempted.  If this fails, we do a

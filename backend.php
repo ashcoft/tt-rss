@@ -10,8 +10,9 @@
 		$method = strtolower($method);
 
 	// Public calls compatibility shim
-	if (in_array($op, ['rss', 'getProfiles', 'share'])) {
-		header('Location: public.php?' . $_SERVER['QUERY_STRING']);
+	if (in_array($op, ['rss', 'getUnread', 'getProfiles', 'share'])) {
+		$query_string = $_SERVER['QUERY_STRING'] ?? '';
+		header('Location: public.php?' . htmlspecialchars($query_string, ENT_QUOTES, 'UTF-8'));
 		return;
 	}
 

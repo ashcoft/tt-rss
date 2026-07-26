@@ -256,6 +256,25 @@ class Handler_Public extends Handler {
 		}
 	}
 
+	public function getUnread(): void {
+		$login = clean($_REQUEST["login"]);
+		$fresh = clean($_REQUEST["fresh"] ?? "0") == "1";
+
+		$uid = UserHelper::find_user_by_login($login);
+
+		if ($uid !== null) {
+			$unread_count = Feeds::_get_global_unread($uid);
+			print htmlspecialchars((string) $unread_count, ENT_QUOTES, 'UTF-8');
+
+			if ($fresh) {
+				$counters = Feeds::_get_counters(Feeds::FEED_FRESH, false, true, $uid);
+				print ';' . htmlspecialchars((string) $counters, ENT_QUOTES, 'UTF-8');
+			}
+		} else {
+			print '-1;User not found';
+		}
+	}
+
 	function getProfiles(): void {
 		$login = clean($_REQUEST["login"]);
 		$rv = [];
