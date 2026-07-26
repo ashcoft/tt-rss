@@ -3,6 +3,7 @@
   "description": "A free, flexible, open-source, web-based news feed (RSS/Atom/other) reader and aggregator.",
   "version": "1.0.0",
   "type": "module",
+  "snyk": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
