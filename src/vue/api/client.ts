@@ -74,16 +74,17 @@ class ApiClient {
     };
 
     // Add remaining params, converting arrays to proper format
-    Object.entries(restParams).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(restParams)) {
       if (Array.isArray(value)) {
         // Arrays get [] suffix for PHP backend (e.g., ids[]=1&ids[]=2)
-        value.forEach((v) => {
-          allParams[`${key}[]`] = String(v);
-        });
-      } else if (value !== undefined && value !== null) {
+        for (const v of value) {
+          const arrayKey = `${key}[]`;
+          allParams[arrayKey] = String(v);
+        }
+      } else if (value != null) {
         allParams[key] = String(value);
       }
-    });
+    }
 
     // Add CSRF token
     if (this.csrfToken) {
@@ -102,15 +103,15 @@ class ApiClient {
     let data: ApiResponse<T>;
 
     if (method === 'GET') {
-      Object.entries(allParams).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(allParams)) {
         url.searchParams.set(key, value);
-      });
+      }
       response = await fetch(url.toString(), options);
     } else {
       const formData = new URLSearchParams();
-      Object.entries(allParams).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(allParams)) {
         formData.set(key, value);
-      });
+      }
       options.body = formData.toString();
       response = await fetch(url.toString(), options);
     }

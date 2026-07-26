@@ -84,8 +84,9 @@ export const useHeadlinesStore = defineStore('headlines', () => {
         search: searchQuery.value,
       });
 
-      if (response.status === 0) {
-        headlines.value = response.content.headlines || [];
+      if (response.status === 0 && response.content) {
+        const content = response.content as { headlines?: Headline[] };
+        headlines.value = content.headlines ?? [];
         hasMore.value = headlines.value.length >= limit;
       } else {
         error.value = 'Failed to load headlines';
@@ -113,8 +114,9 @@ export const useHeadlinesStore = defineStore('headlines', () => {
         search: searchQuery.value,
       });
 
-      if (response.status === 0) {
-        const newHeadlines = response.content.headlines || [];
+      if (response.status === 0 && response.content) {
+        const content = response.content as { headlines?: Headline[] };
+        const newHeadlines = content.headlines ?? [];
         headlines.value.push(...newHeadlines);
         // Only continue if we got a full page of results
         hasMore.value = newHeadlines.length === limit;

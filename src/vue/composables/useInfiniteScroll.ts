@@ -17,7 +17,7 @@ export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
   const loading = ref(false);
   const container = ref<HTMLElement | null>(null);
 
-  const handleScroll = async () => {
+  const handleScroll = () => {
     if (!container.value || !enabled.value || loading.value) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container.value;
@@ -25,28 +25,26 @@ export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
 
     if (distanceFromBottom < threshold) {
       loading.value = true;
-      try {
-        await onLoadMore();
-      } finally {
+      Promise.resolve(onLoadMore()).finally(() => {
         loading.value = false;
-      }
+      });
+    }
+  };
+
+  const cleanup = () => {
+    if (container.value) {
+      container.value.removeEventListener('scroll', handleScroll);
+      container.value = null;
     }
   };
 
   const setupScrollListener = (el: HTMLElement) => {
-    // Remove existing listener if any to prevent double-binding
-    if (container.value) {
-      container.value.removeEventListener('scroll', handleScroll);
-    }
+    cleanup();
     container.value = el;
     el.addEventListener('scroll', handleScroll);
   };
 
-  onUnmounted(() => {
-    if (container.value) {
-      container.value.removeEventListener('scroll', handleScroll);
-    }
-  });
+  onUnmounted(cleanup);
 
   return {
     loading,

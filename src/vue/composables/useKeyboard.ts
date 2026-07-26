@@ -19,7 +19,12 @@ export interface KeyboardShortcuts {
   onHelp?: () => void;
 }
 
+/**
+ * Handles keyboard events for navigation and shortcuts
+ * @param event - KeyboardEvent from document keydown
+ */
 export function useKeyboard(shortcuts: KeyboardShortcuts) {
+  /** @param {KeyboardEvent} event */
   const handleKeyDown = (event: KeyboardEvent) => {
     // Ignore if typing in input/textarea
     const target = event.target;

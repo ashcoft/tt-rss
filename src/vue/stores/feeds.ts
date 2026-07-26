@@ -33,17 +33,18 @@ export const useFeedsStore = defineStore('feeds', () => {
 
   // Getters
   const feedsByCategory = computed(() => {
-    const grouped: Record<number | 'uncategorized', Feed[]> = {
+    const grouped: Record<string, Feed[]> = {
       uncategorized: [],
     };
     
-    feeds.value.forEach((feed) => {
+    for (const feed of feeds.value) {
       const catId = feed.cat_id ?? 'uncategorized';
-      if (!grouped[catId]) {
-        grouped[catId] = [];
+      const catKey = String(catId);
+      if (!grouped[catKey]) {
+        grouped[catKey] = [];
       }
-      grouped[catId].push(feed);
-    });
+      grouped[catKey].push(feed);
+    }
     
     return grouped;
   });
@@ -72,9 +73,10 @@ export const useFeedsStore = defineStore('feeds', () => {
     try {
       const response = await api.getFeedTree();
       
-      if (response.status === 0) {
-        feeds.value = response.content.feeds || [];
-        categories.value = response.content.categories || [];
+      if (response.status === 0 && response.content) {
+        const content = response.content as { feeds?: Feed[]; categories?: Category[] };
+        feeds.value = content.feeds ?? [];
+        categories.value = content.categories ?? [];
       } else {
         error.value = 'Failed to load feeds';
       }
