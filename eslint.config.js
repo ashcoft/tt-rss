@@ -6,9 +6,6 @@ import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
-  js.configs.recommended,
-
-  // Ignore patterns
   {
     ignores: [
       '.github/**',
@@ -20,6 +17,8 @@ export default [
       'vendor/**'
     ]
   },
+
+  js.configs.recommended,
 
   {
     files: ['js/**/*.js', 'plugins/**/*.js'],
