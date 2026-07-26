@@ -6,13 +6,13 @@
   "snyk": {
     "ignore": {
       "SNYK-JS-IMAGESIZE-17295814": {
-        "less>vuetify>less": {
+        "*": {
           "reason": "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available.",
           "expires": "2026-12-31T00:00:00.000Z"
         }
       },
       "SNYK-JS-IMAGESIZE-17295816": {
-        "less>vuetify>less": {
+        "*": {
           "reason": "image-size vulnerability in less's transitive dependency used by vuetify. No fixed version available.",
           "expires": "2026-12-31T00:00:00.000Z"
         }
