@@ -81,7 +81,7 @@ defineEmits<{
   action: [headline: Headline, action: string];
 }>();
 
-const toggleRead = (headline: Headline) => {
+const toggleRead = (_headline: Headline) => {
   // Emit event to toggle read state
 };
 

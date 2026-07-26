@@ -1,0 +1,69 @@
+nohup: ignoring input
+! Corepack is about to download https://registry.npmjs.org/pnpm/-/pnpm-11.17.0.tgz
+? Verifying lockfile against supply-chain policies (672 entries)...
+Lockfile is up to date, resolution step is skipped
+[WARN] Broken lockfile: no entry for '@mdi/font@7.4.47' in pnpm-lock.yaml
+[ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY] The lockfile is broken! Resolution step will be performed to fix it.
+[WARN] Could not find preferred package sass@1.80.0 in lockfile
+[WARN] Could not find preferred package vite-plugin-vuetify@2.0.4 in lockfile
+[WARN] Could not find preferred package @mdi/font@7.4.47 in lockfile
+[WARN] Could not find preferred package vuetify@3.7.10 in lockfile
+Progress: resolved 1, reused 0, downloaded 0, added 0
+[WARN] deprecated @types/dompurify@3.2.0: This is a stub types definition. dompurify provides its own type definitions, so you do not need this installed.
+Progress: resolved 23, reused 0, downloaded 23, added 0
+Progress: resolved 29, reused 0, downloaded 28, added 0
+Progress: resolved 30, reused 0, downloaded 30, added 0
+Progress: resolved 31, reused 0, downloaded 30, added 0
+✓ Lockfile passes supply-chain policies (672 entries in 5.1s)
+Progress: resolved 69, reused 0, downloaded 32, added 0
+Progress: resolved 187, reused 0, downloaded 111, added 0
+Progress: resolved 361, reused 0, downloaded 219, added 0
+Progress: resolved 577, reused 0, downloaded 459, added 0
+[WARN] 1 deprecated subdependencies found: semver-diff@5.0.0
+Packages: +616
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 677, reused 0, downloaded 616, added 148
+Progress: resolved 677, reused 0, downloaded 616, added 616, done
+.../esbuild@0.25.12/node_modules/esbuild postinstall$ node install.js
+.../esbuild@0.25.12/node_modules/esbuild postinstall: Done
+
+dependencies:
++ @mdi/font 7.4.47
++ @types/dompurify 3.2.0 deprecated
++ dompurify 3.4.11 (3.4.12 is available)
++ vue 3.5.39 (3.5.40 is available)
++ vuetify 3.12.11 (4.1.6 is available)
+
+devDependencies:
++ @eslint/js 10.0.1
++ @semantic-release/changelog 6.0.3 (7.0.0 is available)
++ @semantic-release/commit-analyzer 13.0.1
++ @semantic-release/git 10.0.1 (11.0.1 is available)
++ @semantic-release/github 11.0.6 (12.0.9 is available)
++ @semantic-release/release-notes-generator 14.1.1
++ @stylistic/eslint-plugin 5.10.0
++ @typescript-eslint/eslint-plugin 8.63.0 (8.65.0 is available)
++ @typescript-eslint/parser 8.63.0 (8.65.0 is available)
++ @vitejs/plugin-vue 5.2.4 (6.0.8 is available)
++ conventional-changelog-conventionalcommits 8.0.0 (10.2.1 is available)
++ eslint 10.6.0 (10.8.0 is available)
++ eslint-plugin-vue 10.9.2 (10.10.0 is available)
++ globals 17.7.0
++ gulp 5.0.1
++ gulp-less 5.0.0
++ gulp-touch-fd 2.0.0
++ less 4.6.7 (4.8.0 is available)
++ postcss-less 6.0.0
++ sass 1.102.0
++ semantic-release 24.2.9 (25.0.8 is available)
++ stylelint 17.14.0 (17.14.1 is available)
++ stylelint-config-property-sort-order-smacss 11.2.0
++ stylelint-config-standard 40.0.0
++ typescript 5.9.3 (7.0.2 is available)
++ vite 6.4.3 (8.1.5 is available)
++ vite-plugin-vuetify 2.1.3
++ vue-eslint-parser 10.4.1
+
+[ERR_PNPM_IGNORED_BUILDS] Ignored build scripts: @parcel/watcher@2.6.0
+
+Run "pnpm approve-builds" to pick which dependencies should be allowed to run scripts.
