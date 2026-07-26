@@ -25,7 +25,7 @@ export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
 
     if (distanceFromBottom < threshold) {
       loading.value = true;
-      Promise.resolve(onLoadMore()).finally(() => {
+      void Promise.resolve(onLoadMore()).finally(() => {
         loading.value = false;
       });
     }

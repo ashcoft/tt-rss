@@ -22,6 +22,11 @@ export interface Category {
   parent_id: number | null;
 }
 
+export interface FeedsByCategory {
+  uncategorized: Feed[];
+  [categoryId: number]: Feed[];
+}
+
 export const useFeedsStore = defineStore('feeds', () => {
   // State
   const feeds = ref<Feed[]>([]);
@@ -32,21 +37,30 @@ export const useFeedsStore = defineStore('feeds', () => {
   const currentIsCat = ref(false);
 
   // Getters
-  const feedsByCategory = computed(() => {
-    const grouped: Record<string, Feed[]> = {
-      uncategorized: [],
-    };
+  const feedsByCategory = computed((): FeedsByCategory => {
+    const uncategorizedFeeds: Feed[] = [];
+    const categoryMap = new Map<number, Feed[]>();
     
     for (const feed of feeds.value) {
-      const catId = feed.cat_id ?? 'uncategorized';
-      const catKey = String(catId);
-      if (!grouped[catKey]) {
-        grouped[catKey] = [];
+      if (feed.cat_id != null) {
+        const existing = categoryMap.get(feed.cat_id);
+        if (existing) {
+          existing.push(feed);
+        } else {
+          categoryMap.set(feed.cat_id, [feed]);
+        }
+      } else {
+        uncategorizedFeeds.push(feed);
       }
-      grouped[catKey].push(feed);
     }
     
-    return grouped;
+    // Convert map to object with numeric keys
+    const result: FeedsByCategory = { uncategorized: uncategorizedFeeds };
+    for (const [catId, catFeeds] of categoryMap) {
+      result[catId] = catFeeds;
+    }
+    
+    return result;
   });
 
   const totalUnread = computed(() => {
@@ -73,10 +87,12 @@ export const useFeedsStore = defineStore('feeds', () => {
     try {
       const response = await api.getFeedTree();
       
-      if (response.status === 0 && response.content) {
-        const content = response.content as { feeds?: Feed[]; categories?: Category[] };
-        feeds.value = content.feeds ?? [];
-        categories.value = content.categories ?? [];
+      if (response.status === 0) {
+        // TypeScript type narrowing - content is guaranteed when status is 0
+        const content = response.content;
+        const feedData = (content as { feeds?: Feed[]; categories?: Category[] });
+        feeds.value = feedData.feeds ?? [];
+        categories.value = feedData.categories ?? [];
       } else {
         error.value = 'Failed to load feeds';
       }

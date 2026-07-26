@@ -68,28 +68,9 @@ class ApiClient {
     // Build params object - remove op/method from params to avoid duplication
     const { op, method: _m, ...restParams } = params as Record<string, string | number | boolean | string[] | number[]>;
     
-    const allParams: Record<string, string> = {
-      op: String(op || endpoint),
-      method: String(_m || 'index'),
-    };
-
-    // Add remaining params, converting arrays to proper format
-    for (const [key, value] of Object.entries(restParams)) {
-      if (Array.isArray(value)) {
-        // Arrays get [] suffix for PHP backend (e.g., ids[]=1&ids[]=2)
-        for (const v of value) {
-          const arrayKey = `${key}[]`;
-          allParams[arrayKey] = String(v);
-        }
-      } else if (value != null) {
-        allParams[key] = String(value);
-      }
-    }
-
-    // Add CSRF token
-    if (this.csrfToken) {
-      allParams.csrf_token = this.csrfToken;
-    }
+    // Set required params
+    const reqOp = String(op || endpoint);
+    const reqMethod = String(_m || 'index');
 
     const options: RequestInit = {
       method,
@@ -103,15 +84,49 @@ class ApiClient {
     let data: ApiResponse<T>;
 
     if (method === 'GET') {
-      for (const [key, value] of Object.entries(allParams)) {
-        url.searchParams.set(key, value);
+      // Build URL with params directly
+      url.searchParams.set('op', reqOp);
+      url.searchParams.set('method', reqMethod);
+      
+      // Add remaining params, converting arrays to proper format
+      for (const [key, value] of Object.entries(restParams)) {
+        if (Array.isArray(value)) {
+          for (const v of value) {
+            url.searchParams.set(`${key}[]`, String(v));
+          }
+        } else if (value != null) {
+          url.searchParams.set(key, String(value));
+        }
       }
+
+      // Add CSRF token
+      if (this.csrfToken) {
+        url.searchParams.set('csrf_token', this.csrfToken);
+      }
+
       response = await fetch(url.toString(), options);
     } else {
+      // Build form data directly
       const formData = new URLSearchParams();
-      for (const [key, value] of Object.entries(allParams)) {
-        formData.set(key, value);
+      formData.set('op', reqOp);
+      formData.set('method', reqMethod);
+      
+      // Add remaining params
+      for (const [key, value] of Object.entries(restParams)) {
+        if (Array.isArray(value)) {
+          for (const v of value) {
+            formData.set(`${key}[]`, String(v));
+          }
+        } else if (value != null) {
+          formData.set(key, String(value));
+        }
       }
+
+      // Add CSRF token
+      if (this.csrfToken) {
+        formData.set('csrf_token', this.csrfToken);
+      }
+
       options.body = formData.toString();
       response = await fetch(url.toString(), options);
     }
