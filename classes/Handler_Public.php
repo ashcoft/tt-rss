@@ -262,8 +262,8 @@ class Handler_Public extends Handler {
 
 		$uid = UserHelper::find_user_by_login($login);
 
-		if ($uid) {
-			print Feeds::_get_global_unread($uid);
+		if ($uid !== null) {
+			print (string) Feeds::_get_global_unread($uid);
 
 			if ($fresh) {
 				print ';' . Feeds::_get_counters(Feeds::FEED_FRESH, false, true, $uid);
