@@ -256,7 +256,7 @@ class Handler_Public extends Handler {
 		}
 	}
 
-	function getUnread(): void {
+	public function getUnread(): void {
 		$login = clean($_REQUEST["login"]);
 		$fresh = clean($_REQUEST["fresh"] ?? "0") == "1";
 
@@ -265,8 +265,9 @@ class Handler_Public extends Handler {
 		if ($uid) {
 			print Feeds::_get_global_unread($uid);
 
-			if ($fresh)
+			if ($fresh) {
 				print ';' . Feeds::_get_counters(Feeds::FEED_FRESH, false, true, $uid);
+			}
 		} else {
 			print '-1;User not found';
 		}
