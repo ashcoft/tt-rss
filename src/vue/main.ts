@@ -5,8 +5,6 @@
  * It bootstraps the Vue application and mounts it to the DOM.
  */
 
-/* global document */
-
 import { createApp } from 'vue';
 import { createVuetify } from 'vuetify';
 import 'vuetify/styles';
@@ -29,6 +27,7 @@ app.use(vuetify);
 // Mount the app
 // The app will be mounted to the element with id="vue-app"
 // This allows for gradual migration - the Dojo app can coexist with Vue components
+// eslint-disable-next-line no-undef
 const mountPoint = document.getElementById('vue-app');
 
 if (mountPoint) {
