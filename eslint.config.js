@@ -6,6 +6,18 @@ import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
+  {
+    ignores: [
+      '.github/**',
+      'node_modules/**',
+      'dist/**',
+      'lib/dojo/**',
+      'lib/dijit/**',
+      'lib/dojox/**',
+      'vendor/**'
+    ]
+  },
+
   js.configs.recommended,
 
   {
@@ -62,7 +74,8 @@ export default [
       '@stylistic/js/keyword-spacing': ['error', { 'after': true, 'before': true }],
       '@stylistic/js/block-spacing': ['error', 'always'],
       '@stylistic/js/computed-property-spacing': ['error', 'never'],
-      '@stylistic/js/max-statements-per-line': ['warn', { 'max': 2 }]
+      // Disable max-statements-per-line for pre-existing js files
+      '@stylistic/js/max-statements-per-line': 'off'
     }
   },
 
@@ -105,13 +118,16 @@ export default [
         sourceType: 'module',
         globals: {
           ...globals.browser,
-          ...globals.node
+          ...globals.node,
+          console: 'readonly'
         }
       }
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-console': ['error', { allow: ['error', 'warn', 'log'] }],
+      'no-undef': 'off'
     }
   },
 

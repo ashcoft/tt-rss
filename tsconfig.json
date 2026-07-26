@@ -14,6 +14,10 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
+      "@/*": ["src/vue/*"],
+      "@/types": ["src/vue/types"],
+      "@/components/*": ["src/vue/components/*"],
+      "@/composables/*": ["src/vue/composables/*"],
       "dojo/*": ["lib/dojo/*"],
       "dijit/*": ["lib/dijit/*"],
       "dojox/*": ["lib/dojox/*"],
