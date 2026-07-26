@@ -27,13 +27,11 @@ app.use(vuetify);
 // Mount the app
 // The app will be mounted to the element with id="vue-app"
 // This allows for gradual migration - the Dojo app can coexist with Vue components
-// eslint-disable-next-line no-undef
 const mountPoint = document.getElementById('vue-app');
 
 if (mountPoint) {
   app.mount('#vue-app');
 } else {
-  // eslint-disable-next-line no-console
   console.warn('[Vue 3] Mount point #vue-app not found. Vue components will be available for lazy loading.');
 }
 

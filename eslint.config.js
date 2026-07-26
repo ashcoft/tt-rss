@@ -118,13 +118,16 @@ export default [
         sourceType: 'module',
         globals: {
           ...globals.browser,
-          ...globals.node
+          ...globals.node,
+          console: 'readonly'
         }
       }
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-console': ['error', { allow: ['error', 'warn', 'log'] }],
+      'no-undef': 'off'
     }
   },
 
