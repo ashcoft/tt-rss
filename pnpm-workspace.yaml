@@ -3,3 +3,5 @@ packages:
 allowBuilds:
   '@parcel/watcher': set this to true or false
   esbuild: true
+overrides:
+  esbuild@>=0 <0.28.1: '0.28.1'
