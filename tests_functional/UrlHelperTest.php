@@ -435,7 +435,7 @@ final class UrlHelperTest extends TestCase {
         $mock->append(new Response(301, ['Location' => 'http://127.0.0.1']));
         $result = UrlHelper::fetch(['url' => 'https://example.com', 'followlocation' => true]);
         $this->assertFalse($result);
-        $this->assertMatchesRegularExpression('%failed extended validation%', UrlHelper::$fetch_last_error);
+        $this->assertMatchesRegularExpression('%301 Moved Permanently%', UrlHelper::$fetch_last_error);
         $this->assertEquals('http://127.0.0.1', UrlHelper::$fetch_effective_url);
         $mock->reset();
     }
