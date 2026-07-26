@@ -76,13 +76,13 @@ defineProps<{
   loading: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   select: [headline: Headline];
   action: [headline: Headline, action: string];
 }>();
 
-const toggleRead = (_headline: Headline) => {
-  // Emit event to toggle read state
+const toggleRead = (headline: Headline) => {
+  emit('action', headline, 'toggle_read');
 };
 
 const formatDate = (timestamp: number): string => {

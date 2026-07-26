@@ -190,6 +190,20 @@ const markAsRead = async (articleId: number, isRead: boolean) => {
   const headline = headlines.value.find(h => h.id === articleId);
   if (headline) {
     headline.is_read = isRead;
+    try {
+      await fetch('/backend.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          op: 'RPC',
+          method: 'catchupSelected',
+          'ids[]': String(articleId),
+          cmode: isRead ? '0' : '1'
+        })
+      });
+    } catch (error) {
+      console.error('Failed to update read state:', error);
+    }
   }
 };
 
@@ -200,10 +214,24 @@ const markAsRead = async (articleId: number, isRead: boolean) => {
  * @param {boolean} starred - True to star the article, false to unstar.
  * @returns {Promise<void>}
  */
-const toggleStar = (articleId: number, starred: boolean) => {
+const toggleStar = async (articleId: number, starred: boolean) => {
   const headline = headlines.value.find(h => h.id === articleId);
   if (headline) {
     headline.is_marked = starred;
+    try {
+      await fetch('/backend.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          op: 'RPC',
+          method: 'markSelected',
+          'ids[]': String(articleId),
+          cmode: '2'
+        })
+      });
+    } catch (error) {
+      console.error('Failed to update starred state:', error);
+    }
   }
 };
 
@@ -214,12 +242,25 @@ const toggleStar = (articleId: number, starred: boolean) => {
  * @param {boolean} published - True to publish the article, false to unpublish.
  * @returns {Promise<void>}
  */
-const togglePublish = (articleId: number, published: boolean) => {
+const togglePublish = async (articleId: number, published: boolean) => {
   const headline = headlines.value.find(h => h.id === articleId);
   if (headline) {
     headline.is_published = published;
+    try {
+      await fetch('/backend.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          op: 'RPC',
+          method: 'publishSelected',
+          'ids[]': String(articleId),
+          cmode: '2'
+        })
+      });
+    } catch (error) {
+      console.error('Failed to update published state:', error);
+    }
   }
-  return Promise.resolve();
 };
 
 /**

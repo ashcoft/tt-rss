@@ -103,7 +103,9 @@ interface Props {
 
 defineProps<Props>();
 
-const emit = defineEmits<(e: 'action', action: string, payload?: string | number) => void>();
+const emit = defineEmits<{
+  (e: 'action', action: string, payload?: string | number | object): void;
+}>();
 
 // State
 const searchQuery = ref('');
