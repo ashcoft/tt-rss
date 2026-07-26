@@ -263,11 +263,14 @@ class Handler_Public extends Handler {
 		$uid = UserHelper::find_user_by_login($login);
 
 		if ($uid !== null) {
+			// codacy ignore start
+			// These methods return integers, not user-controlled strings - false positive XSS warning
 			print (string) Feeds::_get_global_unread($uid);
 
 			if ($fresh) {
 				print ';' . Feeds::_get_counters(Feeds::FEED_FRESH, false, true, $uid);
 			}
+			// codacy ignore end
 		} else {
 			print '-1;User not found';
 		}
