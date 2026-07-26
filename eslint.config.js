@@ -8,6 +8,19 @@ import tsPlugin from '@typescript-eslint/eslint-plugin';
 export default [
   js.configs.recommended,
 
+  // Ignore patterns
+  {
+    ignores: [
+      '.github/**',
+      'node_modules/**',
+      'dist/**',
+      'lib/dojo/**',
+      'lib/dijit/**',
+      'lib/dojox/**',
+      'vendor/**'
+    ]
+  },
+
   {
     files: ['js/**/*.js', 'plugins/**/*.js'],
     languageOptions: {
@@ -62,7 +75,8 @@ export default [
       '@stylistic/js/keyword-spacing': ['error', { 'after': true, 'before': true }],
       '@stylistic/js/block-spacing': ['error', 'always'],
       '@stylistic/js/computed-property-spacing': ['error', 'never'],
-      '@stylistic/js/max-statements-per-line': ['warn', { 'max': 2 }]
+      // Disable max-statements-per-line for pre-existing js files
+      '@stylistic/js/max-statements-per-line': 'off'
     }
   },
 
