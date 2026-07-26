@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vuetify from 'vite-plugin-vuetify';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    vuetify({ autoImport: true })
+  ],
   
   // Root directory
   root: '.',
@@ -55,6 +59,6 @@ export default defineConfig({
   
   // Optimize dependencies
   optimizeDeps: {
-    include: ['vue', 'element-plus']
+    include: ['vue', 'vuetify']
   }
 });
