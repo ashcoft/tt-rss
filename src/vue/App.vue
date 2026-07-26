@@ -63,10 +63,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import type { Feed, Category, Headline, Article } from './types';
-import { FeedTree } from './components/FeedTree.vue';
-import { Toolbar } from './components/Toolbar.vue';
-import { HeadlinesList } from './components/HeadlinesList.vue';
-import { ArticleView } from './components/ArticleView.vue';
+import FeedTree from './components/FeedTree.vue';
+import Toolbar from './components/Toolbar.vue';
+import HeadlinesList from './components/HeadlinesList.vue';
+import ArticleView from './components/ArticleView.vue';
 
 // State
 const feeds = ref<Feed[]>([]);

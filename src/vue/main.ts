@@ -9,7 +9,7 @@ import { createApp } from 'vue';
 import { createVuetify } from 'vuetify';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
-import { App } from './App.vue';
+import App from './App.vue';
 
 // Create Vuetify instance with default theme
 const vuetify = createVuetify({
