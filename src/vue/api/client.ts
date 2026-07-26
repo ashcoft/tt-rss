@@ -33,6 +33,29 @@ class ApiClient {
   }
 
   /**
+   * Initialize CSRF token from the page's __csrf_token global
+   * Call this on app startup
+   */
+  initCsrfToken(): void {
+    // Try to get from window object if set by backend
+    const win = window as unknown as Record<string, unknown>;
+    if (win.__csrf_token) {
+      this.csrfToken = String(win.__csrf_token);
+      return;
+    }
+    
+    // Try to get from meta tag
+    const meta = document.querySelector('meta[name="csrf_token"]');
+    if (meta) {
+      this.csrfToken = meta.getAttribute('content') || 'auto';
+      return;
+    }
+    
+    // Default to 'auto' for TT-RSS which handles it automatically when logged in
+    this.csrfToken = 'auto';
+  }
+
+  /**
    * Fetch with error handling
    */
   private async request<T>(
@@ -42,12 +65,25 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const url = new URL(this.baseUrl, window.location.origin);
     
-    // Add operation and method
+    // Build params object - remove op/method from params to avoid duplication
+    const { op, method: _m, ...restParams } = params as Record<string, string | number | boolean | string[] | number[]>;
+    
     const allParams: Record<string, string> = {
-      ...params,
-      op: String(params.op || endpoint),
-      method: String(params.method || 'index'),
-    } as Record<string, string>;
+      op: String(op || endpoint),
+      method: String(_m || 'index'),
+    };
+
+    // Add remaining params, converting arrays to proper format
+    Object.entries(restParams).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        // Arrays get [] suffix for PHP backend (e.g., ids[]=1&ids[]=2)
+        value.forEach((v) => {
+          allParams[`${key}[]`] = String(v);
+        });
+      } else if (value !== undefined && value !== null) {
+        allParams[key] = String(value);
+      }
+    });
 
     // Add CSRF token
     if (this.csrfToken) {
@@ -67,21 +103,13 @@ class ApiClient {
 
     if (method === 'GET') {
       Object.entries(allParams).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          value.forEach((v) => url.searchParams.append(`${key}[]`, String(v)));
-        } else {
-          url.searchParams.set(key, String(value));
-        }
+        url.searchParams.set(key, value);
       });
       response = await fetch(url.toString(), options);
     } else {
       const formData = new URLSearchParams();
       Object.entries(allParams).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          value.forEach((v) => formData.append(`${key}[]`, String(v)));
-        } else {
-          formData.set(key, String(value));
-        }
+        formData.set(key, value);
       });
       options.body = formData.toString();
       response = await fetch(url.toString(), options);
@@ -238,7 +266,7 @@ class ApiClient {
     return this.request('RPC', {
       op: 'RPC',
       method: 'catchupSelected',
-      'ids[]': articleIds,
+      ids: articleIds,
       cmode: mode,
     }, 'POST');
   }
@@ -247,7 +275,7 @@ class ApiClient {
     return this.request('RPC', {
       op: 'RPC',
       method: 'markSelected',
-      'ids[]': articleIds,
+      ids: articleIds,
       cmode: mode,
     }, 'POST');
   }
@@ -256,16 +284,16 @@ class ApiClient {
     return this.request('RPC', {
       op: 'RPC',
       method: 'publishSelected',
-      'ids[]': articleIds,
+      ids: articleIds,
       cmode: mode,
     }, 'POST');
   }
 
   async deleteArticles(articleIds: number[]): Promise<ApiResponse<boolean>> {
-    return this.request('article', {
-      op: 'article',
+    return this.request('RPC', {
+      op: 'RPC',
       method: 'delete',
-      article_id: articleIds,
+      ids: articleIds,
     }, 'POST');
   }
 

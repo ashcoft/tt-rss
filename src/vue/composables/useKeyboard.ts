@@ -22,9 +22,11 @@ export interface KeyboardShortcuts {
 export function useKeyboard(shortcuts: KeyboardShortcuts) {
   const handleKeyDown = (event: KeyboardEvent) => {
     // Ignore if typing in input/textarea
-    const target = event.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-      return;
+    const target = event.target;
+    if (target instanceof HTMLElement) {
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
     }
 
     switch (event.key.toLowerCase()) {

@@ -3,7 +3,7 @@
  * Handles loading more content when scrolling to bottom
  */
 
-import { ref, onMounted, onUnmounted, type Ref } from 'vue';
+import { ref, onUnmounted, type Ref } from 'vue';
 
 export interface UseInfiniteScrollOptions {
   threshold?: number;
@@ -34,15 +34,13 @@ export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
   };
 
   const setupScrollListener = (el: HTMLElement) => {
+    // Remove existing listener if any to prevent double-binding
+    if (container.value) {
+      container.value.removeEventListener('scroll', handleScroll);
+    }
     container.value = el;
     el.addEventListener('scroll', handleScroll);
   };
-
-  onMounted(() => {
-    if (container.value) {
-      container.value.addEventListener('scroll', handleScroll);
-    }
-  });
 
   onUnmounted(() => {
     if (container.value) {

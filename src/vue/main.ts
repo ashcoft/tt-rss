@@ -11,6 +11,7 @@ import { createVuetify } from 'vuetify';
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 import App from './App.vue';
+import { api } from './api/client';
 
 // Create Pinia state management
 const pinia = createPinia();
@@ -21,6 +22,9 @@ const vuetify = createVuetify({
     defaultTheme: 'light',
   },
 });
+
+// Initialize API client with CSRF token from backend
+api.initCsrfToken();
 
 // Create Vue app instance
 const app = createApp(App);

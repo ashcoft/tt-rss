@@ -116,7 +116,12 @@ export const useHeadlinesStore = defineStore('headlines', () => {
       if (response.status === 0) {
         const newHeadlines = response.content.headlines || [];
         headlines.value.push(...newHeadlines);
-        hasMore.value = newHeadlines.length >= limit;
+        // Only continue if we got a full page of results
+        hasMore.value = newHeadlines.length === limit;
+      } else {
+        console.warn('Load more returned non-success status:', response.status);
+        skip.value -= limit; // Revert skip on failure status
+        hasMore.value = false; // Stop pagination on failure
       }
     } catch (err) {
       console.error('Failed to load more headlines:', err);

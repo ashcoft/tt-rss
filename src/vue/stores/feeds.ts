@@ -97,9 +97,9 @@ export const useFeedsStore = defineStore('feeds', () => {
       feed.unread = Math.max(0, feed.unread + delta);
     }
     
-    // Update category unread
+    // Update category unread (cat_id can be 0 for uncategorized)
     const catId = feed?.cat_id;
-    if (catId) {
+    if (catId != null) {
       const cat = categories.value.find(c => c.id === catId);
       if (cat) {
         cat.unread = Math.max(0, cat.unread + delta);
