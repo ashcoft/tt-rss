@@ -1,20 +1,30 @@
 /**
  * Tiny Tiny RSS - Vue 3 Application Entry Point
  * 
- * This is the main entry point for the Vue 3 + Element Plus migration.
+ * This is the main entry point for the Vue 3 + Vuetify migration.
  * It bootstraps the Vue application and mounts it to the DOM.
  */
 
+/* global document */
+
 import { createApp } from 'vue';
-import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css';
+import { createVuetify } from 'vuetify';
+import 'vuetify/styles';
+import '@mdi/font/css/materialdesignicons.css';
 import { App } from './App.vue';
+
+// Create Vuetify instance with default theme
+const vuetify = createVuetify({
+  theme: {
+    defaultTheme: 'light',
+  },
+});
 
 // Create Vue app instance
 const app = createApp(App);
 
-// Use Element Plus UI framework
-app.use(ElementPlus);
+// Use Vuetify UI framework
+app.use(vuetify);
 
 // Mount the app
 // The app will be mounted to the element with id="vue-app"
@@ -24,8 +34,8 @@ const mountPoint = document.getElementById('vue-app');
 if (mountPoint) {
   app.mount('#vue-app');
 } else {
-  // This warning indicates the Vue mount point is missing in the DOM.
-  console.warn('[Vue 3] Mount point #vue-app not found. Vue components will be available for lazy loading.'); // skipcq: JS-0002
+  // eslint-disable-next-line no-console
+  console.warn('[Vue 3] Mount point #vue-app not found. Vue components will be available for lazy loading.');
 }
 
 // Export app instance for debugging

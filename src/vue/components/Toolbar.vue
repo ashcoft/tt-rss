@@ -1,24 +1,26 @@
 <template>
   <div class="toolbar">
     <div class="toolbar-left">
-      <el-button-group>
-        <el-button
-          :icon="Refresh"
+      <v-btn-toggle>
+        <v-btn
+          icon="mdi-refresh"
           @click="$emit('action', 'refresh')"
           title="Refresh"
         />
-        <el-button
-          :icon="Check"
+        <v-btn
+          icon="mdi-check-all"
           @click="$emit('action', 'catchup')"
           title="Mark all as read"
         />
-      </el-button-group>
+      </v-btn-toggle>
 
-      <el-input
+      <v-text-field
         v-model="searchQuery"
         placeholder="Search articles..."
-        prefix-icon="Search"
-        clearable
+        prepend-inner-icon="mdi-magnify"
+        variant="outlined"
+        density="compact"
+        hide-details
         class="search-input"
         @keyup.enter="$emit('action', 'search', searchQuery)"
       />
@@ -29,50 +31,70 @@
     </div>
 
     <div class="toolbar-right">
-      <el-button-group>
-        <el-button
-          :icon="ViewList"
-          :type="viewMode === 'list' ? 'primary' : ''"
-          @click="setViewMode('list')"
+      <v-btn-toggle
+        :model-value="viewMode"
+        @update:model-value="setViewMode"
+      >
+        <v-btn
+          value="list"
+          icon="mdi-view-list"
           title="List view"
         />
-        <el-button
-          :icon="Grid"
-          :type="viewMode === 'grid' ? 'primary' : ''"
-          @click="setViewMode('grid')"
+        <v-btn
+          value="grid"
+          icon="mdi-view-grid"
           title="Grid view"
         />
-        <el-button
-          :icon="Expand"
-          :type="viewMode === 'expanded' ? 'primary' : ''"
-          @click="setViewMode('expanded')"
+        <v-btn
+          value="expanded"
+          icon="mdi-view-sequential"
           title="Expanded view"
         />
-      </el-button-group>
+      </v-btn-toggle>
 
-      <el-dropdown @command="handleSort">
-        <el-button>
-          Sort: {{ sortLabel }}
-          <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="date">Date</el-dropdown-item>
-            <el-dropdown-item command="feed">Feed</el-dropdown-item>
-            <el-dropdown-item command="title">Title</el-dropdown-item>
-          </el-dropdown-menu>
+      <v-menu>
+        <template #activator="{ props }">
+          <v-btn v-bind="props">
+            Sort: {{ sortLabel }}
+            <v-icon end>mdi-chevron-down</v-icon>
+          </v-btn>
         </template>
-      </el-dropdown>
+        <v-list>
+          <v-list-item
+            v-for="item in sortOptions"
+            :key="item.value"
+            :value="item.value"
+            @click="handleSort(item.value)"
+          >
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
 
-      <el-dropdown @command="handleAction">
-        <el-button :icon="More" />
-        <template #dropdown>
-          <el-dropdown-menu>
+      <v-menu>
+        <template #activator="{ props }">
+          <v-btn icon="mdi-dots-vertical" v-bind="props" />
+        </template>
+        <v-list>
+          <v-list-item
+            v-for="item in actionOptions"
+            :key="item.value"
+            :value="item.value"
+            @click="handleAction(item.value)"
+          >
+            <template #prepend>
+              <v-icon>{{ item.icon }}</v-icon>
+            </template>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import {
-  Refresh, Check, ViewList, Grid, Expand, ArrowDown, More
-} from '@element-plus/icons-vue';
 import type { Feed } from '@/types';
 
 interface Props {
@@ -88,6 +110,18 @@ const searchQuery = ref('');
 const viewMode = ref<'list' | 'grid' | 'expanded'>('list');
 const sortBy = ref('date');
 const sortOrder = ref<'asc' | 'desc'>('desc');
+
+const sortOptions = [
+  { title: 'Date', value: 'date' },
+  { title: 'Feed', value: 'feed' },
+  { title: 'Title', value: 'title' }
+];
+
+const actionOptions = [
+  { title: 'Edit Feed', value: 'edit', icon: 'mdi-pencil' },
+  { title: 'Delete Feed', value: 'delete', icon: 'mdi-delete' },
+  { title: 'Mark All Read', value: 'catchup', icon: 'mdi-check-all' }
+];
 
 // Computed
 const sortLabel = computed(() => {
@@ -156,6 +190,6 @@ const handleAction = (command: string) => {
 }
 
 .search-input {
-  width: 200px;
+  max-width: 200px;
 }
 </style>

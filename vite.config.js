@@ -7,13 +7,14 @@
  * - Dev server with HMR for faster development
  * - Proxy to PHP backend for API calls
  * - Asset handling for CSS, fonts, and images
- * - Vue 3 + Element Plus support for new UI components
+ * - Vue 3 + Vuetify support for new UI components
  * 
  * The old build system remains functional as a fallback.
  */
 
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import vuetify from 'vite-plugin-vuetify';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -30,6 +31,7 @@ export default defineConfig({
   // Plugins
   plugins: [
     vue(),
+    vuetify({ autoImport: true }),
   ],
   
   // Build configuration
@@ -195,8 +197,8 @@ export default defineConfig({
       'dojo/dnd/Manager',
       'dojo/store/Observable',
       
-      // Element Plus
-      'element-plus',
+      // Vuetify
+      'vuetify',
     ],
     
     // Exclude patterns - Dojo should be pre-bundled, not excluded

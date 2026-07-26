@@ -1,9 +1,9 @@
 <template>
-  <el-config-provider :locale="locale">
+  <v-app>
     <div class="ttrss-app">
       <header class="app-header">
         <h1>Tiny Tiny RSS</h1>
-        <p class="subtitle">Vue 3 + Element Plus Migration</p>
+        <p class="subtitle">Vue 3 + Vuetify Migration</p>
       </header>
 
       <main class="app-main">
@@ -41,20 +41,32 @@
         <span class="status">{{ statusMessage }}</span>
       </footer>
     </div>
-  </el-config-provider>
+
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+    >
+      {{ snackbarText }}
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="snackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+  </v-app>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
 import type { Feed, Category, Headline, Article } from '@/types';
 import { FeedTree } from '@/components/FeedTree.vue';
 import { Toolbar } from '@/components/Toolbar.vue';
 import { HeadlinesList } from '@/components/HeadlinesList.vue';
 import { ArticleView } from '@/components/ArticleView.vue';
-
-// Locale for Element Plus
-import en from 'element-plus/es/locale/lang/en';
 
 // State
 const feeds = ref<Feed[]>([]);
@@ -64,9 +76,9 @@ const selectedArticle = ref<Article | null>(null);
 const currentFeedId = ref<number | string>(0);
 const currentIsCat = ref(false);
 const loadingHeadlines = ref(false);
-
-// Locale
-const locale = en;
+const snackbar = ref(false);
+const snackbarText = ref('');
+const snackbarColor = ref<'success' | 'error' | 'info' | 'warning'>('info');
 
 // Computed
 const currentFeedInfo = computed(() => {
@@ -76,10 +88,18 @@ const currentFeedInfo = computed(() => {
   }
   return null;
 });
+
 const statusMessage = computed(() => {
   const unread = headlines.value.filter(h => !h.is_read).length;
   return `${headlines.value.length} articles, ${unread} unread`;
 });
+
+// Helper function to show messages
+const showMessage = (text: string, color: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+  snackbarText.value = text;
+  snackbarColor.value = color;
+  snackbar.value = true;
+};
 
 // API Functions
 const loadFeeds = async () => {
@@ -95,7 +115,7 @@ const loadFeeds = async () => {
     statusHandlers[data.status]?.(data.content);
   } catch (error) {
     console.error('Failed to load feeds:', error);
-    ElMessage.error('Failed to load feeds');
+    showMessage('Failed to load feeds', 'error');
   }
 };
 
@@ -127,7 +147,7 @@ const loadHeadlines = async () => {
     statusHandlers[data.status]?.(data.content);
   } catch (error) {
     console.error('Failed to load headlines:', error);
-    ElMessage.error('Failed to load headlines');
+    showMessage('Failed to load headlines', 'error');
   } finally {
     loadingHeadlines.value = false;
   }
@@ -155,7 +175,7 @@ const loadArticle = async (articleId: number) => {
     }
   } catch (error) {
     console.error('Failed to load article:', error);
-    ElMessage.error('Failed to load article');
+    showMessage('Failed to load article', 'error');
   }
 };
 
@@ -208,7 +228,7 @@ const togglePublish = (articleId: number, published: boolean) => {
  * @returns {void}
  */
 const catchupCurrent = () => {
-  ElMessage.info('Catchup functionality coming soon');
+  showMessage('Catchup functionality coming soon', 'info');
 };
 
 // Handlers
@@ -233,10 +253,10 @@ const handleToolbarAction = (action: string) => {
       catchupCurrent();
       break;
     case 'search':
-      ElMessage.info('Search functionality coming soon');
+      showMessage('Search functionality coming soon', 'info');
       break;
     default:
-      ElMessage.warning(`Unknown action: ${action}`);
+      showMessage(`Unknown action: ${action}`, 'warning');
   }
 };
 
@@ -272,7 +292,7 @@ const handleHeadlineAction = (headline: Headline, action: string) => {
       void togglePublish(headline.id, !headline.is_published);
       break;
     default:
-      ElMessage.warning(`Unknown action: ${action}`);
+      showMessage(`Unknown action: ${action}`, 'warning');
   }
 };
 
