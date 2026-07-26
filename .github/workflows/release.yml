@@ -20,14 +20,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm ci --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Ensure zip available
         run: |
@@ -40,11 +43,11 @@ jobs:
           tar --exclude='.git' \
               --exclude='.github' \
               --exclude='node_modules' \
+              --exclude='dist' \
               --exclude='*.log' \
               --exclude='*.tmp' \
-              --exclude='*.ts' \
-              --exclude='*.less' \
               --exclude='package-lock.json' \
+              --exclude='pnpm-lock.yaml' \
               -czf /tmp/tt-rss.tar.gz . && mv /tmp/tt-rss.tar.gz .
 
       - name: Create zip
@@ -53,11 +56,11 @@ jobs:
               -x '.git/*' \
               -x '.github/*' \
               -x 'node_modules/*' \
+              -x 'dist/*' \
               -x '*.log' \
               -x '*.tmp' \
-              -x '*.ts' \
-              -x '*.less' \
-              -x 'package-lock.json'
+              -x 'package-lock.json' \
+              -x 'pnpm-lock.yaml'
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -82,14 +85,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm ci --ignore-scripts
+        run: pnpm install --frozen-lockfile
 
       - name: Download artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -103,7 +109,7 @@ jobs:
           ls -la tt-rss.*
 
       - name: Semantic Release
-        run: npx semantic-release
+        run: pnpm exec semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIT_AUTHOR_NAME: github-actions[bot]
