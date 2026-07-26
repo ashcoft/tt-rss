@@ -1,375 +1,368 @@
+<template>
+  <v-app>
+    <div class="ttrss-app">
+      <header class="app-header">
+        <h1>Tiny Tiny RSS</h1>
+        <p class="subtitle">Vue 3 + Vuetify Migration</p>
+      </header>
+
+      <main class="app-main">
+        <aside class="sidebar">
+          <FeedTree
+            :feeds="feeds"
+            :categories="categories"
+            @select="handleFeedSelect"
+          />
+        </aside>
+
+        <section class="content">
+          <Toolbar
+            :feed-info="currentFeedInfo"
+            @action="handleToolbarAction"
+          />
+
+          <HeadlinesList
+            :headlines="headlines"
+            :loading="loadingHeadlines"
+            @select="handleHeadlineSelect"
+            @action="handleHeadlineAction"
+          />
+        </section>
+
+        <aside class="article-panel" v-if="selectedArticle">
+          <ArticleView
+            :article="selectedArticle"
+            @close="selectedArticle = null"
+          />
+        </aside>
+      </main>
+
+      <footer class="app-footer">
+        <span class="status">{{ statusMessage }}</span>
+      </footer>
+    </div>
+
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+    >
+      {{ snackbarText }}
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="snackbar = false"
+        >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+  </v-app>
+</template>
+
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import ArticleView from './components/ArticleView.vue';
+import { ref, computed, onMounted } from 'vue';
+import type { Feed, Category, Headline, Article } from '@/types';
+import { FeedTree } from '@/components/FeedTree.vue';
+import { Toolbar } from '@/components/Toolbar.vue';
+import { HeadlinesList } from '@/components/HeadlinesList.vue';
+import { ArticleView } from '@/components/ArticleView.vue';
 
-const articles = ref<Array<{
-  id: number;
-  title: string;
-  content: string;
-  link: string;
-  feed: string;
-  unread: boolean;
-}>>([]);
-const selectedArticle = ref<number | null>(null);
-const loading = ref(false);
-const error = ref<string | null>(null);
+// State
+const feeds = ref<Feed[]>([]);
+const categories = ref<Category[]>([]);
+const headlines = ref<Headline[]>([]);
+const selectedArticle = ref<Article | null>(null);
+const currentFeedId = ref<number | string>(0);
+const currentIsCat = ref(false);
+const loadingHeadlines = ref(false);
+const snackbar = ref(false);
+const snackbarText = ref('');
+const snackbarColor = ref<'success' | 'error' | 'info' | 'warning'>('info');
 
-// Async wrapper for loadArticles to satisfy linting
-async function loadArticles(): Promise<void> {
-  loading.value = true;
-  error.value = null;
-  
-  try {
-    const response = await fetch('/api/articles', {
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    articles.value = data.articles || [];
-  } catch (err) {
-    console.error('Failed to load articles:', err);
-    error.value = 'Failed to load articles. Please try again.';
-  } finally {
-    loading.value = false;
+// Computed
+const currentFeedInfo = computed(() => {
+  if (typeof currentFeedId.value === 'number' && currentFeedId.value > 0) {
+    const feed = feeds.value.find(f => f.id === currentFeedId.value);
+    if (feed) return feed;
   }
-}
-
-// Async wrapper for markAsRead to satisfy linting
-async function markAsRead(articleId: number): Promise<void> {
-  try {
-    const response = await fetch(`/api/articles/${articleId}/read`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const article = articles.value.find(a => a.id === articleId);
-    if (article) {
-      article.unread = false;
-    }
-  } catch (err) {
-    console.error('Failed to mark article as read:', err);
-  }
-}
-
-// Async wrapper for markAllAsRead to satisfy linting
-async function markAllAsRead(): Promise<void> {
-  try {
-    const response = await fetch('/api/articles/mark-all-read', {
-      method: 'POST',
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    articles.value.forEach(article => {
-      article.unread = false;
-    });
-  } catch (err) {
-    console.error('Failed to mark all as read:', err);
-  }
-}
-
-// Async wrapper for toggleStar to satisfy linting
-async function toggleStar(articleId: number): Promise<void> {
-  try {
-    const response = await fetch(`/api/articles/${articleId}/star`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-  } catch (err) {
-    console.error('Failed to toggle star:', err);
-  }
-}
-
-// Async wrapper for togglePublish to satisfy linting
-async function togglePublish(articleId: number): Promise<void> {
-  try {
-    const response = await fetch(`/api/articles/${articleId}/publish`, {
-      method: 'POST',
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-  } catch (err) {
-    console.error('Failed to toggle publish:', err);
-  }
-}
-
-// Async wrapper for loadHeadlines to satisfy linting
-async function loadHeadlines(): Promise<void> {
-  loading.value = true;
-  error.value = null;
-  
-  try {
-    const response = await fetch('/api/headlines', {
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    articles.value = data.articles || [];
-  } catch (err) {
-    console.error('Failed to load headlines:', err);
-    error.value = 'Failed to load headlines. Please try again.';
-  } finally {
-    loading.value = false;
-  }
-}
-
-// Async wrapper for fetchFeeds to satisfy linting
-async function fetchFeeds(): Promise<void> {
-  try {
-    const response = await fetch('/api/feeds', {
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    // Handle feeds data
-    console.log('Feeds loaded:', data);
-  } catch (err) {
-    console.error('Failed to load feeds:', err);
-  }
-}
-
-// Async wrapper for fetchLabels to satisfy linting
-async function fetchLabels(): Promise<void> {
-  try {
-    const response = await fetch('/api/labels', {
-      credentials: 'include'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    // Handle labels data
-    console.log('Labels loaded:', data);
-  } catch (err) {
-    console.error('Failed to load labels:', err);
-  }
-}
-
-// Sync wrapper for toolbar actions (void operator for fire-and-forget)
-function handleToolbarAction(action: string): void {
-  switch (action) {
-    case 'refresh':
-      void loadHeadlines(); // Fire-and-forget with void
-      break;
-    case 'mark-all-read':
-      void markAllAsRead(); // Fire-and-forget with void
-      break;
-  }
-}
-
-// Sync wrapper for headline actions (void operator for fire-and-forget)
-function handleHeadlineAction(action: string, articleId: number): void {
-  switch (action) {
-    case 'read':
-      void markAsRead(articleId); // Fire-and-forget with void
-      break;
-    case 'star':
-      void toggleStar(articleId); // Fire-and-forget with void
-      break;
-    case 'publish':
-      void togglePublish(articleId); // Fire-and-forget with void
-      break;
-  }
-}
-
-function selectArticle(articleId: number): void {
-  selectedArticle.value = articleId;
-  void markAsRead(articleId); // Fire-and-forget with void
-}
-
-// Fix: Use proper .toString() for URLSearchParams template literal
-function searchArticles(query: string): void {
-  const params = new URLSearchParams({ q: query });
-  
-  void (async () => {
-    try {
-      const response = await fetch(`/api/search?${params.toString()}`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      articles.value = data.articles || [];
-    } catch (err) {
-      console.error('Failed to search articles:', err);
-      error.value = 'Search failed. Please try again.';
-    }
-  })();
-}
-
-// Fix: Use async/await in onMounted
-onMounted(async () => {
-  await Promise.all([
-    loadArticles(),
-    fetchFeeds(),
-    fetchLabels()
-  ]);
+  return null;
 });
 
-defineExpose({
-  articles,
-  selectedArticle,
-  loading,
-  error,
-  selectArticle,
-  markAsRead,
-  markAllAsRead,
-  toggleStar,
-  togglePublish,
-  loadHeadlines,
-  handleToolbarAction,
-  handleHeadlineAction,
-  searchArticles
+const statusMessage = computed(() => {
+  const unread = headlines.value.filter(h => !h.is_read).length;
+  return `${headlines.value.length} articles, ${unread} unread`;
+});
+
+// Helper function to show messages
+const showMessage = (text: string, color: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+  snackbarText.value = text;
+  snackbarColor.value = color;
+  snackbar.value = true;
+};
+
+// API Functions
+const loadFeeds = async () => {
+  try {
+    const response = await fetch('/backend.php?op=feeds&method=getTree&csrf_token=auto');
+    const data = await response.json();
+    const statusHandlers: { [key: number]: (content: unknown) => void } = {
+      0: content => {
+        feeds.value = (content as { feeds?: Feed[] }).feeds || [];
+        categories.value = (content as { categories?: Category[] }).categories || [];
+      }
+    };
+    statusHandlers[data.status]?.(data.content);
+  } catch (error) {
+    console.error('Failed to load feeds:', error);
+    showMessage('Failed to load feeds', 'error');
+  }
+};
+
+/**
+ * Loads the headlines for the current feed.
+ * Fetches headlines from the backend and updates the headlines state.
+ *
+ * @returns {Promise<void>}
+ */
+const loadHeadlines = async () => {
+  loadingHeadlines.value = true;
+  try {
+    const params = new URLSearchParams({
+      op: 'feeds',
+      method: 'getHeadlines',
+      feed_id: String(currentFeedId.value),
+      is_cat: currentIsCat.value ? '1' : '0',
+      view_mode: 'adaptive',
+      csrf_token: 'auto'
+    });
+
+    const response = await fetch(`/backend.php?${params.toString()}`);
+    const data = await response.json();
+    const statusHandlers: { [key: number]: (content: unknown) => void } = {
+      0: content => {
+        headlines.value = (content as { headlines?: Headline[] }).headlines || [];
+      }
+    };
+    statusHandlers[data.status]?.(data.content);
+  } catch (error) {
+    console.error('Failed to load headlines:', error);
+    showMessage('Failed to load headlines', 'error');
+  } finally {
+    loadingHeadlines.value = false;
+  }
+};
+
+/**
+ * Loads the article with the given ID.
+ *
+ * @param {number} articleId - ID of the article to load.
+ * @returns {Promise<void>}
+ */
+const loadArticle = async (articleId: number) => {
+  try {
+    const params = new URLSearchParams({
+      op: 'article',
+      method: 'view',
+      article_id: String(articleId),
+      csrf_token: 'auto'
+    });
+
+    const response = await fetch(`/backend.php?${params.toString()}`);
+    const data = await response.json();
+    if (data.status === 0 && data.content) {
+      selectedArticle.value = data.content;
+    }
+  } catch (error) {
+    console.error('Failed to load article:', error);
+    showMessage('Failed to load article', 'error');
+  }
+};
+
+/**
+ * Marks an article as read or unread.
+ *
+ * @param {number} articleId - ID of the article.
+ * @param {boolean} isRead - True to mark as read, false to mark as unread.
+ * @returns {Promise<void>}
+ */
+const markAsRead = async (articleId: number, isRead: boolean) => {
+  const headline = headlines.value.find(h => h.id === articleId);
+  if (headline) {
+    headline.is_read = isRead;
+  }
+};
+
+/**
+ * Toggles the starred state of an article.
+ *
+ * @param {number} articleId - ID of the article.
+ * @param {boolean} starred - True to star the article, false to unstar.
+ * @returns {Promise<void>}
+ */
+const toggleStar = (articleId: number, starred: boolean) => {
+  const headline = headlines.value.find(h => h.id === articleId);
+  if (headline) {
+    headline.is_marked = starred;
+  }
+};
+
+/**
+ * Toggles the published state of an article.
+ *
+ * @param {number} articleId - ID of the article.
+ * @param {boolean} published - True to publish the article, false to unpublish.
+ * @returns {Promise<void>}
+ */
+const togglePublish = (articleId: number, published: boolean) => {
+  const headline = headlines.value.find(h => h.id === articleId);
+  if (headline) {
+    headline.is_published = published;
+  }
+  return Promise.resolve();
+};
+
+/**
+ * Displays an informational message about catchup functionality.
+ *
+ * @returns {void}
+ */
+const catchupCurrent = () => {
+  showMessage('Catchup functionality coming soon', 'info');
+};
+
+// Handlers
+const handleFeedSelect = async (feedId: number | string, isCat: boolean) => {
+  currentFeedId.value = feedId;
+  currentIsCat.value = isCat;
+  await loadHeadlines();
+};
+
+/**
+ * Handles toolbar actions based on the specified action string.
+ *
+ * @param {string} action - The action to perform.
+ * @returns {void}
+ */
+const handleToolbarAction = (action: string) => {
+  switch (action) {
+    case 'refresh':
+      void loadHeadlines();
+      break;
+    case 'catchup':
+      catchupCurrent();
+      break;
+    case 'search':
+      showMessage('Search functionality coming soon', 'info');
+      break;
+    default:
+      showMessage(`Unknown action: ${action}`, 'warning');
+  }
+};
+
+/**
+ * Handles selection of a headline by loading the associated article.
+ *
+ * @param {Headline} headline - The selected headline object.
+ * @returns {Promise<void>}
+ */
+const handleHeadlineSelect = async (headline: Headline) => {
+  await loadArticle(headline.id);
+};
+
+/**
+ * Handles various actions on a headline such as marking read/unread, starring, or publishing.
+ *
+ * @param {Headline} headline - The headline object to act on.
+ * @param {string} action - The action to perform on the headline.
+ * @returns {void}
+ */
+const handleHeadlineAction = (headline: Headline, action: string) => {
+  switch (action) {
+    case 'mark_read':
+      void markAsRead(headline.id, true);
+      break;
+    case 'mark_unread':
+      void markAsRead(headline.id, false);
+      break;
+    case 'toggle_star':
+      void toggleStar(headline.id, !headline.is_marked);
+      break;
+    case 'toggle_publish':
+      void togglePublish(headline.id, !headline.is_published);
+      break;
+    default:
+      showMessage(`Unknown action: ${action}`, 'warning');
+  }
+};
+
+// Lifecycle
+onMounted(() => {
+  void loadFeeds();
 });
 </script>
 
-<template>
-  <div class="vue-app">
-    <header class="app-header">
-      <h1>Tiny Tiny RSS</h1>
-      <nav class="app-nav">
-        <button @click="loadArticles">Refresh</button>
-        <button @click="markAllAsRead">Mark All Read</button>
-      </nav>
-    </header>
-    
-    <main class="app-main">
-      <div v-if="loading" class="loading">Loading...</div>
-      <div v-else-if="error" class="error">{{ error }}</div>
-      <template v-else>
-        <div class="article-list">
-          <article
-            v-for="article in articles"
-            :key="article.id"
-            :class="{ unread: article.unread }"
-            @click="selectArticle(article.id)"
-          >
-            <h3>{{ article.title }}</h3>
-            <p class="feed-name">{{ article.feed }}</p>
-          </article>
-        </div>
-        <ArticleView
-          v-if="selectedArticle"
-          :article-id="selectedArticle"
-        />
-      </template>
-    </main>
-  </div>
-</template>
-
 <style scoped>
-.vue-app {
+.ttrss-app {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background: var(--ttrss-bg, #f5f5f5);
 }
 
 .app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 1rem;
-  background: var(--header-bg, #f5f5f5);
-  border-bottom: 1px solid #ddd;
+  background: var(--ttrss-header-bg, #fff);
+  border-bottom: 1px solid var(--ttrss-border, #ddd);
 }
 
 .app-header h1 {
   margin: 0;
   font-size: 1.5rem;
+  color: var(--ttrss-primary, #1976d2);
 }
 
-.app-nav {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.app-nav button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ccc;
-  background: white;
-  cursor: pointer;
-}
-
-.app-nav button:hover {
-  background: #eee;
+.app-header .subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: #666;
 }
 
 .app-main {
+  display: flex;
   flex: 1;
-  overflow: auto;
-  padding: 1rem;
+  overflow: hidden;
 }
 
-.loading,
-.error {
-  text-align: center;
-  padding: 2rem;
+.sidebar {
+  width: 250px;
+  overflow-y: auto;
+  background: var(--ttrss-sidebar-bg, #fff);
+  border-right: 1px solid var(--ttrss-border, #ddd);
 }
 
-.error {
-  color: #d32f2f;
-}
-
-.article-list {
+.content {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  overflow: hidden;
 }
 
-.article-list article {
-  padding: 1rem;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  transition: background 0.2s;
+.article-panel {
+  width: 400px;
+  overflow-y: auto;
+  background: var(--ttrss-article-bg, #fff);
+  border-left: 1px solid var(--ttrss-border, #ddd);
 }
 
-.article-list article:hover {
-  background: #f9f9f9;
-}
-
-.article-list article.unread {
-  font-weight: bold;
-  background: #fffde7;
-}
-
-.article-list h3 {
-  margin: 0 0 0.5rem 0;
-}
-
-.feed-name {
-  color: #666;
+.app-footer {
+  padding: 0.5rem 1rem;
+  background: var(--ttrss-footer-bg, #f0f0f0);
+  border-top: 1px solid var(--ttrss-border, #ddd);
   font-size: 0.875rem;
-  margin: 0;
+}
+
+.status {
+  color: #666;
 }
 </style>
