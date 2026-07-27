@@ -21,10 +21,10 @@ export interface KeyboardShortcuts {
 
 export function useKeyboard(shortcuts: KeyboardShortcuts) {
   /**
-   * Handle keyboard events for navigation
+   * Process keyboard shortcuts
    * @param ev - Keyboard event object
    */
-  const handleKeyboard = (ev: KeyboardEvent): void => {
+  const processKey = (ev: KeyboardEvent): void => {
     // Ignore if typing in input/textarea
     const target = ev.target;
     if (target instanceof HTMLElement) {
@@ -96,11 +96,11 @@ export function useKeyboard(shortcuts: KeyboardShortcuts) {
   };
 
   onMounted(() => {
-    document.addEventListener('keydown', handleKeyboard);
+    document.addEventListener('keydown', processKey);
   });
 
   onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeyboard);
+    document.removeEventListener('keydown', processKey);
   });
 }
 
