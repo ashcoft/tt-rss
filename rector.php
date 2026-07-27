@@ -11,6 +11,7 @@ return RectorConfig::configure()
 	->withCache(__DIR__ . '/.rector-tmp', FileCacheStorage::class)
 	->withPaths([__DIR__])
 	->withSkip([
+		__DIR__ . '/.github',
 		__DIR__ . '/lib',
 		__DIR__ . '/plugins.local',
 		__DIR__ . '/vendor',

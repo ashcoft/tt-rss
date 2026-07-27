@@ -150,15 +150,15 @@ All other files remain unchanged:
 
 ```
 src/vue/
-├── main.ts              # Vue app entry point
-├── App.vue              # Main app with layout
-├── types/
-│   └── index.ts         # TypeScript definitions
-└── components/
-    ├── FeedTree.vue     # Feed/category navigation
-    ├── Toolbar.vue      # Action toolbar
-    ├── HeadlinesList.vue # Article headlines
-    └── ArticleView.vue  # Article content display
+в”њв”Ђв”Ђ main.ts              # Vue app entry point
+в”њв”Ђв”Ђ App.vue              # Main app with layout
+в”њв”Ђв”Ђ types/
+в”‚   в””в”Ђв”Ђ index.ts         # TypeScript definitions
+в””в”Ђв”Ђ components/
+    в”њв”Ђв”Ђ FeedTree.vue     # Feed/category navigation
+    в”њв”Ђв”Ђ Toolbar.vue      # Action toolbar
+    в”њв”Ђв”Ђ HeadlinesList.vue # Article headlines
+    в””в”Ђв”Ђ ArticleView.vue  # Article content display
 ```
 
 ### Component Mapping
@@ -221,25 +221,115 @@ For production build issues:
 
 ## Migration Progress
 
-- [x] Phase 1: Analysis of existing build system
-- [x] Phase 2: Vite configuration with AMD support
-- [x] Phase 3: Entry point and AMD shim
-- [x] Phase 4: pnpm and TypeScript setup
-- [x] Phase 5: Vue 3 + Vuetify components
-- [x] Phase 6: Testing and validation
-- [x] Phase 7: Documentation
+### вњ… Phase 1: Build System вњ… COMPLETE
+- [x] Analysis of existing build system
+- [x] Vite configuration with AMD support
+- [x] Entry point and AMD shim
+- [x] pnpm and TypeScript setup
+- [x] Vue 3 + Vuetify components
+- [x] Testing and validation
+- [x] Documentation
+
+### вњ… Phase 2: Core Vue Infrastructure вњ… COMPLETE
+- [x] API Client (`src/vue/api/client.ts`)
+  - Full TT-RSS API coverage (auth, feeds, articles, labels, categories, search)
+  - CSRF token handling
+  - Proper array parameter serialization
+- [x] Pinia Stores (`src/vue/stores/`)
+  - `feeds.ts` - Feed and category state management
+  - `headlines.ts` - Headlines and articles state management
+- [x] Composables (`src/vue/composables/`)
+  - `useKeyboard.ts` - Keyboard shortcuts (j/k, o, r, s, f, u, /, ?)
+  - `useInfiniteScroll.ts` - Infinite scroll for headlines
+- [x] App integration with Pinia stores
+- [x] CSRF token initialization on app startup
+
+### рџљ§ Phase 3: Feature Parity (In Progress)
+- [ ] All article actions (mark read/unread, star, publish, delete)
+- [ ] Feed management (add, edit, delete feeds)
+- [ ] Category management
+- [ ] Labels management
+- [ ] Search functionality
+- [ ] Filter functionality
+- [ ] User authentication/login flow
+- [ ] Drag and drop support
+
+### вќЊ Phase 4: Preferences (Not Started)
+- [ ] User preferences
+- [ ] Feed preferences
+- [ ] Filter rules
+- [ ] Label management
+- [ ] Plugin settings
+
+### вќЊ Phase 5: Polish (Not Started)
+- [ ] Error handling
+- [ ] Loading states
+- [ ] Responsive design
+- [ ] Theme support (light/dark)
+- [ ] Accessibility improvements
+- [ ] Real-time updates (polling)
+- [ ] Offline support (service worker)
+
+## Vue Source Structure
+
+```text
+src/vue/
+в”œв”€в”€ api/
+в”‚   в””в”€в”€ client.ts          # TT-RSS API client (full API coverage)
+в”њв”Ђв”Ђ components/
+в”‚   в”њв”Ђв”Ђ ArticleView.vue    # Article content display
+в”‚   в”њв”Ђв”Ђ FeedTree.vue       # Feed/category navigation
+в”‚   в”њв”Ђв”Ђ HeadlinesList.vue  # Headlines with actions
+в”‚   в””в”Ђв”Ђ Toolbar.vue        # Action toolbar
+в”њв”Ђв”Ђ composables/
+в”‚   в”њв”Ђв”Ђ useInfiniteScroll.ts  # Infinite scroll
+в”‚   в””в”Ђв”Ђ useKeyboard.ts        # Keyboard shortcuts
+в”њв”Ђв”Ђ stores/
+в”‚   в”њв”Ђв”Ђ feeds.ts           # Feed/category state
+в”‚   в”њв”Ђв”Ђ headlines.ts       # Headlines/articles state
+в”‚   в””в”Ђв”Ђ index.ts          # Store exports
+в”њв”Ђв”Ђ types/
+в”‚   в””в”Ђв”Ђ index.ts           # TypeScript types
+в”њв”Ђв”Ђ App.vue                # Main application
+в””в”Ђв”Ђ main.ts               # Entry point with Pinia/Vuetify
+```
+
+## Dojo/Dijit Files Still Used
+
+### Core Application
+- `js/App.js` - Main application controller
+- `js/tt-rss.js` - Core TT-RSS functionality
+- `js/common.js` - Common utilities
+
+### Article & Headlines
+- `js/Article.js` - Article operations
+- `js/Headlines.js` - Headlines view with actions
+- `js/Feeds.js` - Feed operations
+
+### Common Components
+- `js/CommonDialogs.js` - Dialog components
+- `js/CommonFilters.js` - Filter components
+- `js/Toolbar.js` - Toolbar (more features)
+
+### Feed Tree
+- `js/FeedTree.js` - Feed tree with categories, drag-drop
+
+### Preferences
+- `js/prefs.js`, `js/Pref*.js` - All preferences modules
+
+### Form & Other
+- `js/form/` - Form widgets
+- `js/SingleUseDialog.js`, `js/PluginHost.js`, etc.
 
 ## Future Enhancements
 
 Potential improvements for future phases:
 
-1. **Full ESM Migration**: Gradually convert Dojo modules to ESM
-2. **HMR for Dojo**: Implement HMR for Dojo widgets
-3. **Complete Component Migration**: Migrate remaining Dojo components to Vue
-4. **Vue Router Integration**: Add client-side routing
-5. **Pinia State Management**: Replace Dojo stores with Pinia
-6. **Bundle Optimization**: Analyze and optimize the production bundle
-7. **Full TypeScript Adoption**: Convert all Vue components to TypeScript
+1. **Complete Component Migration**: Migrate remaining Dojo components to Vue
+2. **Vue Router Integration**: Add client-side routing for preferences, etc.
+3. **Bundle Optimization**: Analyze and optimize the production bundle
+4. **Full TypeScript Adoption**: Convert all Vue components to TypeScript
+5. **Full ESM Migration**: Gradually convert Dojo modules to ESM
 
 ## Contributing
 
