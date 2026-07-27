@@ -92,7 +92,7 @@ class ApiClient {
       for (const [key, value] of Object.entries(restParams)) {
         if (Array.isArray(value)) {
           for (const v of value) {
-            url.searchParams.set(`${key}[]`, String(v));
+            url.searchParams.append(`${key}[]`, String(v));
           }
         } else {
           // After Array.isArray check, value is not an array
@@ -117,7 +117,7 @@ class ApiClient {
       for (const [key, value] of Object.entries(restParams)) {
         if (Array.isArray(value)) {
           for (const v of value) {
-            formData.set(`${key}[]`, String(v));
+            formData.append(`${key}[]`, String(v));
           }
         } else {
           // After Array.isArray check, value is not an array
@@ -197,9 +197,10 @@ class ApiClient {
       parent_id: number | null;
     }>;
   }>> {
-    return this.request('feeds', {
-      op: 'feeds',
-      method: 'getTree',
+    return this.request('Pref_Feeds', {
+      op: 'Pref_Feeds',
+      method: 'getfeedtree',
+      mode: 2,
     });
   }
 
@@ -223,7 +224,7 @@ class ApiClient {
       content: string;
       excerpt: string;
       updated: number;
-      is_starred: boolean;
+      is_marked: boolean;
       is_read: boolean;
       is_published: boolean;
       tags: string[];
@@ -239,11 +240,11 @@ class ApiClient {
     first_id: number;
     last_id: number;
   }>> {
-    return this.request('feeds', {
-      op: 'feeds',
-      method: 'getHeadlines',
-      feed_id: feedId,
-      is_cat: options.isCat ? '1' : '0',
+    return this.request('Feeds', {
+      op: 'Feeds',
+      method: 'view',
+      feed: feedId,
+      cat: options.isCat ? '1' : '0',
       view_mode: options.viewMode || 'adaptive',
       limit: options.limit || 30,
       skip: options.skip || 0,

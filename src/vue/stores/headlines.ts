@@ -15,7 +15,7 @@ export interface Headline {
   content: string;
   excerpt: string;
   updated: number;
-  is_starred: boolean;
+  is_marked: boolean;
   is_read: boolean;
   is_published: boolean;
   tags: string[];
@@ -36,7 +36,7 @@ export interface Article {
   content: string;
   excerpt: string;
   updated: number;
-  is_starred: boolean;
+  is_marked: boolean;
   is_read: boolean;
   is_published: boolean;
   tags: string[];
@@ -228,14 +228,14 @@ export const useHeadlinesStore = defineStore('headlines', () => {
     const headline = headlines.value.find(h => h.id === articleId);
     if (!headline) return;
 
-    const newValue = !headline.is_starred;
+    const newValue = !headline.is_marked;
 
     try {
       await api.markArticles([articleId], newValue ? 2 : 0);
-      headline.is_starred = newValue;
+      headline.is_marked = newValue;
       
       if (selectedArticle.value?.id === articleId) {
-        selectedArticle.value.is_starred = newValue;
+        selectedArticle.value.is_marked = newValue;
       }
     } catch (err) {
       console.error('Failed to toggle star:', err);

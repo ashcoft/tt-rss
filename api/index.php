@@ -55,7 +55,9 @@
 
 	$method = strtolower($_REQUEST["op"] ?? "");
 
-	$handler = new API($_REQUEST);
+	// Ensure $_REQUEST is an array (could be null if JSON decode fails)
+	$requestParams = is_array($_REQUEST) ? $_REQUEST : [];
+	$handler = new API($requestParams);
 
 	if ($handler->before($method)) {
 		if ($method && method_exists($handler, $method)) {

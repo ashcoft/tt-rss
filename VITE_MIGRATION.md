@@ -150,15 +150,15 @@ All other files remain unchanged:
 
 ```
 src/vue/
-├── main.ts              # Vue app entry point
-├── App.vue              # Main app with layout
-├── types/
-│   └── index.ts         # TypeScript definitions
-└── components/
-    ├── FeedTree.vue     # Feed/category navigation
-    ├── Toolbar.vue      # Action toolbar
-    ├── HeadlinesList.vue # Article headlines
-    └── ArticleView.vue  # Article content display
+в”њв”Ђв”Ђ main.ts              # Vue app entry point
+в”њв”Ђв”Ђ App.vue              # Main app with layout
+в”њв”Ђв”Ђ types/
+в”‚   в””в”Ђв”Ђ index.ts         # TypeScript definitions
+в””в”Ђв”Ђ components/
+    в”њв”Ђв”Ђ FeedTree.vue     # Feed/category navigation
+    в”њв”Ђв”Ђ Toolbar.vue      # Action toolbar
+    в”њв”Ђв”Ђ HeadlinesList.vue # Article headlines
+    в””в”Ђв”Ђ ArticleView.vue  # Article content display
 ```
 
 ### Component Mapping
@@ -221,7 +221,7 @@ For production build issues:
 
 ## Migration Progress
 
-### ✅ Phase 1: Build System ✅ COMPLETE
+### вњ… Phase 1: Build System вњ… COMPLETE
 - [x] Analysis of existing build system
 - [x] Vite configuration with AMD support
 - [x] Entry point and AMD shim
@@ -230,7 +230,7 @@ For production build issues:
 - [x] Testing and validation
 - [x] Documentation
 
-### ✅ Phase 2: Core Vue Infrastructure ✅ COMPLETE
+### вњ… Phase 2: Core Vue Infrastructure вњ… COMPLETE
 - [x] API Client (`src/vue/api/client.ts`)
   - Full TT-RSS API coverage (auth, feeds, articles, labels, categories, search)
   - CSRF token handling
@@ -244,7 +244,7 @@ For production build issues:
 - [x] App integration with Pinia stores
 - [x] CSRF token initialization on app startup
 
-### 🚧 Phase 3: Feature Parity (In Progress)
+### рџљ§ Phase 3: Feature Parity (In Progress)
 - [ ] All article actions (mark read/unread, star, publish, delete)
 - [ ] Feed management (add, edit, delete feeds)
 - [ ] Category management
@@ -254,14 +254,14 @@ For production build issues:
 - [ ] User authentication/login flow
 - [ ] Drag and drop support
 
-### ❌ Phase 4: Preferences (Not Started)
+### вќЊ Phase 4: Preferences (Not Started)
 - [ ] User preferences
 - [ ] Feed preferences
 - [ ] Filter rules
 - [ ] Label management
 - [ ] Plugin settings
 
-### ❌ Phase 5: Polish (Not Started)
+### вќЊ Phase 5: Polish (Not Started)
 - [ ] Error handling
 - [ ] Loading states
 - [ ] Responsive design
@@ -272,26 +272,26 @@ For production build issues:
 
 ## Vue Source Structure
 
-```
+```text
 src/vue/
-├── api/
-│   └── client.ts          # TT-RSS API client (full API coverage)
-├── components/
-│   ├── ArticleView.vue    # Article content display
-│   ├── FeedTree.vue       # Feed/category navigation
-│   ├── HeadlinesList.vue  # Headlines with actions
-│   └── Toolbar.vue        # Action toolbar
-├── composables/
-│   ├── useInfiniteScroll.ts  # Infinite scroll
-│   └── useKeyboard.ts        # Keyboard shortcuts
-├── stores/
-│   ├── feeds.ts           # Feed/category state
-│   ├── headlines.ts       # Headlines/articles state
-│   └── index.ts          # Store exports
-├── types/
-│   └── index.ts           # TypeScript types
-├── App.vue                # Main application
-└── main.ts               # Entry point with Pinia/Vuetify
+в”œв”€в”€ api/
+в”‚   в””в”€в”€ client.ts          # TT-RSS API client (full API coverage)
+в”њв”Ђв”Ђ components/
+в”‚   в”њв”Ђв”Ђ ArticleView.vue    # Article content display
+в”‚   в”њв”Ђв”Ђ FeedTree.vue       # Feed/category navigation
+в”‚   в”њв”Ђв”Ђ HeadlinesList.vue  # Headlines with actions
+в”‚   в””в”Ђв”Ђ Toolbar.vue        # Action toolbar
+в”њв”Ђв”Ђ composables/
+в”‚   в”њв”Ђв”Ђ useInfiniteScroll.ts  # Infinite scroll
+в”‚   в””в”Ђв”Ђ useKeyboard.ts        # Keyboard shortcuts
+в”њв”Ђв”Ђ stores/
+в”‚   в”њв”Ђв”Ђ feeds.ts           # Feed/category state
+в”‚   в”њв”Ђв”Ђ headlines.ts       # Headlines/articles state
+в”‚   в””в”Ђв”Ђ index.ts          # Store exports
+в”њв”Ђв”Ђ types/
+в”‚   в””в”Ђв”Ђ index.ts           # TypeScript types
+в”њв”Ђв”Ђ App.vue                # Main application
+в””в”Ђв”Ђ main.ts               # Entry point with Pinia/Vuetify
 ```
 
 ## Dojo/Dijit Files Still Used
