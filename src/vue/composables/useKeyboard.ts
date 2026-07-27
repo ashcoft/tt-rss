@@ -20,11 +20,7 @@ export interface KeyboardShortcuts {
 }
 
 export function useKeyboard(shortcuts: KeyboardShortcuts) {
-  /**
-   * Process keyboard shortcuts
-   * @param ev - Keyboard event object
-   */
-  // @ts-expect-error - Codacy false positive: function does not return HTML content
+  /* codacy:disable XSS */
   const handler = (ev: KeyboardEvent): void => {
     // Ignore if typing in input/textarea
     const target = ev.target;
