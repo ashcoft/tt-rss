@@ -22,10 +22,7 @@ export interface Category {
   parent_id: number | null;
 }
 
-export interface FeedsByCategory {
-  uncategorized: Feed[];
-  [categoryId: string]: Feed[];
-}
+export type FeedsByCategoryMap = Map<string, Feed[]>;
 
 export const useFeedsStore = defineStore('feeds', () => {
   // State
@@ -37,30 +34,24 @@ export const useFeedsStore = defineStore('feeds', () => {
   const currentIsCat = ref(false);
 
   // Getters
-  const feedsByCategory = computed((): FeedsByCategory => {
-    const uncategorizedFeeds: Feed[] = [];
-    const categoryMap = new Map<string, Feed[]>();
+  const feedsByCategory = computed((): FeedsByCategoryMap => {
+    const result = new Map<string, Feed[]>();
+    result.set('uncategorized', []);
     
     for (const feed of feeds.value) {
       if (feed.cat_id != null) {
         const catKey = String(feed.cat_id);
-        const existing = categoryMap.get(catKey);
+        const existing = result.get(catKey);
         if (existing) {
           existing.push(feed);
         } else {
-          categoryMap.set(catKey, [feed]);
+          result.set(catKey, [feed]);
         }
       } else {
-        uncategorizedFeeds.push(feed);
+        const uncategorized = result.get('uncategorized')!;
+        uncategorized.push(feed);
       }
     }
-    
-    // Convert map to object with string keys
-    const result: FeedsByCategory = { uncategorized: uncategorizedFeeds };
-    // Add category entries with explicit string keys
-    categoryMap.forEach((catFeeds, catId) => {
-      result[catId] = catFeeds;
-    });
     
     return result;
   });
