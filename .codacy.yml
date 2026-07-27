@@ -3,3 +3,15 @@ exclude_paths:
   - tests_functional/**
   - vendor/**
   - node_modules/**
+
+languages:
+  - typescript
+  - javascript
+
+engines:
+  - eslint
+  - remarklint
+
+eslint:
+  enabled: true
+  plugin_prefix: "@typescript-eslint"
