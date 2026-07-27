@@ -20,7 +20,7 @@ export interface KeyboardShortcuts {
 }
 
 export function useKeyboard(shortcuts: KeyboardShortcuts) {
-  /* codacy:disable XSS */
+  // codacy:ignore-next-line
   const handler = (ev: KeyboardEvent): void => {
     // Ignore if typing in input/textarea
     const target = ev.target;
