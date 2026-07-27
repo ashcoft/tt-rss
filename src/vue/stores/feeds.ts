@@ -24,7 +24,7 @@ export interface Category {
 
 export interface FeedsByCategory {
   uncategorized: Feed[];
-  [categoryId: number]: Feed[];
+  [categoryId: string]: Feed[];
 }
 
 export const useFeedsStore = defineStore('feeds', () => {
@@ -39,26 +39,28 @@ export const useFeedsStore = defineStore('feeds', () => {
   // Getters
   const feedsByCategory = computed((): FeedsByCategory => {
     const uncategorizedFeeds: Feed[] = [];
-    const categoryMap = new Map<number, Feed[]>();
+    const categoryMap = new Map<string, Feed[]>();
     
     for (const feed of feeds.value) {
       if (feed.cat_id != null) {
-        const existing = categoryMap.get(feed.cat_id);
+        const catKey = String(feed.cat_id);
+        const existing = categoryMap.get(catKey);
         if (existing) {
           existing.push(feed);
         } else {
-          categoryMap.set(feed.cat_id, [feed]);
+          categoryMap.set(catKey, [feed]);
         }
       } else {
         uncategorizedFeeds.push(feed);
       }
     }
     
-    // Convert map to object with numeric keys
+    // Convert map to object with string keys
     const result: FeedsByCategory = { uncategorized: uncategorizedFeeds };
-    for (const [catId, catFeeds] of categoryMap) {
+    // Add category entries with explicit string keys
+    categoryMap.forEach((catFeeds, catId) => {
       result[catId] = catFeeds;
-    }
+    });
     
     return result;
   });

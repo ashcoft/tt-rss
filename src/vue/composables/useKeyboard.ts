@@ -21,75 +21,78 @@ export interface KeyboardShortcuts {
 
 /**
  * Handles keyboard events for navigation and shortcuts
- * @param event - KeyboardEvent from document keydown
+ * @param event - KeyboardEvent from document
  */
 export function useKeyboard(shortcuts: KeyboardShortcuts) {
-  /** @param {KeyboardEvent} event */
-  const handleKeyDown = (event: KeyboardEvent) => {
+  /**
+   * Process keyboard input for navigation
+   * @param e - Keyboard event object
+   */
+  const processKeyboardInput = (e: KeyboardEvent): void => {
     // Ignore if typing in input/textarea
-    const target = event.target;
+    const target = e.target;
     if (target instanceof HTMLElement) {
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return;
       }
     }
 
-    switch (event.key.toLowerCase()) {
+    switch (e.key.toLowerCase()) {
       // Navigation
       case 'j':
       case 'arrowdown':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onNext?.();
         break;
       case 'k':
       case 'arrowup':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onPrevious?.();
         break;
       case 'enter':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onSelect?.();
         break;
       
       // Article actions
       case 'o':
       case 'l':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onOpenArticle?.();
         break;
       case 'r':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onToggleRead?.();
         break;
       case 's':
-        if (!event.ctrlKey && !event.metaKey) {
-          event.preventDefault();
+        if (!e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
           shortcuts.onToggleStar?.();
         }
         break;
       case 'f':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onTogglePublish?.();
         break;
       
       // Other actions
       case 'g':
-        if (event.shiftKey) {
-          event.preventDefault();
+        if (e.shiftKey) {
+          e.preventDefault();
           shortcuts.onCatchup?.();
         }
         break;
       case '/':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onSearch?.();
         break;
       case '?':
-        event.preventDefault();
+        e.preventDefault();
         shortcuts.onHelp?.();
         break;
       case 'u':
-        if (!event.ctrlKey && !event.metaKey) {
-          event.preventDefault();
+        if (!e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
           shortcuts.onRefresh?.();
         }
         break;
@@ -97,11 +100,11 @@ export function useKeyboard(shortcuts: KeyboardShortcuts) {
   };
 
   onMounted(() => {
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', processKeyboardInput);
   });
 
   onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeyDown);
+    document.removeEventListener('keydown', processKeyboardInput);
   });
 }
 

@@ -143,8 +143,9 @@ export const useHeadlinesStore = defineStore('headlines', () => {
     try {
       const response = await api.getArticle(articleId);
 
-      if (response.status === 0 && response.content) {
-        selectedArticle.value = response.content;
+      if (response.status === 0) {
+        // Type narrowing - content exists when status is 0
+        selectedArticle.value = response.content as NonNullable<typeof response.content>;
         
         // Mark as read in headlines list
         const headline = headlines.value.find(h => h.id === articleId);

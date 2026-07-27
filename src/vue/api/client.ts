@@ -94,8 +94,10 @@ class ApiClient {
           for (const v of value) {
             url.searchParams.set(`${key}[]`, String(v));
           }
-        } else if (value != null) {
-          url.searchParams.set(key, String(value));
+        } else {
+          // After Array.isArray check, value is not an array
+          const nonArrayValue: string | number | boolean = value as string | number | boolean;
+          url.searchParams.set(key, String(nonArrayValue));
         }
       }
 
@@ -117,8 +119,10 @@ class ApiClient {
           for (const v of value) {
             formData.set(`${key}[]`, String(v));
           }
-        } else if (value != null) {
-          formData.set(key, String(value));
+        } else {
+          // After Array.isArray check, value is not an array
+          const nonArrayValue: string | number | boolean = value as string | number | boolean;
+          formData.set(key, String(nonArrayValue));
         }
       }
 
