@@ -103,9 +103,9 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
       with:
-        php-version: '8.5'
+        php-version: '8.4'
         coverage: none
-        tools: rector/rector:^2.2
+        tools: rector/rector:^2.0
 
     - name: Install dependencies
       uses: ramsey/composer-install@v4
