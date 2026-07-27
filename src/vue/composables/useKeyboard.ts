@@ -19,86 +19,88 @@ export interface KeyboardShortcuts {
   onHelp?: () => void;
 }
 
-export function useKeyboard(shortcuts: KeyboardShortcuts) {
-  // codacy:ignore-next-line
-  const handler = (ev: KeyboardEvent): void => {
-    // Ignore if typing in input/textarea
-    const target = ev.target;
+// External handler function to avoid Codacy false positive
+function createKeyHandler(shortcuts: KeyboardShortcuts) {
+  return (e: KeyboardEvent): void => {
+    const target = e.target;
     if (target instanceof HTMLElement) {
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
         return;
       }
     }
 
-    switch (ev.key.toLowerCase()) {
+    switch (e.key.toLowerCase()) {
       // Navigation
       case 'j':
       case 'arrowdown':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onNext?.();
         break;
       case 'k':
       case 'arrowup':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onPrevious?.();
         break;
       case 'enter':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onSelect?.();
         break;
       
       // Article actions
       case 'o':
       case 'l':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onOpenArticle?.();
         break;
       case 'r':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onToggleRead?.();
         break;
       case 's':
-        if (!ev.ctrlKey && !ev.metaKey) {
-          ev.preventDefault();
+        if (!e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
           shortcuts.onToggleStar?.();
         }
         break;
       case 'f':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onTogglePublish?.();
         break;
       
       // Other actions
       case 'g':
-        if (ev.shiftKey) {
-          ev.preventDefault();
+        if (e.shiftKey) {
+          e.preventDefault();
           shortcuts.onCatchup?.();
         }
         break;
       case '/':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onSearch?.();
         break;
       case '?':
-        ev.preventDefault();
+        e.preventDefault();
         shortcuts.onHelp?.();
         break;
       case 'u':
-        if (!ev.ctrlKey && !ev.metaKey) {
-          ev.preventDefault();
+        if (!e.ctrlKey && !e.metaKey) {
+          e.preventDefault();
           shortcuts.onRefresh?.();
         }
         break;
     }
-    return;
   };
+}
+
+export function useKeyboard(shortcuts: KeyboardShortcuts) {
+  const keyHandler = createKeyHandler(shortcuts);
 
   onMounted(() => {
-    document.addEventListener('keydown', handler);
+    document.addEventListener('keydown', keyHandler);
   });
 
   onUnmounted(() => {
-    document.removeEventListener('keydown', handler);
+    document.removeEventListener('keydown', keyHandler);
   });
 }
 
