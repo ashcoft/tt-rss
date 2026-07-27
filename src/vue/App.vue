@@ -62,8 +62,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useFeedsStore } from './stores';
-import { useHeadlinesStore } from './stores';
+import { useFeedsStore, useHeadlinesStore, type Headline } from './stores';
 import FeedTree from './components/FeedTree.vue';
 import Toolbar from './components/Toolbar.vue';
 import HeadlinesList from './components/HeadlinesList.vue';
@@ -115,11 +114,11 @@ const handleToolbarAction = (action: string) => {
   }
 };
 
-const handleHeadlineSelect = async (headline: typeof headlinesStore.headlines.value[0]) => {
+const handleHeadlineSelect = async (headline: Headline) => {
   await headlinesStore.loadArticle(headline.id);
 };
 
-const handleHeadlineAction = (headline: typeof headlinesStore.headlines.value[0], action: string) => {
+const handleHeadlineAction = (headline: Headline, action: string) => {
   switch (action) {
     case 'mark_read':
       void headlinesStore.markAsRead([headline.id]);
@@ -134,8 +133,10 @@ const handleHeadlineAction = (headline: typeof headlinesStore.headlines.value[0]
       void headlinesStore.togglePublish(headline.id);
       break;
     case 'delete':
-      void headlinesStore.deleteArticle(headline.id).then(() => {
+      headlinesStore.deleteArticle(headline.id).then(() => {
         showMessage('Article deleted', 'success');
+      }).catch(() => {
+        showMessage('Failed to delete article', 'error');
       });
       break;
     default:

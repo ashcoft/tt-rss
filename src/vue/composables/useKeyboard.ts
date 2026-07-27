@@ -29,6 +29,11 @@ function createKeyHandler(shortcuts: KeyboardShortcuts) {
       }
     }
 
+    // Return early when modifier keys are pressed to avoid overriding browser shortcuts
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      return;
+    }
+
     switch (e.key.toLowerCase()) {
       // Navigation
       case 'j':
@@ -67,7 +72,7 @@ function createKeyHandler(shortcuts: KeyboardShortcuts) {
         shortcuts.onTogglePublish?.();
         break;
       
-      // Other actions
+      // Other actions (Shift is allowed, but Ctrl/Meta/Alt are already filtered)
       case 'g':
         if (e.shiftKey) {
           e.preventDefault();
@@ -83,10 +88,8 @@ function createKeyHandler(shortcuts: KeyboardShortcuts) {
         shortcuts.onHelp?.();
         break;
       case 'u':
-        if (!e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          shortcuts.onRefresh?.();
-        }
+        e.preventDefault();
+        shortcuts.onRefresh?.();
         break;
     }
   };

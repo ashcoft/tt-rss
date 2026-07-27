@@ -32,6 +32,7 @@
     "@mdi/font": "^7.4.47",
     "@types/dompurify": "^3.0.5",
     "dompurify": "^3.4.11",
+    "pinia": "^3.0.0",
     "vue": "^3.5.0",
     "vuetify": "^3.7.0"
   },
@@ -54,7 +55,6 @@
     "gulp-less": "^5.0.0",
     "gulp-touch-fd": "^2.0.0",
     "less": "^4.6.7",
-    "pinia": "^3.0.0",
     "postcss-less": "^6.0.0",
     "sass": "^1.80.0",
     "semantic-release": "^24.2.0",

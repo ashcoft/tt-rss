@@ -59,9 +59,7 @@ export const useFeedsStore = defineStore('feeds', () => {
   });
 
   const totalUnread = computed(() => {
-    let total = categories.value.reduce((sum, cat) => sum + cat.unread, 0);
-    total += feeds.value.reduce((sum, feed) => sum + feed.unread, 0);
-    return total;
+    return feeds.value.reduce((sum, feed) => sum + feed.unread, 0);
   });
 
   const currentFeed = computed(() => {

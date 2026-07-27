@@ -147,14 +147,22 @@ export const useHeadlinesStore = defineStore('headlines', () => {
         // Type narrowing - content exists when status is 0
         selectedArticle.value = response.content as NonNullable<typeof response.content>;
         
-        // Mark as read in headlines list
+        // Mark as read on backend when an unread headline is opened
         const headline = headlines.value.find(h => h.id === articleId);
         if (headline && !headline.is_read) {
+          // Optimistically update local state first
           headline.is_read = true;
-          
-          // Update feed unread count
           const feedsStore = useFeedsStore();
           feedsStore.updateFeedUnread(headline.feed_id, -1);
+          
+          // Then persist to backend
+          try {
+            await markAsRead([articleId]);
+          } catch {
+            // Revert optimistic update if API fails
+            headline.is_read = false;
+            feedsStore.updateFeedUnread(headline.feed_id, 1);
+          }
         }
       }
     } catch (err) {
@@ -167,15 +175,26 @@ export const useHeadlinesStore = defineStore('headlines', () => {
     try {
       await api.catchupArticles(articleIds, 0);
       
-      // Update local state
+      const feedsStore = useFeedsStore();
+      const feedUnreadDeltas = new Map<number, number>();
+      
+      // Update local state and track feed unread changes
       articleIds.forEach(id => {
         const headline = headlines.value.find(h => h.id === id);
-        if (headline) {
+        if (headline && !headline.is_read) {
           headline.is_read = true;
+          const delta = feedUnreadDeltas.get(headline.feed_id) || 0;
+          feedUnreadDeltas.set(headline.feed_id, delta - 1);
         }
+      });
+      
+      // Update feed unread counts
+      feedUnreadDeltas.forEach((delta, feedId) => {
+        feedsStore.updateFeedUnread(feedId, delta);
       });
     } catch (err) {
       console.error('Failed to mark as read:', err);
+      throw err;
     }
   }
 
@@ -183,14 +202,25 @@ export const useHeadlinesStore = defineStore('headlines', () => {
     try {
       await api.catchupArticles(articleIds, 1);
       
+      const feedsStore = useFeedsStore();
+      const feedUnreadDeltas = new Map<number, number>();
+      
       articleIds.forEach(id => {
         const headline = headlines.value.find(h => h.id === id);
-        if (headline) {
+        if (headline && headline.is_read) {
           headline.is_read = false;
+          const delta = feedUnreadDeltas.get(headline.feed_id) || 0;
+          feedUnreadDeltas.set(headline.feed_id, delta + 1);
         }
+      });
+      
+      // Update feed unread counts
+      feedUnreadDeltas.forEach((delta, feedId) => {
+        feedsStore.updateFeedUnread(feedId, delta);
       });
     } catch (err) {
       console.error('Failed to mark as unread:', err);
+      throw err;
     }
   }
 
@@ -233,6 +263,14 @@ export const useHeadlinesStore = defineStore('headlines', () => {
   async function deleteArticle(articleId: number) {
     try {
       await api.deleteArticles([articleId]);
+      
+      const feedsStore = useFeedsStore();
+      const headline = headlines.value.find(h => h.id === articleId);
+      
+      // Update feed unread count if deleting an unread article
+      if (headline && !headline.is_read) {
+        feedsStore.updateFeedUnread(headline.feed_id, -1);
+      }
       
       // Remove from headlines
       const index = headlines.value.findIndex(h => h.id === articleId);

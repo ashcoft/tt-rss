@@ -8,11 +8,12 @@ import { ref, onUnmounted, type Ref } from 'vue';
 export interface UseInfiniteScrollOptions {
   threshold?: number;
   onLoadMore: () => Promise<void> | void;
+  onError?: (error: unknown) => void;
   enabled?: Ref<boolean>;
 }
 
 export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
-  const { threshold = 100, onLoadMore, enabled = ref(true) } = options;
+  const { threshold = 100, onLoadMore, onError, enabled = ref(true) } = options;
   
   const loading = ref(false);
   const container = ref<HTMLElement | null>(null);
@@ -25,9 +26,13 @@ export function useInfiniteScroll(options: UseInfiniteScrollOptions) {
 
     if (distanceFromBottom < threshold) {
       loading.value = true;
-      void Promise.resolve(onLoadMore()).finally(() => {
-        loading.value = false;
-      });
+      Promise.resolve(onLoadMore())
+        .catch((err) => {
+          onError?.(err);
+        })
+        .finally(() => {
+          loading.value = false;
+        });
     }
   };
 
