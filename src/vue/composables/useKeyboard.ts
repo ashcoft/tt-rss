@@ -62,10 +62,8 @@ function createKeyHandler(shortcuts: KeyboardShortcuts) {
         shortcuts.onToggleRead?.();
         break;
       case 's':
-        if (!e.ctrlKey && !e.metaKey) {
-          e.preventDefault();
-          shortcuts.onToggleStar?.();
-        }
+        e.preventDefault();
+        shortcuts.onToggleStar?.();
         break;
       case 'f':
         e.preventDefault();
