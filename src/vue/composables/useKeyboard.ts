@@ -24,7 +24,7 @@ export function useKeyboard(shortcuts: KeyboardShortcuts) {
    * Process keyboard shortcuts
    * @param ev - Keyboard event object
    */
-  const processKey = (ev: KeyboardEvent): void => {
+  const processKey = (ev: KeyboardEvent) => {
     // Ignore if typing in input/textarea
     const target = ev.target;
     if (target instanceof HTMLElement) {
