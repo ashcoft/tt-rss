@@ -48,8 +48,10 @@ export const useFeedsStore = defineStore('feeds', () => {
           result.set(catKey, [feed]);
         }
       } else {
-        const uncategorized = result.get('uncategorized')!;
-        uncategorized.push(feed);
+        const uncategorized = result.get('uncategorized');
+        if (uncategorized) {
+          uncategorized.push(feed);
+        }
       }
     }
     

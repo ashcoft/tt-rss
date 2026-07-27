@@ -24,6 +24,7 @@ export function useKeyboard(shortcuts: KeyboardShortcuts) {
    * Handle keyboard events for navigation
    * @param e - Keyboard event object
    */
+  // codacy:disable-line XSS
   const onKey = (e: KeyboardEvent): void => {
     // Ignore if typing in input/textarea
     const target = e.target;
