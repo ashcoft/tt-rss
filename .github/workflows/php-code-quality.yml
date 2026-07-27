@@ -121,7 +121,7 @@ jobs:
 
     - name: Run Rector (dry run)
       run: |
-        rector --dry-run || [ $? -eq 2 ]
+        rector --dry-run; exit_code=$?; [ $exit_code -eq 0 ] || [ $exit_code -eq 2 ]
 
     # https://getrector.com/documentation/cache-in-ci#content-github-actions
     - name: Save result cache

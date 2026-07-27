@@ -55,7 +55,7 @@
 
 	$method = strtolower($_REQUEST["op"] ?? "");
 
-	$handler = new API($_REQUEST ?? []);
+	$handler = new API($_REQUEST);
 
 	if ($handler->before($method)) {
 		if ($method && method_exists($handler, $method)) {
