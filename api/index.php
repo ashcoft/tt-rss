@@ -29,7 +29,7 @@
 	$requestParams = json_decode((string)file_get_contents("php://input"), true);
 
 	// Ensure request params is an array (could be null if JSON decode fails)
-	if (!is_array($requestParams)) {
+	if (is_array($requestParams) === false) {
 		$requestParams = [];
 	}
 
