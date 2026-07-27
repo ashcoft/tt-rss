@@ -26,7 +26,15 @@
 
 	ob_start();
 
-	$_REQUEST = json_decode((string)file_get_contents("php://input"), true);
+	$requestParams = json_decode((string)file_get_contents("php://input"), true);
+
+	// Ensure request params is an array (could be null if JSON decode fails)
+	if (!is_array($requestParams)) {
+		$requestParams = [];
+	}
+
+	// Also set $_REQUEST for backward compatibility
+	$_REQUEST = $requestParams;
 
 	if (!empty($_REQUEST["sid"])) {
 		session_id($_REQUEST["sid"]);
@@ -55,8 +63,6 @@
 
 	$method = strtolower($_REQUEST["op"] ?? "");
 
-	// Ensure $_REQUEST is an array (could be null if JSON decode fails)
-	$requestParams = is_array($_REQUEST) ? $_REQUEST : [];
 	$handler = new API($requestParams);
 
 	if ($handler->before($method)) {
