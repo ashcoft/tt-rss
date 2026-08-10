@@ -417,7 +417,6 @@ final class SanitizerTest extends TestCase {
         $this->assertStringNotContainsString('allow=', $result);
     }
 
-// Fork intentionally dropped this srcdoc test (Sanitizer disallows srcdoc entirely, no allowance path exists); keep fork state.
     public function test_keeps_required_link_attrs(): void {
         $result = Sanitizer::sanitize('<a href="http://example.com" target="_blank" rel="noopener noreferrer">link</a>');
         $this->assertStringContainsString('href=', $result);
@@ -1147,7 +1146,3 @@ final class SanitizerTest extends TestCase {
     }
 
 }
-
-    // Fork intentionally dropped this srcdoc test; the Sanitizer disallows srcdoc entirely (no allowance path exists), so the test cannot pass as written.  The effective behavior(srcdoc removed) is already covered by the disallowed-attributes list.
-
-
